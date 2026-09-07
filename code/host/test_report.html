@@ -1,0 +1,228 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Tesseract host — test report</title>
+<style>
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #f4f6f5; color: #1a1f1c; margin: 0; padding: 32px; }
+  h1 { margin-top: 0; }
+  .summary { display: flex; gap: 16px; margin-bottom: 24px; flex-wrap: wrap; }
+  .summary .card { background: white; border-radius: 12px; padding: 16px 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); min-width: 120px; }
+  .summary .card .n { font-size: 28px; font-weight: 700; }
+  .summary .pass .n { color: #2e7d5b; }
+  .summary .fail .n { color: #c0392b; }
+  .summary .skip .n { color: #b08900; }
+  table { border-collapse: collapse; width: 100%; max-width: 900px; background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.08); margin-bottom: 40px; }
+  th, td { text-align: left; padding: 10px 16px; border-bottom: 1px solid #eee; }
+  th { background: #eef3f0; }
+  tr.fail { background: #fdecea; }
+  tr.skip { background: #fff8e1; }
+  td.status { font-weight: 700; white-space: nowrap; }
+  tr.pass td.status { color: #2e7d5b; }
+  tr.fail td.status { color: #c0392b; }
+  tr.skip td.status { color: #b08900; }
+  h2 { margin-top: 40px; }
+  .gallery { display: flex; flex-wrap: wrap; gap: 24px; }
+  .phone-frame { margin: 0; background: #1a1f1c; border-radius: 28px; padding: 10px; width: 180px; box-shadow: 0 2px 8px rgba(0,0,0,0.25); }
+  .phone-screen { width: 160px; height: 328px; border-radius: 18px; overflow: hidden; background: white; }
+  .phone-screen img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  figcaption { color: #1a1f1c; text-align: center; font-size: 12px; margin-top: 8px; word-break: break-word; }
+  footer { margin-top: 40px; color: #667; font-size: 12px; }
+</style>
+</head>
+<body>
+  <h1>Tesseract host — test report</h1>
+  <div class="summary">
+    <div class="card pass"><div class="n">23</div>passed</div>
+    <div class="card fail"><div class="n">0</div>failed</div>
+    <div class="card skip"><div class="n">0</div>skipped</div>
+  </div>
+
+  <h2>Every test</h2>
+  <table>
+    <thead><tr><th>Test</th><th>Result</th></tr></thead>
+    <tbody>
+      <tr class="pass">
+        <td>host selects touch for Route Quest and tilt for Marble Maze</td>
+        <td class="status">PASS</td>
+      </tr>
+      <tr class="pass">
+        <td>(setUpAll)</td>
+        <td class="status">PASS</td>
+      </tr>
+      <tr class="pass">
+        <td>Host screens (one golden each, plus textScale 2.0) Home</td>
+        <td class="status">PASS</td>
+      </tr>
+      <tr class="pass">
+        <td>Host screens (one golden each, plus textScale 2.0) Home at textScale 2.0</td>
+        <td class="status">PASS</td>
+      </tr>
+      <tr class="pass">
+        <td>Host screens (one golden each, plus textScale 2.0) ChooseGame</td>
+        <td class="status">PASS</td>
+      </tr>
+      <tr class="pass">
+        <td>Host screens (one golden each, plus textScale 2.0) ChooseGame at textScale 2.0</td>
+        <td class="status">PASS</td>
+      </tr>
+      <tr class="pass">
+        <td>Host screens (one golden each, plus textScale 2.0) HowToPlay</td>
+        <td class="status">PASS</td>
+      </tr>
+      <tr class="pass">
+        <td>Host screens (one golden each, plus textScale 2.0) HowToPlay at textScale 2.0</td>
+        <td class="status">PASS</td>
+      </tr>
+      <tr class="pass">
+        <td>Host screens (one golden each, plus textScale 2.0) Play (hosts Route Quest) at textScale 2.0</td>
+        <td class="status">PASS</td>
+      </tr>
+      <tr class="pass">
+        <td>Host screens (one golden each, plus textScale 2.0) Finished</td>
+        <td class="status">PASS</td>
+      </tr>
+      <tr class="pass">
+        <td>Host screens (one golden each, plus textScale 2.0) Finished at textScale 2.0</td>
+        <td class="status">PASS</td>
+      </tr>
+      <tr class="pass">
+        <td>Host screens (one golden each, plus textScale 2.0) Finished after Marble Maze</td>
+        <td class="status">PASS</td>
+      </tr>
+      <tr class="pass">
+        <td>Host screens (one golden each, plus textScale 2.0) Rest</td>
+        <td class="status">PASS</td>
+      </tr>
+      <tr class="pass">
+        <td>Host screens (one golden each, plus textScale 2.0) Rest at textScale 2.0</td>
+        <td class="status">PASS</td>
+      </tr>
+      <tr class="pass">
+        <td>Games (level 1, level 3, pause overlay) Route Quest level 1</td>
+        <td class="status">PASS</td>
+      </tr>
+      <tr class="pass">
+        <td>Games (level 1, level 3, pause overlay) Route Quest level 3</td>
+        <td class="status">PASS</td>
+      </tr>
+      <tr class="pass">
+        <td>Games (level 1, level 3, pause overlay) Route Quest pause overlay</td>
+        <td class="status">PASS</td>
+      </tr>
+      <tr class="pass">
+        <td>Games (level 1, level 3, pause overlay) Route Quest returning with collected flag</td>
+        <td class="status">PASS</td>
+      </tr>
+      <tr class="pass">
+        <td>Games (level 1, level 3, pause overlay) Marble Maze level 1</td>
+        <td class="status">PASS</td>
+      </tr>
+      <tr class="pass">
+        <td>Games (level 1, level 3, pause overlay) Marble Maze level 3</td>
+        <td class="status">PASS</td>
+      </tr>
+      <tr class="pass">
+        <td>Games (level 1, level 3, pause overlay) Marble Maze pause overlay</td>
+        <td class="status">PASS</td>
+      </tr>
+      <tr class="pass">
+        <td>Games (level 1, level 3, pause overlay) Marble Maze visible Help route</td>
+        <td class="status">PASS</td>
+      </tr>
+      <tr class="pass">
+        <td>(tearDownAll)</td>
+        <td class="status">PASS</td>
+      </tr>
+
+    </tbody>
+  </table>
+
+  <h2>Golden screenshots (20)</h2>
+  <div class="gallery">
+      <figure class="phone-frame">
+        <div class="phone-screen"><img src="test/goldens/choose_game.png" alt="choose_game"></div>
+        <figcaption>choose_game</figcaption>
+      </figure>
+      <figure class="phone-frame">
+        <div class="phone-screen"><img src="test/goldens/choose_game_textscale_2x.png" alt="choose_game_textscale_2x"></div>
+        <figcaption>choose_game_textscale_2x</figcaption>
+      </figure>
+      <figure class="phone-frame">
+        <div class="phone-screen"><img src="test/goldens/finished.png" alt="finished"></div>
+        <figcaption>finished</figcaption>
+      </figure>
+      <figure class="phone-frame">
+        <div class="phone-screen"><img src="test/goldens/finished_marble_maze.png" alt="finished_marble_maze"></div>
+        <figcaption>finished_marble_maze</figcaption>
+      </figure>
+      <figure class="phone-frame">
+        <div class="phone-screen"><img src="test/goldens/finished_textscale_2x.png" alt="finished_textscale_2x"></div>
+        <figcaption>finished_textscale_2x</figcaption>
+      </figure>
+      <figure class="phone-frame">
+        <div class="phone-screen"><img src="test/goldens/home.png" alt="home"></div>
+        <figcaption>home</figcaption>
+      </figure>
+      <figure class="phone-frame">
+        <div class="phone-screen"><img src="test/goldens/home_textscale_2x.png" alt="home_textscale_2x"></div>
+        <figcaption>home_textscale_2x</figcaption>
+      </figure>
+      <figure class="phone-frame">
+        <div class="phone-screen"><img src="test/goldens/how_to_play.png" alt="how_to_play"></div>
+        <figcaption>how_to_play</figcaption>
+      </figure>
+      <figure class="phone-frame">
+        <div class="phone-screen"><img src="test/goldens/how_to_play_textscale_2x.png" alt="how_to_play_textscale_2x"></div>
+        <figcaption>how_to_play_textscale_2x</figcaption>
+      </figure>
+      <figure class="phone-frame">
+        <div class="phone-screen"><img src="test/goldens/marble_maze_help.png" alt="marble_maze_help"></div>
+        <figcaption>marble_maze_help</figcaption>
+      </figure>
+      <figure class="phone-frame">
+        <div class="phone-screen"><img src="test/goldens/marble_maze_level1.png" alt="marble_maze_level1"></div>
+        <figcaption>marble_maze_level1</figcaption>
+      </figure>
+      <figure class="phone-frame">
+        <div class="phone-screen"><img src="test/goldens/marble_maze_level3.png" alt="marble_maze_level3"></div>
+        <figcaption>marble_maze_level3</figcaption>
+      </figure>
+      <figure class="phone-frame">
+        <div class="phone-screen"><img src="test/goldens/marble_maze_paused.png" alt="marble_maze_paused"></div>
+        <figcaption>marble_maze_paused</figcaption>
+      </figure>
+      <figure class="phone-frame">
+        <div class="phone-screen"><img src="test/goldens/play_textscale_2x.png" alt="play_textscale_2x"></div>
+        <figcaption>play_textscale_2x</figcaption>
+      </figure>
+      <figure class="phone-frame">
+        <div class="phone-screen"><img src="test/goldens/rest.png" alt="rest"></div>
+        <figcaption>rest</figcaption>
+      </figure>
+      <figure class="phone-frame">
+        <div class="phone-screen"><img src="test/goldens/rest_textscale_2x.png" alt="rest_textscale_2x"></div>
+        <figcaption>rest_textscale_2x</figcaption>
+      </figure>
+      <figure class="phone-frame">
+        <div class="phone-screen"><img src="test/goldens/route_quest_level1.png" alt="route_quest_level1"></div>
+        <figcaption>route_quest_level1</figcaption>
+      </figure>
+      <figure class="phone-frame">
+        <div class="phone-screen"><img src="test/goldens/route_quest_level3.png" alt="route_quest_level3"></div>
+        <figcaption>route_quest_level3</figcaption>
+      </figure>
+      <figure class="phone-frame">
+        <div class="phone-screen"><img src="test/goldens/route_quest_paused.png" alt="route_quest_paused"></div>
+        <figcaption>route_quest_paused</figcaption>
+      </figure>
+      <figure class="phone-frame">
+        <div class="phone-screen"><img src="test/goldens/route_quest_returning.png" alt="route_quest_returning"></div>
+        <figcaption>route_quest_returning</figcaption>
+      </figure>
+
+  </div>
+
+  <footer>Generated 2026-09-07T00:07:11.675362 · flutter test exit code 0 · tool/generate_test_report.dart</footer>
+</body>
+</html>

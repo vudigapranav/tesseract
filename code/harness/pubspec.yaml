@@ -1,0 +1,30 @@
+name: tesseract_harness
+description: >
+  Runnable demo app for Route Quest and Marble Maze. Picks a game, level,
+  input mode and text scale, plays it inside a fixed phone-shaped frame, and
+  prints every GameEvent as JSON so telemetry can be checked without a
+  backend. No network, database, auth or shared_preferences dependency.
+version: 0.1.0
+publish_to: 'none'
+
+environment:
+  sdk: '>=3.3.0 <4.0.0'
+  flutter: '>=3.19.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  tesseract_game_contract:
+    path: ../packages/tesseract_game_contract
+  route_quest:
+    path: ../games/route_quest
+  marble_maze:
+    path: ../games/marble_maze
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^4.0.0
+
+flutter:
+  uses-material-design: true

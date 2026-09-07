@@ -1,0 +1,30 @@
+name: tesseract_host
+description: >
+  The real host shell: Home, Choose Activity, How to Play, Play, Finished and
+  Rest, plus the SessionController that wraps game events for the (not yet
+  built) backend outbox. No network, database, auth or shared_preferences
+  dependency — that is wired in separately, later.
+version: 0.1.0
+publish_to: 'none'
+
+environment:
+  sdk: '>=3.3.0 <4.0.0'
+  flutter: '>=3.19.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  tesseract_game_contract:
+    path: ../packages/tesseract_game_contract
+  route_quest:
+    path: ../games/route_quest
+  marble_maze:
+    path: ../games/marble_maze
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^4.0.0
+
+flutter:
+  uses-material-design: true
