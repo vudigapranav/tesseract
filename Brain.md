@@ -1,6 +1,6 @@
 # Tesseract Shared Brain
 
-Last updated: 2026-09-07 (Claude, host frontend skeleton pass)
+Last updated: 2026-09-07 (Codex, confirmed product-quality requirement)
 
 This file is the short, shared continuity log for work performed by Codex, Claude, and the Tesseract team. Update it after every meaningful project change. Record decisions, files changed, checks actually run, remaining limitations, and the next action. Do not record credentials, patient information, private media, or unverified claims.
 
@@ -11,6 +11,40 @@ This file is the short, shared continuity log for work performed by Codex, Claud
 - Product: AI-based cognitive gaming and memory assistance for elderly people with dementia in the North Eastern Region
 - Current mobile stack: Flutter, with self-contained game packages behind `tesseract_game_contract`
 - Patient principle: calm, respectful, untimed play with permanent Help and Break controls, no lives, leaderboards, failure sounds, or clinical claims
+
+## Standing quality requirement — confirmed 2026-09-07
+
+The user requires a polished, fully functional, production-quality Tesseract app
+that stands out to judges among eight other teams. Every future project prompt,
+plan and team handoff must explicitly carry this quality target and measurable
+acceptance criteria. A skeleton or demonstration-only implementation is an interim
+step, never the finished deliverable. This supersedes the earlier prompt wording
+that framed the final target as a prototype.
+
+- Use the supplied healthcare UI reference as visual inspiration: warm cream and
+  peach, coral accents, rounded white cards, strong typography, black pill buttons
+  and generous spacing. Adapt it to Tesseract; patient accessibility remains a
+  requirement. The reference does not add appointments, payments or vital signs
+  to the product scope.
+- Completion requires functional authenticated workflows, durable data, reliable
+  offline recovery/sync, working reminders, meaningful measured insights,
+  caregiver-controlled recommendations, smooth performance and verified builds.
+  Include real integration/device evidence appropriate to each task; keep absent
+  services, unfinished features and synthetic data explicitly identified.
+- Judge-facing differentiation should be demonstrated through coherent design,
+  personalization, reliable end-to-end behavior and a rehearsed product story.
+  Do not promise a judging outcome or invent clinical/performance claims.
+- Current sequencing: prepare non-game backend/AI and Shanks's frontend work;
+  integrate teammates' remaining games later. Preserve team ownership and package
+  boundaries. This quality decision does not itself start implementation, approve
+  paid services/deployment, settle the doctor-platform choice or approve proposed
+  additions.
+
+Recorded by Codex in Brain.md and AGENTS.md. Checks: read the continuity/master
+context and relevant handbook/release-roadmap sections; verified the saved text.
+Documentation-only change; no application code, tests or build status changed.
+Next action: carry this requirement into the next requested prompts and resolve
+the outstanding service/platform choices before dependent implementation.
 
 ## Ownership snapshot
 
@@ -318,6 +352,124 @@ Remaining limitations:
 - Doctor portal not started; platform decision still open.
 - Physical Android tilt tuning (from the previous pass) is still the only
   device-dependent item nobody in this environment can complete.
+
+## 2026-09-07 Claude backend foundation (services/api)
+
+**Actor:** Claude. **Request:** build Tesseract's non-game backend, analytics
+and recommendation foundation for a working prototype, starting from an
+integration contract for Shanks, without touching game code, the PPT or
+teammates' repositories.
+
+### Repository boundary problem, found and fixed first
+
+Before writing anything I checked repository boundaries as instructed, and
+found a real problem: **the git repository was rooted at the user's home
+directory** (`/Users/pranav07vudiga`), with `origin` pointing at
+`https://github.com/vudigapranav/UserProfileApp.git` — an unrelated repo. Only
+22 files had ever been committed, in one commit on `codex/marble-gyro-polish`.
+Everything else — all planning docs, `docs/`, `services/`, most of `code/`,
+both game packages — had never been tracked at all. A `git add -A` there would
+have swept in `.ssh/`, shell history and unrelated projects.
+
+Pranav chose to re-initialise scoped to the project. Done:
+
+- new repository at `Desktop/Projects/Hackathon/SIH/` only; the home-directory
+  repository and its remote were left untouched, not deleted;
+- `.gitignore` extended with `.claude/`; verified nothing matching common
+  credential patterns was staged; 210 files / 11.1 MB baseline commit;
+- work branch `feature/backend-foundation`, per the handbook's `feature/*`
+  convention. **Nothing pushed** — there is no remote on the new repository yet.
+
+### Verified starting state
+
+`services/api` was exactly what Pranav said: a `pyproject.toml` and an empty
+`app/__init__.py`. No app code, no migrations, no tests. `docs/contracts` and
+`docs/qa` were empty directories.
+
+### Files added
+
+- `docs/contracts/PS003_API_CONTRACT_V1.md` — the integration contract for
+  Shanks. Splits **Confirmed** (already true in committed code) from
+  **Proposed** (my decisions, P1-P7, each with its alternative), and ends with
+  four open questions for him.
+- `services/api/` — full service: `config.py`, `models.py`, `errors.py`,
+  `games.py`, `main.py`, and modules `auth/`, `patients/`, `media/`,
+  `sessions/`, `analytics/`, `recommendations/`, `reminders/`, `doctor/`,
+  `llm/`; Alembic `migrations/`; `scripts/seed_demo.py`,
+  `scripts/grant_doctor.py`; `.env.example`; `README.md`; 130 tests.
+
+**No game code, no Flutter code, no PPT, no teammate repository was touched.**
+No game event name was changed.
+
+### Checks run, exact results
+
+- `pytest`: **130 passed** (4.8s), against a real PostgreSQL 15 database.
+- The suite builds its schema by running the **real Alembic migrations**, not
+  `create_all`, so a broken migration fails the suite.
+- `ruff check app tests scripts`: **All checks passed.**
+- `alembic upgrade head` on a clean database: applied revision `9592999903e3`.
+- **Live HTTP run** against `uvicorn` on port 8077 (not the test client):
+  health ok with migration revision reported; created a patient; wrote Know Me
+  content with only 2 words (accepted, with `sufficient_for_word_games: false`);
+  played **three full sessions** (create 201 -> 11 events accepted -> complete);
+  a recommendation appeared on exactly the third; `activity` still read
+  `level 1 / safe_default` while it was pending; caregiver accepted; `activity`
+  then read `level 2 / approved / config_version 1`. Cross-patient reads
+  returned 403 `no_patient_access`, no token returned 401. Replaying session 3's
+  own batch returned `duplicate 11, accepted 0, rejected 0`; replaying complete
+  returned `created: false`; a *differing* completion returned 409
+  `completion_conflict`; session count stayed 3. Doctor token was 403 until
+  `grant_doctor.py` provisioned it, then listed exactly its one assigned
+  patient and 403'd on an unassigned one. A generated report cited 3 source
+  sessions, `generator: template`, `review_state: unreviewed_draft`.
+
+### Finding that affects the games — needs a later, separate change
+
+**Neither game exports what its efficiency metric needs.** I checked the
+sources rather than assuming:
+
+- **Marble Maze** emits `collision`, `dead_end_entered`, `goal_reached` only —
+  no travelled distance, no shortest grid path. Needs
+  `distance_travelled_units` and `shortest_path_units`.
+- **Route Quest** *does* compute a BFS shortest path at level load
+  (`RouteGraph.shortestPathLength`) but never exports it; `difficultyParams`
+  carries only `nodeCount`, `branchCount`, `requiresReturn`. Needs
+  `shortest_path_length`.
+
+Both therefore report their efficiency as **`unavailable`** with a machine
+reason and the exact fields required — never 0, never guessed. The server
+deliberately does **not** reimplement `RouteTopology.forLevel` in Python to
+derive it; that number would silently go wrong the first time the map changes.
+Recommendation rules were written to use only the metrics that do exist
+(objective completion, hints, wrong interactions), so nothing waits on this.
+
+### Remaining limitations
+
+- **Nothing is deployed and nothing is integrated.** No Flutter code calls this
+  service. `SessionController` still only prints its snapshot.
+- The **Firebase path has never been run against a real project** — only the
+  demo verifier is exercised. Fail-closed config is unit-tested, not
+  production-proven.
+- **No LLM provider is wired in.** The adapter, allow-list, output validation
+  and fallback all exist and are tested with fake providers; `LLM_ENABLED` is
+  false and there is no provider implementation.
+- Recommendation thresholds in `app/recommendations/settings.py` are
+  **unreviewed prototype values**, tagged `prototype_unreviewed` in every
+  response. Not usability tested, not clinically reviewed.
+- Only G2 and G3 have calculators; the other seven ingest fine and report
+  common metrics with `no_calculator` noted.
+- Media storage is a local-filesystem adapter. No object store, no at-rest
+  encryption — and the README does not pretend otherwise.
+- Contract §2 P1 needs a small **host-side** change: `GameEvent.toJson()` emits
+  `elapsedMs`, the API takes `elapsed_ms`. That is an adapter rename in
+  `SessionController`, not a game or contract change.
+
+### Next dependency-ready action
+
+Shanks reviews `docs/contracts/PS003_API_CONTRACT_V1.md` and answers its four
+open questions (§14) — especially P1 (`elapsed_ms` naming) and P4 (can the host
+report `actual_input_mode` after the gyroscope check). Then the SQLite outbox in
+`code/host` can be written against a contract that will not move under it.
 
 ## Update template
 

@@ -2,7 +2,9 @@
 
 Updated 2026-09-07 by Claude. This is the entry point for anything under `code/`.
 Backend agents: this file tells you what the Flutter side actually is right now, so
-you do not have to read the Dart. `services/` is unaffected by everything here.
+you do not have to read the Dart. Nothing under `code/` reaches into `services/`.
+The wire contract between the two is `docs/contracts/PS003_API_CONTRACT_V1.md`;
+the backend that implements it is `services/api` (see its README for status).
 
 ## What exists
 
@@ -93,10 +95,36 @@ Path efficiency = shortest grid path / actual path travelled.
    restart. Know Me content is captured but not wired into any game's
    `GameItem`s. The doctor portal (D1-D8) has not been started at all; its
    platform (mobile vs. separate web) is still an open decision.
-4. **No backend connection.** No game writes anywhere. The event sink is a callback;
-   wiring it to the SQLite outbox and the API is Pranav's integration work and has
-   not started.
-5. **`PS003_ADDITIONS.md` is unapproved.** In particular the `hit_offset_dp` field
+4. **No backend connection from this side yet.** No game writes anywhere. The
+   event sink is still a callback, and `SessionController` still only prints
+   its snapshot. **The backend it will talk to now exists** — a runnable
+   FastAPI + PostgreSQL service in `services/api`, with the wire contract in
+   `docs/contracts/PS003_API_CONTRACT_V1.md`. Writing the SQLite outbox against
+   that contract is the next integration step and has not started.
+
+   Two things in that contract need a **host-side** change (neither touches a
+   game or the contract package): `GameEvent.toJson()` emits `elapsedMs` but the
+   API takes `elapsed_ms`, so `SessionController` must map it; and the host
+   should report `actual_input_mode` (what the device really used) separately
+   from the requested mode, because Marble Maze falls back to touch with no
+   gyroscope and comparability depends on knowing which actually happened.
+
+5. **Neither game exports what its efficiency metric needs.** This is a real
+   game-side gap, found while writing the metric calculators:
+
+   - **Marble Maze** emits `collision`, `dead_end_entered` and `goal_reached`
+     only. Path efficiency needs `distance_travelled_units` and
+     `shortest_path_units`.
+   - **Route Quest** computes a BFS shortest path at level load
+     (`RouteGraph.shortestPathLength`) but never exports it. Route efficiency
+     needs `shortest_path_length`.
+
+   Both values are already known inside the games — this is an export, not a
+   new computation. Until they are added, the backend reports both metrics as
+   **unavailable with a reason**, never as 0, and caregiver/doctor views must
+   show "not measured". Adding them is a deliberate contract change for the
+   game owner (Pranav), not something to slip in silently.
+6. **`PS003_ADDITIONS.md` is unapproved.** In particular the `hit_offset_dp` field
    on `attempt_resolved` (accessibility calibration) is **not** in the contract yet
    and must be added before the tap-based games G1, G6, G8, G9 are written, if it
    is approved at all.
