@@ -1,0 +1,37 @@
+{
+  "expo": {
+    "name": "Tesseract",
+    "slug": "tesseract",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.tesseract.app",
+      "infoPlist": {
+        "NSMicrophoneUsageDescription": "Tesseract asks for the microphone only when you tap to speak, and never listens on its own.",
+        "NSMotionUsageDescription": "Marble Maze uses phone motion to guide the marble. A touch alternative is always available."
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#E6F4FE",
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "backgroundImage": "./assets/android-icon-background.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png"
+      },
+      "predictiveBackGestureEnabled": false
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      "expo-secure-store",
+      "expo-sqlite",
+      "expo-font",
+      "expo-localization"
+    ],
+    "scheme": "tesseract"
+  }
+}

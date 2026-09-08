@@ -1211,3 +1211,70 @@ widget-test teardown.
 4. **Backend**: service-account file + an HTTPS API URL to finish the
    end-to-end auth path; the two gaps above.
 5. **Five required games** absent.
+
+
+## 2026-09-08 Expo Go port — React Native frontend alongside Flutter
+
+User asked for an Expo Go-compatible React Native build so the app can be run
+on an **iPhone** by scanning a QR. Flutter is untouched and remains the
+reference implementation; the new app is `code/tesseract-expo`.
+
+Context for why: `adb devices` was empty all session and the user has no Android
+phone. The Flutter host has **no iOS target at all** (`code/host` has `android/`
+and `web/` only), and its remaining checklist is Android-specific, so an iPhone
+could not validate it.
+
+### Compatibility decisions, checked not assumed
+
+- **Expo SDK 57.** App Store Expo Go is **57.0.9** (2026-09-02) and Expo Go runs
+  only the newest SDK. The SDK 57 changelog still says iOS approval was pending
+  — written at release; the store listing is the current fact.
+- **`expo-doctor`: 21/21 passed.** Every dependency is Expo Go-bundled or pure
+  JS. No prebuild, no development client, no native config plugin.
+- **Speech recognition is impossible in Expo Go**, and this is documented, not
+  worked around. `expo-speech-recognition` states it requires a development
+  build; Expo Go runs a fixed App Store binary that cannot load a native module
+  it was not compiled with. `expo-speech` (TTS) *is* bundled and works.
+
+### Built and verified
+
+- Design tokens and components ported from `TesseractDesign` — cream ground,
+  coral accents, white rounded cards, black pill buttons, 64pt patient targets,
+  accessibility roles and labels throughout.
+- Localisation **generated from the Flutter ARBs** by `tools/sync-l10n.mjs`, so
+  the two apps cannot drift. `npm run l10n:check` fails if they do. Same
+  measured coverage: en/as/bn 100%, mni/kha/lus 8%, all non-English **draft**.
+- TypeScript game contract with the same invariants as the Dart one, enforced
+  by throws rather than asserts.
+- All five activities ported with rules, events, sequencing and difficulty
+  settings unchanged, attributed to Ruthika.
+- Outbox with ordered create → events → complete, stable ids across retries,
+  500-event batch cap, permanent-4xx stop, 401 pause, restart recovery.
+- Identity over the same Firebase REST endpoints already verified live. No
+  synthetic fallback.
+- Caregiver dashboard, patient basics, hand-over, patient home, choose activity,
+  instructions with Read aloud, play, finished, rest, settings with the speech
+  probe and About.
+
+**38 tests passing** (contract 9, games 20, outbox 9). TypeScript strict clean.
+`expo-doctor` 21/21. **iOS bundle builds: HTTP 200, 5.3 MB.**
+
+### Not verified, and not claimed
+
+**Nothing has run on the iPhone.** A built bundle is not a device test. App
+start, navigation, language switching, the full loop, storage across restarts,
+offline, VoiceOver, Dynamic Type, motion input and all speech behaviour are
+**NOT TESTED** until the QR is scanned.
+
+### Deliberately not built yet, and said so on screen
+
+Know Me editing, reminders, the recommendation decision loop, doctor screens,
+the biometric gate, and bundled Noto fonts. Those screens state outright that
+they are not built rather than showing plausible-looking empty states. The
+Flutter build has all of them; this is a first working port, not parity.
+
+Also stated: in-game wording is English-only, matching Flutter's existing gap,
+rather than inventing ARB keys to inflate coverage.
+
+Full detail, setup and the per-language speech matrix:
+`docs/handoffs/EXPO_GO_STATUS.md`.

@@ -731,3 +731,36 @@ recorded because no device was connected.
    service-account file and HTTPS URL needed for end-to-end auth.
 5. Five of the nine required games absent (Reveal Match, Trace, Coloring, Spot
    Difference, Picture Recall) — no repositories available.
+
+
+## 2026-09-08 — Expo Go React Native frontend added (Flutter preserved)
+
+New app at `code/tesseract-expo`. Flutter `code/host` untouched and still the
+reference build. Reason: the user has an iPhone, `code/host` has no iOS target,
+and no Android device was available all session.
+
+**Expo SDK 57** (App Store Expo Go 57.0.9). `expo-doctor` 21/21. Every package
+is Expo Go-bundled or pure JS — no prebuild, no development client.
+
+Implemented: design system, localisation generated from the Flutter ARBs, the
+TS game contract, all five activities, the session outbox, Firebase identity,
+and the caregiver → hand-over → play → return path plus settings and About.
+
+Verified: **38 tests passing**, TypeScript strict clean, iOS bundle builds
+(HTTP 200, 5.3 MB). Coverage unchanged from Flutter: en/as/bn 100%,
+mni/kha/lus 8%, all non-English draft, none fluent-reviewed.
+
+**NOT TESTED:** everything on the iPhone. Nothing has run on a device yet.
+
+**Hard Expo Go limitation:** speech recognition cannot work — it needs a native
+module Expo Go does not contain. Reading aloud (`expo-speech`) does work. The
+tap-to-speak contract including confirmation-before-saving is implemented
+against an interface so a real recogniser is a one-file swap.
+
+**Not built yet** (stated on screen, not stubbed): Know Me, reminders,
+recommendation decisions, doctor screens, biometric gate, bundled Noto fonts.
+
+Game catalogue unchanged: four of nine required plus one extra. Reveal Match,
+Trace, Coloring, Spot Difference and Picture Recall still missing.
+
+Detail: `docs/handoffs/EXPO_GO_STATUS.md`.
