@@ -1,4 +1,13 @@
 /**
+ * Local, offline-only observations — **not** the approved activity authority.
+ *
+ * The server owns recommendations: `GET /v1/patients/{id}/recommendations`
+ * produces them, and `POST /v1/recommendations/{id}/decision` records the
+ * caregiver's accept / modify / reject against a real server-issued UUID.
+ * What is computed here is shown *only* when the server has nothing to say,
+ * and the UI labels it as a local observation so it cannot be mistaken for an
+ * approved recommendation.
+ *
  * The activity suggestion layer.
  *
  * This is the app's "intelligence", and it is deliberately **deterministic and
@@ -39,6 +48,8 @@ export type SuggestionKind =
 
 export interface Suggestion {
   id: string;
+  /** Always `local-observation`. Server proposals carry a real UUID. */
+  source: typeof LOCAL_SOURCE;
   gameId: string;
   kind: SuggestionKind;
   currentLevel: number;
@@ -52,6 +63,9 @@ export interface Suggestion {
 /** How many finished sessions before any suggestion is offered at all. */
 export const MIN_SESSIONS_FOR_SUGGESTION = 4;
 
+/** Marks everything from this module as local advice, never server-approved. */
+export const LOCAL_SOURCE = 'local-observation' as const;
+
 function median(values: number[]): number | null {
   if (values.length === 0) return null;
   const s = [...values].sort((a, b) => a - b);
@@ -64,9 +78,9 @@ export function signalsFrom(sessions: readonly OutboxSession[]): ActivitySignal[
   const byGame = new Map<string, OutboxSession[]>();
   for (const s of sessions) {
     if (!s.completed || !s.result) continue;
-    const list = byGame.get(s.gameId) ?? [];
+    const list = byGame.get(s.snapshot.gameId) ?? [];
     list.push(s);
-    byGame.set(s.gameId, list);
+    byGame.set(s.snapshot.gameId, list);
   }
 
   return [...byGame.entries()].map(([gameId, list]) => {
@@ -74,7 +88,7 @@ export function signalsFrom(sessions: readonly OutboxSession[]): ActivitySignal[
     const durations = completed
       .map((s) => {
         const last = s.events[s.events.length - 1];
-        return last?.elapsedMs ?? 0;
+        return last?.event.elapsedMs ?? 0;
       })
       .filter((ms) => ms > 0);
 
@@ -86,7 +100,7 @@ export function signalsFrom(sessions: readonly OutboxSession[]): ActivitySignal[
       stoppedEarly: list.filter((s) => s.result?.status === 'stopped_by_user')
         .length,
       medianMs: median(durations),
-      lastLevel: list[list.length - 1]?.level ?? 1,
+      lastLevel: list[list.length - 1]?.snapshot.level ?? 1,
     };
   });
 }
@@ -109,6 +123,7 @@ export function suggestionsFrom(
     if (s.sessions < MIN_SESSIONS_FOR_SUGGESTION) {
       out.push({
         id: `${s.gameId}-insufficient`,
+        source: LOCAL_SOURCE,
         gameId: s.gameId,
         kind: 'notEnoughData',
         currentLevel: s.lastLevel,
@@ -133,6 +148,7 @@ export function suggestionsFrom(
     ) {
       out.push({
         id: `${s.gameId}-raise`,
+        source: LOCAL_SOURCE,
         gameId: s.gameId,
         kind: 'raiseLevel',
         currentLevel: s.lastLevel,
@@ -149,6 +165,7 @@ export function suggestionsFrom(
       if (s.lastLevel > 1) {
         out.push({
           id: `${s.gameId}-lower`,
+          source: LOCAL_SOURCE,
           gameId: s.gameId,
           kind: 'lowerLevel',
           currentLevel: s.lastLevel,
@@ -159,6 +176,7 @@ export function suggestionsFrom(
       } else {
         out.push({
           id: `${s.gameId}-different`,
+          source: LOCAL_SOURCE,
           gameId: s.gameId,
           kind: 'tryDifferent',
           currentLevel: s.lastLevel,
@@ -172,6 +190,7 @@ export function suggestionsFrom(
 
     out.push({
       id: `${s.gameId}-keep`,
+      source: LOCAL_SOURCE,
       gameId: s.gameId,
       kind: 'keepLevel',
       currentLevel: s.lastLevel,

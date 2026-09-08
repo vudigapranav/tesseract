@@ -1,9 +1,14 @@
+import { toGraphemes } from '../../l10n/graphemes';
+
 /**
- * Word grid construction, ported from word_grid.dart.
+ * Word grid construction.
  *
- * Script handling: words are split by Unicode **code point**, not UTF-16 code
- * unit, so Bengali-Assamese and Meetei Mayek text is placed one real character
- * per cell instead of splitting a surrogate pair down the middle.
+ * Script handling: words are split into **grapheme clusters**, not code
+ * points. A Devanagari or Bengali syllable is a base consonant plus its
+ * matras, nukta and virama-joined consonants — several code points that a
+ * reader sees as one letter. Splitting by code point put a floating matra in
+ * its own cell, which is not something anyone can search for, and let a word
+ * be judged to "fit" a grid it visually overflows.
  *
  * A word the caregiver supplied that cannot be placed is reported in
  * `skipped`, never silently dropped — the host tells them which of their words
@@ -35,7 +40,7 @@ export function wordSearchDifficultyParams(level: number) {
   }
 }
 
-const codePoints = (s: string): string[] => Array.from(s);
+const units = (s: string): string[] => toGraphemes(s);
 
 type Dir = readonly [number, number];
 const ORTHOGONAL: Dir[] = [
@@ -82,7 +87,7 @@ export function buildWordGrid({
   // Longest first: long words are hardest to fit, and placing them while the
   // grid is empty gives every word its best chance.
   const ordered = [...entries].sort(
-    (a, b) => codePoints(b.word).length - codePoints(a.word).length,
+    (a, b) => units(b.word).length - units(a.word).length,
   );
   const dirs = allowDiagonals ? [...ORTHOGONAL, ...DIAGONAL] : ORTHOGONAL;
 
@@ -91,7 +96,7 @@ export function buildWordGrid({
       skipped.push(entry);
       continue;
     }
-    const chars = codePoints(entry.word);
+    const chars = units(entry.word);
     if (chars.length === 0 || chars.length > size) {
       skipped.push(entry);
       continue;
@@ -136,7 +141,8 @@ export function buildWordGrid({
     else skipped.push(entry);
   }
 
-  const alphabet = fillAlphabet.length > 0 ? fillAlphabet : codePoints('ABCDEFGHIJKLMNOPQRSTUVWXYZ');
+  const alphabet =
+    fillAlphabet.length > 0 ? fillAlphabet : units('ABCDEFGHIJKLMNOPQRSTUVWXYZ');
   const filled = letters.map(
     (c) => c ?? alphabet[Math.floor(rand() * alphabet.length)],
   );

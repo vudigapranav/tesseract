@@ -25,32 +25,24 @@ import {
 } from '../design/components';
 import { useApp } from '../state/AppState';
 import { translate } from '../l10n/i18n';
-import { readJson, writeJson } from '../data/storage';
-import { newId } from '../data/outbox';
-import type { PatientSummary } from '../data/apiClient';
+import type { NoteOut, PatientOut, ReportOut } from '../data/apiClient';
 
-interface DoctorNote {
-  id: string;
-  patientId: string;
-  text: string;
-  authorLabel: string;
-  createdAt: string;
-}
-
-const NOTES_KEY = 'doctorNotes';
+// Notes and reports are server-backed. The previous UI claimed there was no
+// notes endpoint; POST/GET /v1/patients/{id}/notes and the reports routes
+// exist, and are used here with the server's assignment checks in force.
 
 export function DoctorPatientsScreen({
   onOpen,
   onBack,
 }: {
-  onOpen: (p: PatientSummary) => void;
+  onOpen: (p: PatientOut) => void;
   onBack: () => void;
 }) {
   const app = useApp();
   const t = (k: Parameters<typeof translate>[1]) =>
     translate(app.interfaceLanguage, k);
 
-  const [patients, setPatients] = useState<PatientSummary[] | null>(null);
+  const [patients, setPatients] = useState<PatientOut[] | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -86,7 +78,7 @@ export function DoctorPatientsScreen({
       ) : null}
 
       {(patients ?? []).map((p) => (
-        <Card key={p.id}>
+        <Card key={p.patient_id}>
           <TitleLarge>{p.display_name}</TitleLarge>
           <PillButton
             label={t('sessionHistory')}
@@ -107,7 +99,7 @@ export function DoctorPatientDetailScreen({
   patient,
   onBack,
 }: {
-  patient: PatientSummary;
+  patient: PatientOut;
   onBack: () => void;
 }) {
   const app = useApp();
@@ -116,14 +108,29 @@ export function DoctorPatientDetailScreen({
 
   const [summary, setSummary] = useState<Record<string, unknown> | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [notes, setNotes] = useState<DoctorNote[]>([]);
+  const [notes, setNotes] = useState<NoteOut[] | null>(null);
+  const [notesError, setNotesError] = useState<string | null>(null);
   const [draft, setDraft] = useState('');
+  const [savingNote, setSavingNote] = useState(false);
+  const [report, setReport] = useState<ReportOut | null>(null);
+  const [reportError, setReportError] = useState<string | null>(null);
+  const [generating, setGenerating] = useState(false);
 
   useEffect(() => {
-    void readJson<DoctorNote[]>(NOTES_KEY, []).then((all) =>
-      setNotes(all.filter((n) => n.patientId === patient.id)),
-    );
-  }, [patient.id]);
+    void (async () => {
+      if (!app.api) {
+        setNotes([]);
+        return;
+      }
+      try {
+        setNotes(await app.api.listNotes(patient.patient_id));
+        setNotesError(null);
+      } catch {
+        setNotes([]);
+        setNotesError('Could not load notes.');
+      }
+    })();
+  }, [app.api, patient.patient_id]);
 
   useEffect(() => {
     void (async () => {
@@ -132,30 +139,45 @@ export function DoctorPatientDetailScreen({
         return;
       }
       try {
-        setSummary(await app.api.doctorSummary(patient.id));
+        setSummary(await app.api.doctorSummary(patient.patient_id));
+        setError(null);
       } catch {
-        setError('Could not load this patient’s summary.');
+        setError('Could not load this patient\u2019s summary.');
       }
     })();
-  }, [app.api, patient.id]);
+  }, [app.api, patient.patient_id]);
 
   const addNote = async () => {
     const text = draft.trim();
-    if (!text) return;
-    const note: DoctorNote = {
-      id: newId(),
-      patientId: patient.id,
-      text,
-      // Notes are attributed. An unattributed clinical note is not useful and
-      // is not safe.
-      authorLabel: app.identity.uid ?? 'this device',
-      createdAt: new Date().toISOString(),
-    };
-    const all = await readJson<DoctorNote[]>(NOTES_KEY, []);
-    const next = [...all, note];
-    await writeJson(NOTES_KEY, next);
-    setNotes(next.filter((n) => n.patientId === patient.id));
-    setDraft('');
+    if (!text || !app.api) return;
+    setSavingNote(true);
+    setNotesError(null);
+    try {
+      // Authorship comes from the authenticated identity on the server, never
+      // from anything this client asserts.
+      const created = await app.api.addNote(patient.patient_id, text);
+      setNotes((prev) => [...(prev ?? []), created]);
+      setDraft('');
+    } catch {
+      // The draft is kept: losing a written clinical note to a network blip
+      // is not acceptable.
+      setNotesError('Could not save that note. Your text is still here.');
+    } finally {
+      setSavingNote(false);
+    }
+  };
+
+  const generateReport = async () => {
+    if (!app.api) return;
+    setGenerating(true);
+    setReportError(null);
+    try {
+      setReport(await app.api.createReport(patient.patient_id, 30));
+    } catch {
+      setReportError('Could not generate a report.');
+    } finally {
+      setGenerating(false);
+    }
   };
 
   const measures = summary
@@ -185,20 +207,58 @@ export function DoctorPatientDetailScreen({
         <StatusNote icon="info" text={t('doctorDisclaimer')} />
       </Card>
 
+      <SectionHeading title={t('draftReport')} />
+      <Card>
+        {report ? (
+          <>
+            <BodyMedium tone="soft">
+              {`${report.generator} ${report.generator_version} \u00b7 ${report.window_days} days \u00b7 ${report.source_session_ids.length} sessions`}
+            </BodyMedium>
+            {Object.entries(report.content).map(([k, v]) => (
+              <View key={k} style={{ paddingVertical: 4 }}>
+                <BodyLarge>{k.replace(/_/g, ' ')}</BodyLarge>
+                <BodyMedium tone="soft">
+                  {typeof v === 'object' ? JSON.stringify(v) : String(v)}
+                </BodyMedium>
+              </View>
+            ))}
+          </>
+        ) : (
+          <BodyMedium tone="soft">{t('noActivityYet')}</BodyMedium>
+        )}
+        {reportError ? (
+          <StatusNote icon="alert" tone="attention" text={reportError} />
+        ) : null}
+        <PillButton
+          label={t('generate')}
+          variant="outline"
+          busy={generating}
+          disabled={!app.api}
+          onPress={generateReport}
+        />
+        <StatusNote icon="info" text={t('doctorDisclaimer')} />
+      </Card>
+
       <SectionHeading title={t('notes')} />
       <Card>
-        {notes.length === 0 ? (
+        {notes === null ? (
+          <BodyMedium tone="soft">{t('signingIn')}</BodyMedium>
+        ) : notes.length === 0 ? (
           <BodyMedium tone="soft">{t('noNotes')}</BodyMedium>
         ) : (
           notes.map((n) => (
-            <View key={n.id} style={{ paddingVertical: 6 }}>
-              <BodyLarge>{n.text}</BodyLarge>
+            <View key={n.note_id} style={{ paddingVertical: 6 }}>
+              <BodyLarge>{n.body}</BodyLarge>
+              {/* Attributed to the author the server recorded. */}
               <BodyMedium tone="soft">
-                {`${new Date(n.createdAt).toLocaleString()} · ${n.authorLabel}`}
+                {`${new Date(n.created_at).toLocaleString()} \u00b7 ${n.author_user_id}`}
               </BodyMedium>
             </View>
           ))
         )}
+        {notesError ? (
+          <StatusNote icon="alert" tone="attention" text={notesError} />
+        ) : null}
         <TextInput
           accessibilityLabel={t('addNote')}
           value={draft}
@@ -211,12 +271,9 @@ export function DoctorPatientDetailScreen({
         <PillButton
           label={t('addNote')}
           variant="outline"
-          disabled={!draft.trim()}
+          busy={savingNote}
+          disabled={!draft.trim() || !app.api}
           onPress={addNote}
-        />
-        <StatusNote
-          icon="info"
-          text="Notes are stored on this device only. There is no notes endpoint in the API yet."
         />
       </Card>
 

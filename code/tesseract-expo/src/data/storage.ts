@@ -1,74 +1,129 @@
 /**
- * Durable local storage, partitioned by caregiver identity.
+ * Durable local storage, bound to an explicit identity scope.
  *
- * The partitioning is the point: a shared device must never show one
- * caregiver another's patient content. Every key is namespaced by the signed-in
- * identity's stable uid, and reading without an identity returns the anonymous
- * scope, which holds nothing but device preferences.
+ * The previous version kept the scope in a module-level mutable variable that
+ * every read and write consulted at the moment it ran. Because those are
+ * async, a caregiver signing out mid-flight could have an in-progress write
+ * land in the *next* account's partition — a real cross-patient leak on a
+ * shared device, not a theoretical one.
  *
- * AsyncStorage rather than SQLite: it is bundled in Expo Go, and what this app
- * stores is a handful of JSON documents, not a relational workload. The Flutter
- * build uses SQLite because it also runs a session outbox at volume; the outbox
- * here keeps the same ordering guarantees over a JSON array.
+ * A `ScopedStore` now captures its scope at construction. A write started
+ * under one identity can only ever touch that identity's keys, whatever
+ * happens to the app's idea of "current" while it is awaiting.
  */
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const ANON = 'anon';
 const PREFIX = 'tesseract';
+export const ANON_SCOPE = 'anon';
 
 /** Keys that belong to the device, not to any one caregiver. */
-const DEVICE_KEYS = ['interfaceLanguage', 'activeScope'] as const;
-type DeviceKey = (typeof DEVICE_KEYS)[number];
+const DEVICE_KEYS = new Set(['interfaceLanguage', 'activeScope']);
 
-let scope = ANON;
-
-export function currentScope(): string {
-  return scope;
-}
-
-/** Points storage at a caregiver's partition. */
-export async function useScope(uid: string | null): Promise<void> {
-  scope = uid && uid.trim().length > 0 ? uid.trim() : ANON;
-  await AsyncStorage.setItem(`${PREFIX}:activeScope`, scope);
-}
-
-/** Restores the partition that was in use before the app was closed. */
-export async function restoreScope(): Promise<string> {
-  const saved = await AsyncStorage.getItem(`${PREFIX}:activeScope`);
-  scope = saved ?? ANON;
-  return scope;
-}
-
-const scopedKey = (key: string) =>
-  (DEVICE_KEYS as readonly string[]).includes(key)
-    ? `${PREFIX}:${key}`
-    : `${PREFIX}:${scope}:${key}`;
-
-export async function readJson<T>(key: string, fallback: T): Promise<T> {
-  try {
-    const raw = await AsyncStorage.getItem(scopedKey(key));
-    if (raw == null) return fallback;
-    return JSON.parse(raw) as T;
-  } catch {
-    // A corrupt document must not take the app down. The caller gets its
-    // default and the user sees an empty section rather than a crash.
-    return fallback;
+export class CorruptDataError extends Error {
+  constructor(readonly key: string) {
+    super(`Stored data for "${key}" could not be read.`);
   }
 }
 
-export async function writeJson(key: string, value: unknown): Promise<void> {
-  await AsyncStorage.setItem(scopedKey(key), JSON.stringify(value));
+/**
+ * A handle onto exactly one identity's data.
+ *
+ * Construct it once per identity and pass it down. Nothing here reads a
+ * global, so there is no window in which the destination can change.
+ */
+export class ScopedStore {
+  constructor(readonly scope: string) {}
+
+  private key(name: string): string {
+    return DEVICE_KEYS.has(name)
+      ? `${PREFIX}:${name}`
+      : `${PREFIX}:${this.scope}:${name}`;
+  }
+
+  /**
+   * Reads a document.
+   *
+   * `onCorrupt` decides what a broken document means. The default **throws**,
+   * because silently turning unreadable data into a clean empty value is how a
+   * caregiver's Know Me content or a queue of played sessions disappears
+   * without anyone noticing. Callers that genuinely tolerate loss opt in.
+   */
+  async read<T>(
+    name: string,
+    fallback: T,
+    options: { onCorrupt?: 'throw' | 'fallback' } = {},
+  ): Promise<T> {
+    const raw = await AsyncStorage.getItem(this.key(name));
+    if (raw == null) return fallback;
+    try {
+      return JSON.parse(raw) as T;
+    } catch {
+      if (options.onCorrupt === 'fallback') return fallback;
+      throw new CorruptDataError(name);
+    }
+  }
+
+  /** Reads without throwing, reporting whether the document was broken. */
+  async tryRead<T>(
+    name: string,
+    fallback: T,
+  ): Promise<{ value: T; corrupt: boolean }> {
+    try {
+      return { value: await this.read<T>(name, fallback), corrupt: false };
+    } catch {
+      return { value: fallback, corrupt: true };
+    }
+  }
+
+  async write(name: string, value: unknown): Promise<void> {
+    await AsyncStorage.setItem(this.key(name), JSON.stringify(value));
+  }
+
+  async remove(name: string): Promise<void> {
+    await AsyncStorage.removeItem(this.key(name));
+  }
+
+  /** The raw stored string, kept for quarantining a corrupt document. */
+  async raw(name: string): Promise<string | null> {
+    return AsyncStorage.getItem(this.key(name));
+  }
+
+  /**
+   * Moves a broken document aside instead of deleting it, so a caregiver's
+   * data can still be recovered by hand rather than being destroyed by the
+   * code that failed to parse it.
+   */
+  async quarantine(name: string): Promise<void> {
+    const raw = await this.raw(name);
+    if (raw == null) return;
+    await AsyncStorage.setItem(
+      `${this.key(name)}:corrupt:${Date.now()}`,
+      raw,
+    );
+    await this.remove(name);
+  }
+
+  /** Everything under this scope, for a sign-out that really clears. */
+  async clear(): Promise<void> {
+    const keys = await AsyncStorage.getAllKeys();
+    const mine = keys.filter((k) => k.startsWith(`${PREFIX}:${this.scope}:`));
+    if (mine.length) await AsyncStorage.multiRemove(mine);
+  }
 }
 
-export async function removeKey(key: string): Promise<void> {
-  await AsyncStorage.removeItem(scopedKey(key));
+/** Per-patient partition inside a caregiver's scope. */
+export const patientKey = (patientId: string, name: string): string =>
+  `p:${patientId}:${name}`;
+
+export const deviceStore = new ScopedStore(ANON_SCOPE);
+
+export async function rememberActiveScope(scope: string): Promise<void> {
+  await AsyncStorage.setItem(`${PREFIX}:activeScope`, scope);
 }
 
-/** Everything stored for the current scope, for a sign-out that really clears. */
-export async function clearScope(): Promise<void> {
-  const keys = await AsyncStorage.getAllKeys();
-  const mine = keys.filter((k) => k.startsWith(`${PREFIX}:${scope}:`));
-  if (mine.length) await AsyncStorage.multiRemove(mine);
+export async function recallActiveScope(): Promise<string> {
+  return (await AsyncStorage.getItem(`${PREFIX}:activeScope`)) ?? ANON_SCOPE;
 }
 
-export type { DeviceKey };
+export const storeFor = (uid: string | null): ScopedStore =>
+  new ScopedStore(uid && uid.trim() ? uid.trim() : ANON_SCOPE);

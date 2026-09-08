@@ -11,7 +11,7 @@
  *    labels and emit only the opaque `id`. Every game test asserts this.
  */
 import type { GameItem } from '../games/contract';
-import { readJson, writeJson } from './storage';
+import { patientKey, type ScopedStore } from './storage';
 
 export type KnowMeKind = 'place' | 'step' | 'word' | 'picture';
 
@@ -29,10 +29,11 @@ export interface KnowMeEntry {
 export interface KnowMeContent {
   entries: KnowMeEntry[];
   /**
-   * Server revision this was last synced from. Used for conflict-aware
-   * uploads; a 409 keeps local edits rather than overwriting them.
+   * Server `version` this was last synced from — an integer, matching
+   * `PersonalizationIn`. Used for conflict-aware uploads; a 409 keeps local
+   * edits rather than overwriting them.
    */
-  revision?: string;
+  version: number;
   /** True when there are local edits the server has not seen. */
   dirty: boolean;
   /** Bumped locally so a session can report the content it actually used. */
@@ -43,19 +44,55 @@ const KEY = 'knowMe';
 
 export const emptyKnowMe = (): KnowMeContent => ({
   entries: [],
+  version: 1,
   dirty: false,
   localVersion: 'local-v1',
 });
 
-export const loadKnowMe = (patientId: string): Promise<KnowMeContent> =>
-  readJson<KnowMeContent>(`${KEY}:${patientId}`, emptyKnowMe());
+/** Partitioned per patient, so one patient's content never feeds another's. */
+export const loadKnowMe = (
+  store: ScopedStore,
+  patientId: string,
+): Promise<KnowMeContent> =>
+  store
+    .tryRead<KnowMeContent>(patientKey(patientId, KEY), emptyKnowMe())
+    .then((r) => r.value);
 
 export async function saveKnowMe(
+  store: ScopedStore,
   patientId: string,
   content: KnowMeContent,
 ): Promise<void> {
-  await writeJson(`${KEY}:${patientId}`, content);
+  await store.write(patientKey(patientId, KEY), content);
 }
+
+/**
+ * The server's personalization shape.
+ *
+ * `personal_words` and `people_places` are separate lists with different
+ * schemas, so the flat local entry list is split rather than sent as an
+ * invented `entries` array.
+ *
+ * Routine steps and sorting categories have **no approved server
+ * representation**. They stay local and are deliberately not smuggled into
+ * `preferences` — that needs a contract decision from Pranav, not a client
+ * inventing a payload. See docs/handoffs/PRANAV_BACKEND_GAPS.md.
+ */
+export function toPersonalizationBody(content: KnowMeContent) {
+  return {
+    version: content.version,
+    personal_words: content.entries
+      .filter((e) => e.kind === 'word')
+      .map((e) => ({ text: e.label, locale: e.locale ?? 'en' })),
+    people_places: content.entries
+      .filter((e) => e.kind === 'place')
+      .map((e) => ({ kind: 'place' as const, label: e.label })),
+    preferences: {},
+  };
+}
+
+/** Kinds the server can store today. The rest are local-only, and say so. */
+export const SERVER_BACKED_KINDS: readonly KnowMeKind[] = ['word', 'place'];
 
 /** A new local content version, so a session records what it really used. */
 export const bumpLocalVersion = (): string =>

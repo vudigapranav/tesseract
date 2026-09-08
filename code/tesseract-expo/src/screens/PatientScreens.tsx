@@ -211,29 +211,14 @@ export function PlayScreen({
   // half-personal mixture, which would look personal without being it.
   const [knowMe, setKnowMe] = useState<KnowMeContent | null>(null);
   useEffect(() => {
-    void loadKnowMe(app.selectedPatient?.id ?? 'local').then(setKnowMe);
-  }, [app.selectedPatient?.id]);
+    void loadKnowMe(app.store, app.selectedPatient?.id ?? 'local').then(setKnowMe);
+  }, [app.store, app.selectedPatient?.id]);
 
-  /** Created once per session; ids stay stable across retries. */
-  const session = useRef(
-    createOutboxSession({
-      patientId: app.selectedPatient?.id ?? 'local',
-      gameId: registration.gameId,
-      level,
-      // A local preset is labelled as such, never dressed up as a server
-      // revision the backend never issued.
-      configVersion: 'local-v1',
-      contentVersion: 'local-v1',
-      schemaVersion: '1',
-      metricVersion: '1',
-    }),
-  ).current;
-  void emptyKnowMe;
-  const enqueued = useRef(false);
-  if (!enqueued.current) {
-    enqueued.current = true;
-    void app.outbox.enqueue(session);
-  }
+  // The queued session is created only once content is known, so the
+  // snapshot it uploads matches the configuration actually played. Creating
+  // it earlier is what let 'local-v1' be recorded for a session that ran
+  // different content.
+  const session = useRef<ReturnType<typeof createOutboxSession> | null>(null);
 
   const config: GameConfig = useMemo(
     () => ({
@@ -266,15 +251,36 @@ export function PlayScreen({
   // generic set and then swaps to the caregiver's mid-play.
   if (knowMe === null) return <View style={{ flex: 1 }} />;
 
+  if (session.current === null) {
+    session.current = createOutboxSession({
+      patientId: app.selectedPatient?.id ?? 'local',
+      gameId: config.gameId,
+      gameVersion: config.gameVersion,
+      schemaVersion: config.schemaVersion,
+      // The frozen, real values — not placeholders.
+      configVersion: config.configVersion,
+      contentVersion: config.contentVersion,
+      metricVersion: config.metricVersion,
+      level: config.level,
+      difficultyParams: config.difficultyParams,
+      requestedInputMode: config.inputMode,
+      isTutorial: config.isTutorial,
+      textScale: config.textScale,
+      locale: config.locale,
+    });
+    void app.outbox.enqueue(session.current);
+  }
+  const active = session.current;
+
   return (
     <View style={{ flex: 1, paddingTop: spacing.gutter }}>
       <Game
         config={config}
         onEvent={(e: GameEvent) => {
-          void app.outbox.record(session.clientSessionId, e);
+          void app.outbox.record(active.clientSessionId, e);
         }}
         onFinish={(r: GameResult) => {
-          void app.outbox.finalize(session.clientSessionId, r).then(() => {
+          void app.outbox.finalize(active.clientSessionId, r).then(() => {
             void app.syncNow();
           });
           onFinished(r);

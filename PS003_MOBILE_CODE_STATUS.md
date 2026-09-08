@@ -820,3 +820,33 @@ Verified: TypeScript clean, 65 tests, expo-doctor 21/21, iOS bundle builds.
 **NOT TESTED:** all gameplay on iPhone hardware — touch precision, motion feel,
 performance, Devanagari wrapping at large text, VoiceOver order, before/after
 device comparison.
+
+
+## 2026-09-08 — functional audit: defects fixed
+
+An external review's findings were verified against the real backend schemas
+and were correct. TypeScript and the prior 50 tests had not established
+correctness.
+
+Fixed: caregiver gate failing open (now fails closed, passcode separated from
+biometric enrollment, salted-hash PIN fallback); identity scope captured at
+construction instead of read mid-await; patient mode persisted across restart;
+in-flight sync aborted on account change; per-patient partitioning of
+reminders/Know Me/decisions; full API contract parity (patient_id/version,
+PUT /v1/sessions/{id}, occurred_at, personalization shape, accept/modify/reject,
+server UUIDs, timeouts, runtime shape validation); outbox progress driven by
+accepted/duplicate ids rather than events sent; serialized flushes; frozen
+snapshot built after content loads so uploaded versions match what was played;
+corrupt data quarantined not swallowed; bounded backoff; server recommendations
+as the activity authority with local observations explicitly labelled; postpone
+actually scheduling a one-off notification; patient-scoped schedule
+reconciliation; doctor notes/reports via the endpoints that exist; Indic
+grapheme-cluster segmentation.
+
+Verified: TypeScript clean, **110 tests** (was 50), l10n in sync,
+expo-doctor 21/21.
+
+**NOT verified:** no contract test against a live API, no iPhone hardware
+testing, no real Firebase sign-in from Expo. Voice input has no working
+recognition. Non-English languages remain unreviewed drafts and hardcoded
+English remains in several screens.

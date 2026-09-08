@@ -37,7 +37,7 @@ import {
 } from './screens/PatientScreens';
 import type { GameRegistration } from './games/registry';
 import type { GameResult } from './games/contract';
-import type { PatientSummary } from './data/apiClient';
+import type { PatientOut } from './data/apiClient';
 
 type CaregiverRoute =
   | 'home'
@@ -68,7 +68,7 @@ export function Navigation() {
   const [registration, setRegistration] = useState<GameRegistration | null>(null);
   const [level, setLevel] = useState(1);
   const [result, setResult] = useState<GameResult | null>(null);
-  const [doctorPatient, setDoctorPatient] = useState<PatientSummary | null>(null);
+  const [doctorPatient, setDoctorPatient] = useState<PatientOut | null>(null);
 
   if (!app.ready) {
     return (

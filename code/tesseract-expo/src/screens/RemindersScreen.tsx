@@ -26,6 +26,7 @@ import { languageByCode } from '../l10n/languages';
 import { newId } from '../data/outbox';
 import {
   acknowledge,
+  dueLaterToday,
   ensurePermission,
   formatTime,
   loadOccurrences,
@@ -56,18 +57,26 @@ export function RemindersScreen({ onBack }: { onBack: () => void }) {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [loaded, setLoaded] = useState(false);
 
+  const patientId = app.selectedPatient?.id ?? 'local';
+
   useEffect(() => {
     void (async () => {
-      setReminders(await loadReminders());
+      setReminders(await loadReminders(app.store, patientId));
       setLoaded(true);
     })();
-  }, []);
+  }, [app.store, patientId]);
 
-  /** Persist, then converge the OS schedule. Always in that order. */
+  /**
+   * Persist, then converge this patient's schedule. Always in that order, and
+   * always scoped — reconciliation must not touch another patient's alerts.
+   */
   const commit = async (next: Reminder[]) => {
     setReminders(next);
-    await saveReminders(next);
-    const cap = await reconcileSchedule(next, app.patientLanguage);
+    await saveReminders(app.store, patientId, next);
+    const cap = await reconcileSchedule(next, app.patientLanguage, {
+      patientId,
+      soundEnabled: app.prefs.audioEnabled,
+    });
     setCapability(cap);
   };
 
@@ -231,6 +240,7 @@ export function RemindersScreen({ onBack }: { onBack: () => void }) {
 
 export function PatientRemindersScreen({ onBack }: { onBack: () => void }) {
   const app = useApp();
+  const patientId = app.selectedPatient?.id ?? 'local';
   const code = app.patientLanguage;
   const t = (k: Parameters<typeof translate>[1]) => translate(code, k);
   const font = fontFamilyForScript(languageByCode(code).script);
@@ -241,15 +251,17 @@ export function PatientRemindersScreen({ onBack }: { onBack: () => void }) {
 
   useEffect(() => {
     void (async () => {
-      setReminders((await loadReminders()).filter((r) => r.enabled));
-      setOccurrences(await loadOccurrences());
+      setReminders(
+        (await loadReminders(app.store, patientId)).filter((r) => r.enabled),
+      );
+      setOccurrences(await loadOccurrences(app.store, patientId));
       setLoaded(true);
     })();
-  }, []);
+  }, [app.store, patientId]);
 
   const update = async (next: Occurrence[]) => {
     setOccurrences(next);
-    await saveOccurrences(next);
+    await saveOccurrences(app.store, patientId, next);
   };
 
   if (!loaded) return <Screen><View /></Screen>;
@@ -271,6 +283,13 @@ export function PatientRemindersScreen({ onBack }: { onBack: () => void }) {
             <Card key={r.id}>
               <TitleLarge fontFamily={font}>{r.title}</TitleLarge>
               <BodyMedium tone="soft">{time}</BodyMedium>
+              {dueLaterToday(occurrences, r.id) ? (
+                <BodyMedium tone="soft">
+                  {`${t('reminderLater')}: ${new Date(
+                    dueLaterToday(occurrences, r.id) as string,
+                  ).toLocaleTimeString()}`}
+                </BodyMedium>
+              ) : null}
               {/* Reads the caregiver's own words back, in the patient's
                   language setting. It does not translate them. */}
               <SpeakButton text={`${r.title}. ${time}`} languageCode={code} />
@@ -285,13 +304,25 @@ export function PatientRemindersScreen({ onBack }: { onBack: () => void }) {
                   <BigPatientAction
                     label={t('reminderSeenIt')}
                     fontFamily={font}
-                    onPress={() => void update(acknowledge(occurrences, r.id))}
+                    onPress={() =>
+                      void acknowledge(occurrences, r.id).then(update)
+                    }
                   />
                   <BigPatientAction
                     label={t('reminderLater')}
                     primary={false}
                     fontFamily={font}
-                    onPress={() => void update(postpone(occurrences, r.id))}
+                    onPress={() =>
+                      // Actually schedules a one-off notification rather than
+                      // incrementing a counter that nothing ever reads.
+                      void postpone(
+                        occurrences,
+                        r,
+                        code,
+                        15,
+                        app.prefs.audioEnabled,
+                      ).then((res) => update(res.occurrences))
+                    }
                   />
                 </>
               )}

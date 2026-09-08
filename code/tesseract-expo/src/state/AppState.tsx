@@ -21,22 +21,30 @@ import React, {
   useState,
 } from 'react';
 import { AppState as RNAppState } from 'react-native';
-import { ApiClient } from '../data/apiClient';
+import { ApiClient, type PatientOut } from '../data/apiClient';
 import { isApiConfigured, isIdentityConfigured } from '../data/config';
 import { IdentityService } from '../data/identity';
 import { SessionOutbox } from '../data/outbox';
-import * as storage from '../data/storage';
+import {
+  ANON_SCOPE,
+  ScopedStore,
+  patientKey,
+  recallActiveScope,
+  rememberActiveScope,
+  storeFor,
+} from '../data/storage';
 import { SpeechOutputService } from '../speech/tts';
 import type { LanguageCode } from '../l10n/languages';
 
 export type Role = 'caregiver' | 'doctor';
 
 export interface PatientSnapshot {
+  /** The server's `patient_id`. */
   id: string;
   displayName: string;
   language: LanguageCode;
-  /** Server revision last read, for conflict-aware uploads. */
-  profileRevision?: string;
+  /** The server's `version`, for conflict-aware writes. */
+  version?: number;
   /** Local-only until a patient-basics update endpoint exists. */
   ageYears?: number;
   notes?: string;
@@ -98,6 +106,8 @@ interface AppStateValue {
 
   /* services */
   api: ApiClient | null;
+  /** The store bound to the signed-in identity. */
+  store: ScopedStore;
   outbox: SessionOutbox;
   speech: SpeechOutputService;
   syncNow: () => Promise<void>;
@@ -121,6 +131,15 @@ export function AppStateProvider({ children }: { children: React.ReactNode }) {
   const [patientsError, setPatientsError] = useState<string | null>(null);
   const [pendingUploads, setPending] = useState(0);
 
+  /**
+   * The store for whoever is signed in. Captured in state rather than read
+   * from a global, so an async operation that started under one identity
+   * cannot land in another's partition.
+   */
+  const [store, setStore] = useState<ScopedStore>(() => storeFor(null));
+  const storeRef = useRef(store);
+  storeRef.current = store;
+
   const prefsRef = useRef(prefs);
   prefsRef.current = prefs;
 
@@ -138,32 +157,96 @@ export function AppStateProvider({ children }: { children: React.ReactNode }) {
   const apiRef = useRef(api);
   apiRef.current = api;
 
-  const outbox = useRef(new SessionOutbox(() => apiRef.current)).current;
+  /** Rebuilt whenever the scope changes, so it can never span two accounts. */
+  const [outbox, setOutbox] = useState<SessionOutbox>(
+    () => new SessionOutbox(storeFor(null), () => apiRef.current),
+  );
+
+  /** Aborts any sync in flight when the account changes. */
+  const syncAbort = useRef<AbortController | null>(null);
+
+  const cancelSync = useCallback(() => {
+    syncAbort.current?.abort();
+    syncAbort.current = null;
+  }, []);
+
+  /**
+   * Points every scoped service at one identity, atomically.
+   *
+   * Any sync already running belongs to the previous identity and is
+   * abandoned first — letting it finish would write one account's sessions
+   * while another is signed in.
+   */
+  const adoptScope = useCallback(
+    async (uid: string | null) => {
+      cancelSync();
+      const next = storeFor(uid);
+      const nextOutbox = new SessionOutbox(next, () => apiRef.current);
+      await nextOutbox.load();
+      setStore(next);
+      storeRef.current = next;
+      setOutbox(nextOutbox);
+      await rememberActiveScope(next.scope);
+      return next;
+    },
+    [cancelSync],
+  );
+
+  /** Reads every per-identity document from one explicit store. */
+  const loadFrom = useCallback(async (s: ScopedStore) => {
+    setInterfaceLang(
+      (await s.tryRead<LanguageCode>('interfaceLanguage', 'en')).value,
+    );
+    setPatientLang((await s.tryRead<LanguageCode>('patientLanguage', 'en')).value);
+    setPrefsState((await s.tryRead<Preferences>('prefs', DEFAULT_PREFS)).value);
+    setPatients((await s.tryRead<PatientSnapshot[]>('patients', [])).value);
+    setSelectedId(
+      (await s.tryRead<string | null>('selectedPatient', null)).value,
+    );
+    // Patient mode is durable: a device handed to someone must not reopen in
+    // caregiver mode after a restart or a battery death.
+    setPatientMode((await s.tryRead<boolean>('patientMode', false)).value);
+  }, []);
+
+  /** Drops everything identity-specific from memory. */
+  const clearInMemory = useCallback(() => {
+    setPatients([]);
+    setSelectedId(null);
+    setPatientMode(false);
+    setPrefsState(DEFAULT_PREFS);
+    setPatientLang('en');
+    setPatientsError(null);
+  }, []);
 
   /* ------------------------------------------------------------- boot - */
   useEffect(() => {
     (async () => {
-      await storage.restoreScope();
+      const savedScope = await recallActiveScope();
       const restored = await identity.restore();
-      if (restored) {
-        await storage.useScope(identity.uid);
+      if (restored && identity.uid) {
+        const s = await adoptScope(identity.uid);
         setSignedIn(true);
-        setRole(await storage.readJson<Role>('role', 'caregiver'));
+        setRole((await s.tryRead<Role>('role', 'caregiver')).value);
+        await loadFrom(s);
+      } else {
+        // Restoration failed. Do not leave the previous account's data
+        // sitting in memory behind a signed-out shell.
+        clearInMemory();
+        const s = await adoptScope(savedScope === ANON_SCOPE ? null : null);
+        setSignedIn(false);
+        setInterfaceLang(
+          (await s.tryRead<LanguageCode>('interfaceLanguage', 'en')).value,
+        );
       }
-      setInterfaceLang(
-        await storage.readJson<LanguageCode>('interfaceLanguage', 'en'),
-      );
-      setPatientLang(await storage.readJson<LanguageCode>('patientLanguage', 'en'));
-      setPrefsState(await storage.readJson<Preferences>('prefs', DEFAULT_PREFS));
-      setPatients(await storage.readJson<PatientSnapshot[]>('patients', []));
-      setSelectedId(await storage.readJson<string | null>('selectedPatient', null));
-      await outbox.load();
       setReady(true);
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  useEffect(() => outbox.subscribe(() => setPending(outbox.pendingCount)), [outbox]);
+  useEffect(
+    () => outbox.subscribe(() => setPending(outbox.pendingCount)),
+    [outbox],
+  );
 
   /* Speech must not continue out of a backgrounded app. */
   useEffect(() => {
@@ -177,52 +260,44 @@ export function AppStateProvider({ children }: { children: React.ReactNode }) {
   const signIn = useCallback(
     async (email: string, password: string, nextRole: Role) => {
       await identity.signIn(email, password);
-      await storage.useScope(identity.uid);
-      await storage.writeJson('role', nextRole);
+      const s = await adoptScope(identity.uid);
+      await s.write('role', nextRole);
       setRole(nextRole);
       setSignedIn(true);
       setPreviewMode(false);
-      // Preferences and patients are per-caregiver, so re-read them now that
-      // the partition has changed.
-      setInterfaceLang(
-        await storage.readJson<LanguageCode>('interfaceLanguage', interfaceLanguage),
-      );
-      setPatientLang(await storage.readJson<LanguageCode>('patientLanguage', 'en'));
-      setPrefsState(await storage.readJson<Preferences>('prefs', DEFAULT_PREFS));
-      setPatients(await storage.readJson<PatientSnapshot[]>('patients', []));
-      setSelectedId(await storage.readJson<string | null>('selectedPatient', null));
-      await outbox.load();
+      await loadFrom(s);
     },
-    [identity, interfaceLanguage, outbox],
+    [identity, adoptScope, loadFrom],
   );
 
   const signOut = useCallback(async () => {
+    cancelSync();
     await speech.stop();
     await identity.signOut();
-    await storage.useScope(null);
+    clearInMemory();
+    await adoptScope(null);
     setSignedIn(false);
     setRole(null);
     setPreviewMode(false);
-    setPatients([]);
-    setSelectedId(null);
-    setPatientMode(false);
-    await outbox.load();
-  }, [identity, outbox, speech]);
+  }, [identity, adoptScope, speech, cancelSync, clearInMemory]);
 
   const enterPreview = useCallback(async () => {
-    // Explicit and labelled. Never a fallback from a failed real sign-in.
+    // Explicit and labelled, never a fallback from a failed sign-in. Preview
+    // gets its own scope and its own outbox, so it cannot mix with a real
+    // caregiver's queued sessions.
+    cancelSync();
+    clearInMemory();
+    const s = await adoptScope('preview');
     setPreviewMode(true);
     setRole('caregiver');
-    await storage.useScope('preview');
-    setPatients(await storage.readJson<PatientSnapshot[]>('patients', []));
-    setSelectedId(await storage.readJson<string | null>('selectedPatient', null));
-  }, []);
+    await loadFrom(s);
+  }, [adoptScope, cancelSync, clearInMemory, loadFrom]);
 
   /* -------------------------------------------------------- languages - */
   const setInterfaceLanguage = useCallback(
     async (code: LanguageCode) => {
       setInterfaceLang(code);
-      await storage.writeJson('interfaceLanguage', code);
+      await storeRef.current.write('interfaceLanguage', code);
       await speech.handleLanguageChanged();
     },
     [speech],
@@ -231,7 +306,7 @@ export function AppStateProvider({ children }: { children: React.ReactNode }) {
   const setPatientLanguage = useCallback(
     async (code: LanguageCode) => {
       setPatientLang(code);
-      await storage.writeJson('patientLanguage', code);
+      await storeRef.current.write('patientLanguage', code);
       await speech.handleLanguageChanged();
     },
     [speech],
@@ -241,9 +316,7 @@ export function AppStateProvider({ children }: { children: React.ReactNode }) {
     async (next: Partial<Preferences>) => {
       const merged = { ...prefsRef.current, ...next };
       setPrefsState(merged);
-      await storage.writeJson('prefs', merged);
-      // Turning sound off stops speech immediately, not at the end of the
-      // current sentence.
+      await storeRef.current.write('prefs', merged);
       if (next.audioEnabled === false) await speech.stop();
     },
     [speech],
@@ -251,18 +324,19 @@ export function AppStateProvider({ children }: { children: React.ReactNode }) {
 
   /* --------------------------------------------------------- patients - */
   const upsertPatient = useCallback(async (p: PatientSnapshot) => {
+    const s = storeRef.current;
     setPatients((prev) => {
       const next = prev.some((x) => x.id === p.id)
         ? prev.map((x) => (x.id === p.id ? { ...x, ...p } : x))
         : [...prev, p];
-      void storage.writeJson('patients', next);
+      void s.write('patients', next);
       return next;
     });
   }, []);
 
   const selectPatient = useCallback(async (id: string) => {
     setSelectedId(id);
-    await storage.writeJson('selectedPatient', id);
+    await storeRef.current.write('selectedPatient', id);
   }, []);
 
   const refreshPatients = useCallback(async () => {
@@ -271,24 +345,25 @@ export function AppStateProvider({ children }: { children: React.ReactNode }) {
       setPatientsError(null);
       return;
     }
+    const s = storeRef.current;
     try {
       const remote = await client.listPatients();
       setPatientsError(null);
       setPatients((prev) => {
-        // Server data does not silently replace local edits: local fields the
-        // server has no endpoint for (age, notes) are preserved.
-        const merged = remote.map((r) => {
-          const local = prev.find((p) => p.id === r.id);
+        // Local fields the server has no endpoint for are preserved rather
+        // than wiped by a refresh.
+        const merged = remote.map((r: PatientOut) => {
+          const local = prev.find((p) => p.id === r.patient_id);
           return {
-            id: r.id,
+            id: r.patient_id,
             displayName: r.display_name,
             language: (r.language as LanguageCode) ?? local?.language ?? 'en',
-            profileRevision: r.profile_revision,
+            version: r.version,
             ageYears: local?.ageYears,
             notes: local?.notes,
           };
         });
-        void storage.writeJson('patients', merged);
+        void s.write('patients', merged);
         return merged;
       });
     } catch {
@@ -299,9 +374,22 @@ export function AppStateProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const syncNow = useCallback(async () => {
-    await outbox.flush();
+    cancelSync();
+    const controller = new AbortController();
+    syncAbort.current = controller;
+    await outbox.flush(controller.signal);
     setPending(outbox.pendingCount);
-  }, [outbox]);
+  }, [outbox, cancelSync]);
+
+  const enterPatientMode = useCallback(() => {
+    setPatientMode(true);
+    void storeRef.current.write('patientMode', true);
+  }, []);
+
+  const leavePatientMode = useCallback(() => {
+    setPatientMode(false);
+    void storeRef.current.write('patientMode', false);
+  }, []);
 
   const selectedPatient = useMemo(
     () => patients.find((p) => p.id === selectedId) ?? null,
@@ -333,9 +421,10 @@ export function AppStateProvider({ children }: { children: React.ReactNode }) {
       refreshPatients,
       patientsError,
       patientMode,
-      enterPatientMode: () => setPatientMode(true),
-      leavePatientMode: () => setPatientMode(false),
+      enterPatientMode,
+      leavePatientMode,
       api,
+      store,
       outbox,
       speech,
       syncNow,
@@ -345,13 +434,16 @@ export function AppStateProvider({ children }: { children: React.ReactNode }) {
       ready, identity, role, signedIn, signIn, signOut, previewMode, enterPreview,
       interfaceLanguage, patientLanguage, setInterfaceLanguage, setPatientLanguage,
       prefs, setPrefs, patients, selectedPatient, selectPatient, upsertPatient,
-      refreshPatients, patientsError, patientMode, api, outbox, speech, syncNow,
-      pendingUploads,
+      refreshPatients, patientsError, patientMode, enterPatientMode,
+      leavePatientMode, api, store, outbox, speech, syncNow, pendingUploads,
     ],
   );
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }
+
+/** Key for a document that belongs to one patient inside this scope. */
+export const forPatient = patientKey;
 
 export function useApp(): AppStateValue {
   const ctx = useContext(Ctx);

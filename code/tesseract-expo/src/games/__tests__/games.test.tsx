@@ -147,7 +147,10 @@ describe('pure game rules', () => {
     expect(mazeForLevel(3).deadEndCount).toBe(2);
   });
 
-  it('splits words by code point so Bengali is not cut in half', () => {
+  it('places a Bengali syllable in one cell, not one per code point', () => {
+    // চা is চ + া: two code points, but one syllable a reader looks for.
+    // The previous behaviour gave it two cells, the second holding a bare
+    // matra — not a letter anyone can search for.
     const grid = buildWordGrid({
       entries: [{ id: 'w1', word: 'চা' }],
       size: 6,
@@ -157,8 +160,27 @@ describe('pure game rules', () => {
     });
     const placed = grid.words.find((w) => w.id === 'w1');
     expect(placed).toBeDefined();
-    // Two code points, two cells — not four UTF-16 units.
-    expect(placed!.cells).toHaveLength(2);
+    expect(placed!.cells).toHaveLength(1);
+    expect(grid.letters[placed!.cells[0]]).toBe('চা');
+  });
+
+  it('places a Hindi word by syllable, not by code point', () => {
+    // हिन्दी is 6 code points but fewer written units. Splitting by code
+    // point put a bare matra in its own cell and mis-sized the word.
+    const grid = buildWordGrid({
+      entries: [{ id: 'w1', word: 'हिन्दी' }],
+      size: 8,
+      wordCount: 3,
+      allowDiagonals: false,
+      fillAlphabet: ['क', 'ख', 'ग'],
+    });
+    const placed = grid.words.find((w) => w.id === 'w1');
+    expect(placed).toBeDefined();
+    expect(placed!.cells.length).toBeLessThan(Array.from('हिन्दी').length);
+    // Every occupied cell holds a whole syllable, never a lone mark.
+    for (const cell of placed!.cells) {
+      expect(grid.letters[cell]).not.toMatch(/^[\u093E-\u094D]$/);
+    }
   });
 
   it('reports words that do not fit instead of dropping them', () => {

@@ -27,36 +27,54 @@ import {
   describeSignal,
   signalsFrom,
   suggestionsFrom,
-  type Decision,
-  type Suggestion,
 } from '../intelligence/recommendations';
-import { readJson, writeJson } from '../data/storage';
+import type { RecommendationOut } from '../data/apiClient';
+import { patientKey } from '../data/storage';
 
 const DECISIONS_KEY = 'activityDecisions';
 
 export function RecommendationsScreen({ onBack }: { onBack: () => void }) {
   const app = useApp();
-  const t = (k: Parameters<typeof translate>[1]) =>
-    translate(app.interfaceLanguage, k);
+  const t = (
+    k: Parameters<typeof translate>[1],
+    values?: Record<string, string | number>,
+  ) => translate(app.interfaceLanguage, k, values);
 
-  const [decisions, setDecisions] = useState<Decision[]>([]);
+  const patientId = app.selectedPatient?.id ?? null;
+  const [proposals, setProposals] = useState<RecommendationOut[] | null>(null);
   const [status, setStatus] = useState<string | null>(null);
+  const [busyId, setBusyId] = useState<string | null>(null);
 
+  /** Server proposals are the authority. Local observations are advice. */
   useEffect(() => {
-    void readJson<Decision[]>(DECISIONS_KEY, []).then(setDecisions);
-  }, []);
+    void (async () => {
+      if (!app.api || !patientId) {
+        setProposals([]);
+        return;
+      }
+      try {
+        const list = await app.api.listRecommendations(patientId);
+        setProposals(list.items.filter((r) => r.status === 'pending'));
+        setStatus(null);
+      } catch {
+        setProposals([]);
+        setStatus(t('savedOnDevice'));
+      }
+    })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [app.api, patientId]);
 
   const signals = useMemo(
     () => signalsFrom(app.outbox.sessions),
     [app.outbox.sessions],
   );
 
-  const suggestions = useMemo(
+  const localObservations = useMemo(
     () =>
       suggestionsFrom(
         signals,
         (gameId) => registrationFor(gameId)?.maxLevel ?? 3,
-      ),
+      ).filter((x) => x.kind === 'raiseLevel' || x.kind === 'lowerLevel'),
     [signals],
   );
 
@@ -67,109 +85,136 @@ export function RecommendationsScreen({ onBack }: { onBack: () => void }) {
       : gameId;
   };
 
+  /**
+   * Records a decision against the **server's** recommendation id.
+   *
+   * The approved configuration is only stored after the server accepts. A
+   * decision applied locally first would let the patient be handed an
+   * activity the server never approved, and a 409 would leave the two
+   * disagreeing with no way to tell which was right.
+   */
   const decide = async (
-    s: Suggestion,
-    decision: Decision['decision'],
-    level: number,
+    r: RecommendationOut,
+    decision: 'accept' | 'modify' | 'reject',
+    modifiedConfig?: Record<string, unknown>,
   ) => {
-    const record: Decision = {
-      suggestionId: s.id,
-      gameId: s.gameId,
-      decision,
-      level,
-      decidedAt: new Date().toISOString(),
-      basedOnRevision: app.selectedPatient?.profileRevision,
-    };
-    const next = [...decisions.filter((d) => d.gameId !== s.gameId), record];
-    setDecisions(next);
-    await writeJson(DECISIONS_KEY, next);
-
-    // Sent to the server when there is one; the local decision already
-    // applies either way, so an offline caregiver is never blocked.
-    if (app.api) {
-      try {
-        await app.api.decideRecommendation(s.id, { decision, level });
-        setStatus(t('decisionApproved'));
-      } catch (e) {
-        const conflict =
-          typeof e === 'object' && e !== null && 'isConflict' in e
-            ? (e as { isConflict: boolean }).isConflict
-            : false;
-        setStatus(
-          conflict
-            ? 'The server has a newer version of this patient. Your choice is saved here; refresh and review before sending it.'
-            : t('savedOnDevice'),
-        );
-      }
-    } else {
+    if (!app.api || !patientId) {
       setStatus(t('savedOnDevice'));
+      return;
+    }
+    setBusyId(r.recommendation_id);
+    try {
+      const updated = await app.api.decideRecommendation(r.recommendation_id, {
+        decision,
+        ...(modifiedConfig ? { modified_config: modifiedConfig } : {}),
+        expected_config_version: r.based_on_config_version,
+      });
+      // Only now does the approved activity change locally.
+      const activity = await app.api.getActivity(patientId);
+      await app.store.write(patientKey(patientId, 'approvedActivity'), activity);
+      setProposals((prev) =>
+        (prev ?? []).filter((x) => x.recommendation_id !== updated.recommendation_id),
+      );
+      setStatus(
+        decision === 'accept'
+          ? t('decisionApproved')
+          : decision === 'modify'
+            ? t('decisionModified')
+            : t('decisionRejected'),
+      );
+    } catch (e) {
+      const conflict =
+        typeof e === 'object' && e !== null && 'isConflict' in e
+          ? (e as { isConflict: boolean }).isConflict
+          : false;
+      // Never overwrite approved configuration after a conflict.
+      setStatus(conflict ? t('decisionFailed') : t('decisionFailed'));
+    } finally {
+      setBusyId(null);
     }
   };
-
-  const actionable = suggestions.filter(
-    (s) => s.kind === 'raiseLevel' || s.kind === 'lowerLevel',
-  );
 
   return (
     <Screen>
       <View style={{ height: 12 }} />
       <HeadlineLarge>{t('needsYourDecision')}</HeadlineLarge>
       <BodyMedium tone="soft">{t('suggestionCaveat')}</BodyMedium>
-
       {status ? <StatusNote icon="info" text={status} /> : null}
 
-      {actionable.length === 0 ? (
+      {proposals !== null && proposals.length === 0 ? (
         <Card>
           <BodyLarge>{t('noActivityYet')}</BodyLarge>
-          <StatusNote
-            icon="info"
-            text="Suggestions appear once there are enough finished sessions to base one on."
-          />
         </Card>
       ) : null}
 
-      {actionable.map((s) => {
-        const decided = decisions.find((d) => d.gameId === s.gameId);
+      {(proposals ?? []).map((r) => {
+        const level = Number(
+          (r.proposed_config as { level?: unknown }).level ?? 0,
+        );
         return (
-          <Card key={s.id}>
+          <Card key={r.recommendation_id}>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
-              <TitleLarge style={{ flex: 1 }}>{nameOf(s.gameId)}</TitleLarge>
-              {decided ? <Badge label={decided.decision} /> : null}
+              <TitleLarge style={{ flex: 1 }}>
+                {nameOf(String((r.proposed_config as { game_id?: unknown }).game_id ?? ''))}
+              </TitleLarge>
+              <Badge label={t('suggestedChange')} />
             </View>
             <View style={{ height: 6 }} />
             <BodyLarge>
-              {s.kind === 'raiseLevel'
-                ? `Suggested: a slightly larger version (level ${s.proposedLevel}).`
-                : `Suggested: a smaller version (level ${s.proposedLevel}).`}
+              {level ? t('useLevel', { level }) : t('suggestedChange')}
             </BodyLarge>
-            <View style={{ height: 6 }} />
-            {/* The counts behind the suggestion, so it can be checked. */}
-            <BodyMedium tone="soft">{s.reason}</BodyMedium>
-            <View style={{ height: 6 }} />
-            <StatusNote icon="info" text={s.caveat} />
-
+            <BodyMedium tone="soft">
+              {typeof r.reason === 'object'
+                ? Object.entries(r.reason)
+                    .map(([k, v]) => `${k.replace(/_/g, ' ')}: ${String(v)}`)
+                    .join(' \u00b7 ')
+                : String(r.reason)}
+            </BodyMedium>
             <View style={{ height: 8 }} />
             <PillButton
-              label={t('useLevel')}
-              onPress={() => void decide(s, 'accepted', s.proposedLevel)}
+              label={t('useLevel', { level })}
+              busy={busyId === r.recommendation_id}
+              onPress={() => void decide(r, 'accept')}
             />
             <PillButton
               label={t('chooseLevel')}
               variant="outline"
               onPress={() =>
-                // "Modify" means the caregiver picks a different level than
-                // the one proposed — here, staying where they are.
-                void decide(s, 'modified', s.currentLevel)
+                void decide(r, 'modify', {
+                  ...r.current_config,
+                })
               }
             />
             <PillButton
               label={t('keepAsIs')}
               variant="outline"
-              onPress={() => void decide(s, 'rejected', s.currentLevel)}
+              onPress={() => void decide(r, 'reject')}
             />
           </Card>
         );
       })}
+
+      {localObservations.length > 0 ? (
+        <>
+          <SectionHeading title={t('recentActivity')} />
+          <Card>
+            {/* Explicitly local. These are not server recommendations and
+                cannot be accepted — they only tell a caregiver what this
+                device has seen while offline. */}
+            <StatusNote
+              icon="info"
+              tone="attention"
+              text="From this device only. Not an approved recommendation, and nothing changes from here."
+            />
+            {localObservations.map((o) => (
+              <View key={o.id} style={{ paddingVertical: 6 }}>
+                <BodyLarge>{nameOf(o.gameId)}</BodyLarge>
+                <BodyMedium tone="soft">{o.reason}</BodyMedium>
+              </View>
+            ))}
+          </Card>
+        </>
+      ) : null}
 
       <SectionHeading title={t('observedMeasures')} />
       <Card>

@@ -1,21 +1,21 @@
 /**
  * The protected door back from patient mode.
  *
- * Uses device authentication (Face ID / Touch ID / passcode) when the device
- * has it enrolled. When it does not, the gate is honest about that: it says
- * the device has no lock set up rather than pretending to protect something it
- * cannot, and still requires a deliberate confirmation so the return is never
- * a single accidental tap.
+ * **Fails closed.** While capability is still loading there is no way through;
+ * if the device offers no factor at all the gate stays shut and explains why.
+ * The only paths that call `onUnlocked` are a successful OS authentication or
+ * a correct caregiver PIN.
  *
- * The biometric prompt puts the app into `inactive`, not `background`, which is
- * exactly why `useOpeningScreen` ignores `inactive` — otherwise unlocking here
- * would flash the brand every time.
+ * The OS prompt puts the app into `inactive`, not `background`, which is why
+ * `useOpeningScreen` ignores `inactive` — otherwise unlocking here would flash
+ * the opening screen every time.
  */
 import React, { useEffect, useState } from 'react';
-import { View } from 'react-native';
-import * as LocalAuthentication from 'expo-local-authentication';
+import { TextInput, StyleSheet, View } from 'react-native';
+import { colors, spacing } from '../design/tokens';
 import {
   BodyLarge,
+  BodyMedium,
   Card,
   HeadlineLarge,
   PillButton,
@@ -24,6 +24,13 @@ import {
 } from '../design/components';
 import { useApp } from '../state/AppState';
 import { translate } from '../l10n/i18n';
+import {
+  availableFactor,
+  readCapability,
+  unlockWithDevice,
+  unlockWithPin,
+  type AuthCapability,
+} from '../data/caregiverAuth';
 
 export function CaregiverGate({
   onUnlocked,
@@ -36,37 +43,45 @@ export function CaregiverGate({
   const t = (k: Parameters<typeof translate>[1]) =>
     translate(app.interfaceLanguage, k);
 
-  const [canUseDeviceAuth, setCanUseDeviceAuth] = useState<boolean | null>(null);
+  const [capability, setCapability] = useState<AuthCapability | null>(null);
+  const [pin, setPin] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
   useEffect(() => {
-    void (async () => {
-      try {
-        const hardware = await LocalAuthentication.hasHardwareAsync();
-        const enrolled = await LocalAuthentication.isEnrolledAsync();
-        setCanUseDeviceAuth(hardware && enrolled);
-      } catch {
-        setCanUseDeviceAuth(false);
-      }
-    })();
+    let alive = true;
+    void readCapability().then((c) => {
+      if (alive) setCapability(c);
+    });
+    return () => {
+      alive = false;
+    };
   }, []);
 
-  const unlock = async () => {
+  const factor = availableFactor(capability);
+
+  const tryDevice = async () => {
     setBusy(true);
     setError(null);
-    try {
-      const result = await LocalAuthentication.authenticateAsync({
-        promptMessage: t('handOver'),
-        cancelLabel: t('cancel'),
-      });
-      if (result.success) onUnlocked();
-      else setError(t('signInFailed'));
-    } catch {
-      setError(t('signInFailed'));
-    } finally {
-      setBusy(false);
+    const result = await unlockWithDevice(t('handOver'), t('cancel'));
+    setBusy(false);
+    if (result.ok) {
+      onUnlocked();
+      return;
     }
+    // A cancellation is not a failure worth alarming anyone about, but it is
+    // still not an unlock.
+    if (result.reason !== 'cancelled') setError(t('signInFailed'));
+  };
+
+  const tryPin = async () => {
+    setBusy(true);
+    setError(null);
+    const result = await unlockWithPin(pin);
+    setBusy(false);
+    setPin('');
+    if (result.ok) onUnlocked();
+    else setError(t('signInFailed'));
   };
 
   return (
@@ -75,25 +90,80 @@ export function CaregiverGate({
       <HeadlineLarge>{t('caregiverGreeting')}</HeadlineLarge>
       <View style={{ height: 12 }} />
       <Card>
-        {canUseDeviceAuth === false ? (
+        {factor === 'loading' ? (
+          // No route through while capability is unknown.
+          <StatusNote icon="lock" text={t('signingIn')} />
+        ) : null}
+
+        {factor === 'device' ? (
+          <>
+            <BodyLarge>{t('signInPatientNote')}</BodyLarge>
+            <View style={{ height: 12 }} />
+            <PillButton
+              label={t('continueLabel')}
+              busy={busy}
+              onPress={tryDevice}
+            />
+          </>
+        ) : null}
+
+        {factor === 'pin' ? (
+          <>
+            <BodyLarge>{t('signInPatientNote')}</BodyLarge>
+            <BodyMedium tone="soft">
+              This device has no lock set up, so the caregiver PIN is used
+              instead.
+            </BodyMedium>
+            <TextInput
+              accessibilityLabel="Caregiver PIN"
+              value={pin}
+              onChangeText={setPin}
+              keyboardType="number-pad"
+              secureTextEntry
+              style={styles.input}
+            />
+            <PillButton
+              label={t('continueLabel')}
+              busy={busy}
+              disabled={pin.trim().length < 4}
+              onPress={tryPin}
+            />
+          </>
+        ) : null}
+
+        {factor === 'none' ? (
+          // Shut, and honest about it. No bypass button.
           <StatusNote
-            icon="alert"
+            icon="lock"
             tone="attention"
-            text="This device has no passcode or biometric lock set up, so this cannot be protected properly. Set one up in the phone's Settings."
+            text={
+              'This device has no passcode, no biometrics and no caregiver PIN, ' +
+              'so returning cannot be protected. Set a device passcode, or set ' +
+              'a caregiver PIN in Settings while signed in.'
+            }
           />
-        ) : (
-          <BodyLarge>{t('signInPatientNote')}</BodyLarge>
-        )}
+        ) : null}
+
         {error ? <StatusNote icon="alert" tone="attention" text={error} /> : null}
-        <View style={{ height: 12 }} />
-        {canUseDeviceAuth ? (
-          <PillButton label={t('continueLabel')} busy={busy} onPress={unlock} />
-        ) : (
-          // Still a deliberate press, so returning is never one stray tap.
-          <PillButton label={t('continueLabel')} onPress={onUnlocked} />
-        )}
+
+        <View style={{ height: 8 }} />
         <PillButton label={t('cancel')} variant="outline" onPress={onCancel} />
       </Card>
     </Screen>
   );
 }
+
+const styles = StyleSheet.create({
+  input: {
+    minHeight: spacing.minTarget,
+    borderWidth: 1.5,
+    borderColor: colors.hairline,
+    borderRadius: 14,
+    paddingHorizontal: 14,
+    fontSize: 22,
+    letterSpacing: 6,
+    color: colors.ink,
+    backgroundColor: colors.cream,
+    marginVertical: 12,
+  },
+});

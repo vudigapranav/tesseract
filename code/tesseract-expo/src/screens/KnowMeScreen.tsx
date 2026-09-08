@@ -26,12 +26,14 @@ import { translate } from '../l10n/i18n';
 import { languageByCode } from '../l10n/languages';
 import {
   PICTURE_CATEGORIES,
+  SERVER_BACKED_KINDS,
   bumpLocalVersion,
   countFor,
   emptyKnowMe,
   hasEnoughContent,
   loadKnowMe,
   saveKnowMe,
+  toPersonalizationBody,
   type KnowMeContent,
   type KnowMeKind,
 } from '../data/knowMe';
@@ -86,15 +88,15 @@ export function KnowMeScreen({ onBack }: { onBack: () => void }) {
   const [status, setStatus] = useState<string | null>(null);
 
   useEffect(() => {
-    void loadKnowMe(patientId).then((c) => {
+    void loadKnowMe(app.store, patientId).then((c) => {
       setContent(c);
       setLoaded(true);
     });
-  }, [patientId]);
+  }, [app.store, patientId]);
 
   const persist = async (next: KnowMeContent) => {
     setContent(next);
-    await saveKnowMe(patientId, next);
+    await saveKnowMe(app.store, patientId, next);
   };
 
   const add = async (kind: KnowMeKind) => {
@@ -152,22 +154,15 @@ export function KnowMeScreen({ onBack }: { onBack: () => void }) {
       return;
     }
     try {
-      const body = {
-        // Sent against the revision last read. A 409 means the server moved
-        // on, and local edits are kept rather than overwritten.
-        revision: content.revision,
-        entries: content.entries.map((e) => ({
-          id: e.id,
-          kind: e.kind,
-          label: e.label,
-          category_id: e.categoryId,
-          locale: e.locale,
-        })),
-      };
-      const result = await app.api.putPersonalization(patientId, body);
+      const result = await app.api.putPersonalization(
+        patientId,
+        toPersonalizationBody(content),
+      );
       await persist({
         ...content,
-        revision: (result as { revision?: string }).revision ?? content.revision,
+        // The server echoes the version it stored; adopt it so the next
+        // upload is checked against the right one.
+        version: result.version,
         dirty: false,
       });
       setStatus('Uploaded.');
@@ -211,6 +206,15 @@ export function KnowMeScreen({ onBack }: { onBack: () => void }) {
         <StatusNote
           icon="info"
           text="An activity without enough of your content uses generic examples. It is never a mix presented as personal."
+        />
+        {/* Honest about what the server can hold today. */}
+        <StatusNote
+          icon="sync"
+          text={
+            'Words and places sync to the server. Routine steps and sorting ' +
+            'categories stay on this device — the API has no field for them ' +
+            'yet, and inventing one would put bad data in a real record.'
+          }
         />
       </Card>
 

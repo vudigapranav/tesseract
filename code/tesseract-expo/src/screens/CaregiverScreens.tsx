@@ -133,7 +133,7 @@ export function CaregiverHomeScreen({
             .map((s) => (
               <View key={s.clientSessionId} style={styles.historyRow}>
                 <View style={{ flex: 1 }}>
-                  <BodyLarge>{s.gameId}</BodyLarge>
+                  <BodyLarge>{s.snapshot.gameId}</BodyLarge>
                   <BodyMedium tone="soft">
                     {new Date(s.startedAt).toLocaleString()}
                   </BodyMedium>
@@ -191,14 +191,14 @@ export function PatientBasicsScreen({ onDone }: { onDone: () => void }) {
           display_name: name.trim(),
           language,
         });
-        id = created.id;
+        id = created.patient_id;
       }
       const snapshot: PatientSnapshot = {
         id: id ?? `local-${newId()}`,
         displayName: name.trim(),
         language,
         ageYears: age ? Number(age) : undefined,
-        profileRevision: existing?.profileRevision,
+        version: existing?.version,
       };
       await app.upsertPatient(snapshot);
       await app.selectPatient(snapshot.id);

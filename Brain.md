@@ -1444,3 +1444,126 @@ TypeScript strict clean · **65 tests** · `expo-doctor` 21/21 · iOS bundle bui
 (HTTP 200). **No gameplay has been exercised on an iPhone.** Touch precision,
 motion feel, performance, Devanagari wrapping at large text and VoiceOver order
 are **NOT TESTED** on hardware. Before/after device comparison not performed.
+
+
+## 2026-09-08 Functional audit — real defects found and fixed
+
+An external review was right on essentially every point. Verified each against
+`services/api/app/schemas.py` and the routers rather than taking it on trust.
+**TypeScript passing and 50 tests passing had not established correctness** —
+the client was written from memory and disagreed with the server almost
+everywhere.
+
+### P0 — the gate failed open
+
+`CaregiverGate` called `onUnlocked` whenever capability was `null` (still
+loading) or `false` (no biometric enrolled). Anyone holding the phone could
+leave patient mode by pressing Continue. A confirmation button is not
+authentication.
+
+Now `src/data/caregiverAuth.ts` fails closed. `getEnrolledLevelAsync`
+separates **device passcode** from **biometric enrollment** — the old check
+collapsed them and refused a passcode-only phone. When the device offers
+neither, the fallback is a caregiver PIN stored as a salted SHA-256 hash in
+SecureStore (set while signed in), which is a real factor and works offline in
+Expo Go. With no factor at all the gate stays shut and says so. 6 tests.
+
+### P0 — identity isolation
+
+Storage read a module-level mutable scope *at await time*, so a sign-out
+mid-write could land one account's data in the next account's partition.
+`ScopedStore` now captures its scope at construction. `AppState` rebuilds the
+store and outbox atomically per identity, aborts in-flight sync on account
+change, clears in-memory state when restoration fails, and gives preview its
+own scope. Reminders, Know Me and decisions are partitioned per patient via
+`patientKey`. Patient mode is persisted, so a handed-over device cannot reopen
+in caregiver mode. 9 storage tests + outbox isolation test.
+
+### P0 — API contract parity
+
+Every one of these would have failed on first contact with the real server:
+
+| Was | Actually |
+|---|---|
+| `id`, `profile_revision` | `patient_id`, `version` |
+| `POST /patients/{id}/sessions` | `PUT /v1/sessions/{session_id}` |
+| no `patient_id`/`game_version`/`requested_input_mode` | all required |
+| no `occurred_at` | required on every event |
+| `revision` + `entries` | `version`, `personal_words`, `people_places`, `preferences` |
+| `"accepted"/"modified"/"rejected"` | `accept`/`modify`/`reject` |
+| local suggestion ids sent as recommendation ids | server-issued UUIDs |
+| no timeouts, no shape checks | 20s abort + runtime validation |
+
+Routine steps and sorting categories have **no approved server field**. They
+stay local and say so on screen — not smuggled into `preferences`. That needs
+Pranav's decision.
+
+### P1 — the session pipeline lost data
+
+`uploadEvents` advanced progress by events *sent*. A 200 with a partially
+rejected batch marked rejected events as uploaded and they were never seen
+again. Progress now advances only over ids the server reported `accepted` or
+`duplicate`; rejected ids are kept with their reason and surfaced.
+
+Also fixed: overlapping flushes could double-create and double-send (now
+serialized on one chain); `occurred_at` is stamped at record time and preserved
+across replay so a retry does not rewrite history; the frozen snapshot is built
+**after content loads**, so uploaded `config_version`/`content_version` match
+what was actually played instead of a hardcoded `local-v1`; corrupt storage is
+quarantined and reported rather than silently becoming a clean empty queue;
+events after finalization and conflicting completions throw; retries are
+bounded with exponential backoff and blocked sessions expose an actionable
+retry. **20 outbox tests**, each written against a specific defect.
+
+### P1 — recommendations were an unapproved local authority
+
+The Expo engine was deciding activity. Server recommendations are now the
+authority: proposals come from `GET /patients/{id}/recommendations`, decisions
+go to the real UUID with `expected_config_version`, and approved activity is
+stored **only after the server accepts**. Local observations still exist but
+are labelled "from this device only… nothing changes from here" and carry
+`source: 'local-observation'`.
+
+### P1 — postpone did nothing
+
+It incremented a counter no scheduler read. Now it cancels any pending
+postponed alert, schedules a real one-off `DATE` notification, and stores
+`scheduledFor` + `occurrenceId` + `notificationId`. Acknowledging cancels a
+pending postponement. Reconciliation is patient-scoped desired-state
+convergence instead of cancel-all — the old version erased other patients'
+occurrences and left no schedule at all if it failed halfway. Audio preference
+is honoured.
+
+### P1 — doctor flows claimed a missing endpoint
+
+The UI said there was no notes endpoint. `POST/GET /patients/{id}/notes`,
+`POST /patients/{id}/reports` and `GET /reports/{report_id}` all exist and are
+now used, with authorship taken from the server's record. A failed note keeps
+the draft.
+
+### P1 — Indic text was split by code point
+
+`Array.from` splits code points, so a Devanagari or Bengali matra landed in its
+own Word Search cell — not a letter anyone can search for — and words were
+mis-sized against the grid. `src/l10n/graphemes.ts` uses `Intl.Segmenter` where
+available with a deliberate Indic-aware fallback for Hermes without it. 18
+tests across both paths covering Hindi, Bengali, Assamese and Meetei Mayek
+matras and virama conjuncts. One existing test had encoded the bug and was
+corrected.
+
+### Verified
+
+TypeScript strict clean · **110 tests passing** (was 50) · l10n in sync ·
+`expo-doctor` 21/21.
+
+### Still NOT verified — and not claimed
+
+- **No contract test has run against the real API.** The fixes are read off
+  the schemas; nothing has exercised a live server.
+- **No iPhone hardware verification** of any of this.
+- Real Firebase sign-in unverified from Expo.
+- Voice input remains `ExpoGoUnavailableRecognizer` — there is no working
+  recognition, and the controller is not described as one.
+- Coverage: hi/as/bn 100%, mni/kha/lus 8%, **all non-English unreviewed**.
+  Dictionary completeness is not screen completeness; hardcoded English
+  remains in several screens.
