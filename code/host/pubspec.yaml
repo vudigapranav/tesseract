@@ -20,6 +20,12 @@ dependencies:
     path: ../games/route_quest
   marble_maze:
     path: ../games/marble_maze
+  word_search:
+    path: ../games/word_search
+  routine_recall:
+    path: ../games/routine_recall
+  picture_sorting:
+    path: ../games/picture_sorting
   sqflite: ^2.4.3
   path_provider: ^2.1.6
   http: ^1.6.0

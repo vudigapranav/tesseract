@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:marble_maze/marble_maze.dart';
+import 'package:picture_sorting/picture_sorting.dart';
 import 'package:route_quest/route_quest.dart';
+import 'package:routine_recall/routine_recall.dart';
+import 'package:word_search/word_search.dart';
 import 'package:tesseract_game_contract/tesseract_game_contract.dart';
 
 /// To Aryan and Ruthika, when your games are ready:
@@ -76,6 +79,38 @@ const List<GameRegistration> gameRegistry = <GameRegistration>[
     icon: Icons.circle,
     builder: MarbleMazeGame.new,
     difficultyParamsFor: MarbleMazeGame.difficultyParamsForLevel,
+    supportedLocales: <String>['en'],
+  ),
+  // G7. Uses the caregiver's own familiar words as its content.
+  GameRegistration(
+    gameId: 'word_search',
+    gameVersion: '0.1.0',
+    displayNameKey: 'word_search_name',
+    icon: Icons.grid_on_rounded,
+    builder: WordSearchGame.new,
+    difficultyParamsFor: WordSearchGame.difficultyParamsForLevel,
+    supportedLocales: <String>['en'],
+  ),
+  // G8. Ported from Ruthika's original; see her authorship note in the
+  // package's doc comment.
+  GameRegistration(
+    gameId: 'routine_recall',
+    gameVersion: '0.1.0',
+    displayNameKey: 'routine_recall_name',
+    icon: Icons.schedule_rounded,
+    builder: RoutineRecallGame.new,
+    difficultyParamsFor: RoutineRecallGame.difficultyParamsForLevel,
+    supportedLocales: <String>['en'],
+  ),
+  // Extra activity beyond the nine-game catalogue, added at the user's
+  // explicit request. Also ported from Ruthika's original.
+  GameRegistration(
+    gameId: 'picture_sorting',
+    gameVersion: '0.1.0',
+    displayNameKey: 'picture_sorting_name',
+    icon: Icons.category_rounded,
+    builder: PictureSortingGame.new,
+    difficultyParamsFor: PictureSortingGame.difficultyParamsForLevel,
     supportedLocales: <String>['en'],
   ),
 ];

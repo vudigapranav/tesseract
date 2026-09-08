@@ -1,0 +1,23 @@
+name: word_search
+description: >
+  Personalized Word Search (G7) — find familiar words the caregiver entered,
+  in a small forgiving grid. Depends only on tesseract_game_contract.
+version: 0.1.0
+publish_to: 'none'
+
+environment:
+  sdk: '>=3.3.0 <4.0.0'
+  flutter: '>=3.19.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  tesseract_game_contract:
+    path: ../../packages/tesseract_game_contract
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^4.0.0
+
+flutter:

@@ -734,3 +734,110 @@ so notifications, the biometric gate and tilt remain unverified; Firebase has
 never run against a real project; the outbox has never reached the live
 backend. The decision loop is proven against a mocked client shaped to the
 contract, not against the running service.
+
+### 2026-09-08 Claude — three games integrated, doctor screens, design applied
+
+Continued in the same clone on explicit authorisation to resume. Decisions the
+user made when asked: port **both** of Ruthika's games **and** build Word
+Search; doctor D1-D8 as **mobile screens, no web portal** (doctor signs in,
+caregiver signs in, caregiver hands over to the patient); Firebase left
+**unconfigured and clearly labelled**.
+
+#### Ruthika's repository — what is actually there
+
+Cloned read-only at commit `a504486` from `github.com/ruthikareddy678/GAMES`.
+It holds **HTML/CSS/JavaScript only**: `game1` Picture Sorting (1229 lines JS)
+and `game2` Daily Routine Recall (1746 lines JS). **There is no Word Search**,
+which is her assigned G7, and Picture Sorting is not one of the nine catalogue
+games. A web game cannot implement `TesseractGame`, so integration meant
+porting the mechanics to Flutter, not importing a package. Full detail,
+authorship and every deliberate change are in
+`docs/handoffs/RUTHIKA_GAME_INTEGRATION.md`.
+
+#### Three new game packages, all registered and playable
+
+- `code/games/routine_recall` (G8) — ported from `game2`.
+- `code/games/picture_sorting` — ported from `game1`, registered as an **extra**
+  activity beyond the nine, at the user's explicit request.
+- `code/games/word_search` (G7) — newly written; there was no source.
+
+Changes to her mechanics, each deliberate: no score/high-score/stars; answers
+compare **opaque ids** instead of names (her original compared step names,
+which breaks on duplicate labels and would leak personal text); the default
+routine with its medicine step was **not** imported — the routine is built from
+the caregiver's own reminders in time order, falling back to a neutral day;
+no browser speech; wrong answers are retryable with the attempt number
+recorded so first-attempt accuracy stays separable.
+
+Word Search uses the caregiver's familiar words, so it is the most personal
+activity in the catalogue. Interaction is tap-first-letter/tap-last-letter
+rather than a drag, which is far more forgiving with tremor. A word that will
+not fit the grid emits `content_unavailable` with ids rather than vanishing.
+
+**New event types** (`step_presented`, `attempt_resolved`, `word_found`,
+`selection_rejected`, `all_words_found`, `content_unavailable`, `item_sorted`,
+`sorting_completed`) have **no backend calculator yet**; the backend accepts
+unknown types and falls back to `generic_v1`, so ingestion works but no
+game-specific metric is computed. That is a bounded request for Pranav,
+listed in the handoff.
+
+#### Shared contract — one additive change
+
+`tesseract_game_contract` gained `TesseractGameScaffold`: the Help/Break
+controls and pause overlay, so three new games do not each reimplement patient
+safety furniture. **Optional and additive** — Route Quest and Marble Maze draw
+their own and are untouched. No event name, payload or type changed.
+
+#### Doctor D1-D8, in the mobile app
+
+`data/doctor_service.dart`, `doctor/doctor_patients_screen.dart`,
+`doctor/doctor_patient_detail_screen.dart`. Sign-in now offers Caregiver or
+Doctor; the role only decides which screen opens and grants nothing, since the
+backend scopes everything by assignment. The detail screen shows observed
+measures with sample counts, session history with tutorial/assisted/unverified
+flags, a generated draft report with its provenance and limitations, and
+attributed notes. It computes **nothing** of its own, so doctor and caregiver
+can never see different numbers for the same sessions, and it renders
+"not measured" where the backend reports a metric unavailable. There is no
+method by which a doctor approves an activity: caregiver approval remains the
+only path.
+
+#### Other work this pass
+
+Know Me content now reaches every game through a per-game content seam; the
+patient path (home, choose activity, personalized activity, finished, rest,
+progress, reminders) uses the design system; per-game instructions replaced a
+two-way ternary; text size and reduced motion apply immediately.
+
+#### Checks actually run
+
+- `flutter analyze`: **clean** on host, contract and all five game packages.
+- Tests: contract 22, route_quest 16, marble_maze 17, **word_search 24**,
+  **routine_recall 11**, **picture_sorting 9**, host 76 — **175 passing**
+  (was 126). The new game tests assert event sequencing, exactly-once
+  finalisation, Help/Break, retry attempts, empty content, and that no
+  personal label ever reaches a payload.
+- All goldens regenerated after the redesign; 12 stale ones were pixel diffs
+  from intentional change, with no exceptions or overflow errors.
+- Screenshots inspected directly. Word Search's generated grid was verified by
+  reading it: GARDEN down column 2, TEMPLE across row 5, CHAI across row 4.
+- `flutter build apk --debug`: **succeeds**,
+  `code/host/build/app/outputs/flutter-apk/app-debug.apk` (190 MB debug).
+
+#### NOT TESTED
+
+`adb devices` is **empty** — no Android phone or emulator. Every device
+behaviour remains unverified: notifications, reboot/time-zone, the biometric
+gate, Marble Maze tilt, and real emoji rendering (goldens have no emoji font,
+so pictures show as boxes there; every item also carries a text label, so the
+games stay usable either way, but this needs a phone to confirm). Firebase has
+never run against a real project, so no sign-in path — caregiver or doctor —
+has been executed end to end. The doctor screens have therefore never been
+rendered against live data.
+
+#### Next action
+
+Ruthika reviews `docs/handoffs/RUTHIKA_GAME_INTEGRATION.md`. Pranav adds
+backend calculators for the eight new event types. Someone runs the APK on a
+real phone. Public Firebase config + HTTPS backend URL remain the blocker for
+every authenticated path.

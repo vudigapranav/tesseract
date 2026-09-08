@@ -42,7 +42,7 @@ class _PlayScreenState extends State<PlayScreen> {
     preferTouch: widget.flowState.preferTouch,
     // Caregiver-entered Know Me content, as opaque-id items. Falls back to
     // neutral places when Know Me was skipped or is short.
-    items: KnowMeContent.itemsFor(widget.flowState),
+    items: KnowMeContent.itemsFor(widget.flowState, widget.registration.gameId),
   );
   void _onEvent(GameEvent event) {
     _session.recordEvent(event);

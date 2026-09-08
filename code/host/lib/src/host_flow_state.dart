@@ -4,6 +4,7 @@ import 'package:flutter/material.dart' show ChangeNotifier, TimeOfDay;
 import 'data/local_repository.dart';
 import 'data/identity_service.dart';
 import 'data/api_client.dart';
+import 'data/doctor_service.dart';
 import 'data/session_outbox.dart';
 import 'data/reminder_service.dart';
 
@@ -74,6 +75,13 @@ class HostFlowState extends ChangeNotifier {
   final reminderService = ReminderService();
   ApiClient? api;
   SessionOutbox? outbox;
+
+  /// Doctor-side reads, present only while a doctor is signed in.
+  DoctorService? doctorService;
+
+  /// 'caregiver' or 'doctor'. Chosen at sign-in, but it grants nothing on its
+  /// own: the backend decides what this identity may actually read.
+  String role = 'caregiver';
   String patientId = '';
   int profileVersion = 1;
   int configVersion = 0;

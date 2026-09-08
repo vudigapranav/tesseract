@@ -24,7 +24,8 @@ class PersonalizedActivityScreen extends StatelessWidget {
     final GameRegistration registration =
         flowState.approvedActivity ?? gameRegistry.first;
     final ThemeData theme = Theme.of(context);
-    final bool personalised = KnowMeContent.hasPersonalContent(flowState);
+    final bool personalised =
+        KnowMeContent.hasPersonalContent(flowState, registration.gameId);
 
     return Scaffold(
       backgroundColor: Colors.transparent,

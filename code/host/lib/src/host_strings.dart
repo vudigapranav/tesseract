@@ -5,6 +5,9 @@ abstract final class HostStrings {
   static const Map<String, String> _displayNames = <String, String>{
     'route_quest_name': 'Route Quest',
     'marble_maze_name': 'Marble Maze',
+    'word_search_name': 'Word Search',
+    'routine_recall_name': 'Daily Routine',
+    'picture_sorting_name': 'Picture Sorting',
   };
 
   static String displayName(String key) => _displayNames[key] ?? key;

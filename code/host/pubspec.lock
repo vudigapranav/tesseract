@@ -503,6 +503,13 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "7.0.2"
+  picture_sorting:
+    dependency: "direct main"
+    description:
+      path: "../games/picture_sorting"
+      relative: true
+    source: path
+    version: "0.1.0"
   platform:
     dependency: transitive
     description:
@@ -539,6 +546,13 @@ packages:
     dependency: "direct main"
     description:
       path: "../games/route_quest"
+      relative: true
+    source: path
+    version: "0.1.0"
+  routine_recall:
+    dependency: "direct main"
+    description:
+      path: "../games/routine_recall"
       relative: true
     source: path
     version: "0.1.0"
@@ -714,6 +728,13 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "5.15.0"
+  word_search:
+    dependency: "direct main"
+    description:
+      path: "../games/word_search"
+      relative: true
+    source: path
+    version: "0.1.0"
   xdg_directories:
     dependency: transitive
     description:

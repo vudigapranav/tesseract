@@ -21,12 +21,15 @@ class ChooseGameScreen extends StatelessWidget {
   static const Map<String, String> _whatItIs = <String, String>{
     'route_quest': 'Find your way to a place and back again.',
     'marble_maze': 'Guide the marble gently to the end.',
+    'word_search': 'Find familiar words hidden in the letters.',
+    'routine_recall': 'Remember what comes next in the day.',
+    'picture_sorting': 'Put each picture with the ones like it.',
   };
 
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
-    final List<GameRegistration> shown = gameRegistry.take(3).toList();
+    const List<GameRegistration> shown = gameRegistry;
 
     return Scaffold(
       backgroundColor: Colors.transparent,

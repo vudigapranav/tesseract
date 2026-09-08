@@ -6,6 +6,7 @@ export 'src/game_config.dart';
 export 'src/game_event.dart';
 export 'src/game_item.dart';
 export 'src/game_result.dart';
+export 'src/game_scaffold.dart';
 export 'src/game_strings.dart';
 export 'src/tesseract_game.dart';
 export 'src/tesseract_game_state_mixin.dart';

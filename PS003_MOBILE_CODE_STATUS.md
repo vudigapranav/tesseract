@@ -377,3 +377,80 @@ personalization upload, Know Me → `GameItem` wiring, notification tap routing,
 a patient reminder view, live-reactive text/motion preferences, and the
 patient/caregiver visual pass. Doctor D1-D8 platform remains unanswered.
 Session `config_version`/`content_version` are still hardcoded '1'.
+
+## 2026-09-08 Claude — five games registered, doctor screens, design applied
+
+### `code/` now holds eight packages
+
+```
+code/packages/tesseract_game_contract/   shared contract (+ optional scaffold)
+code/games/route_quest/                  G2, Pranav
+code/games/marble_maze/                  G3, Pranav
+code/games/word_search/                  G7, newly written
+code/games/routine_recall/               G8, ported from Ruthika's JS
+code/games/picture_sorting/              extra activity, ported from Ruthika's JS
+code/harness/                            dev tool
+code/host/                               the app
+```
+
+**Ruthika's repository contains HTML/CSS/JS, not Flutter, and contains no Word
+Search.** Her two games were ported by rewriting the mechanics in Dart against
+`TesseractGame`; Word Search was written from scratch. Authorship, every
+deliberate change to her mechanics, and the open questions for her are in
+`docs/handoffs/RUTHIKA_GAME_INTEGRATION.md`. **Four of the nine catalogue games
+are still not implemented** (Aryan's G1, G4, G5, G6, G9 — five, of which none
+exist yet). Nothing here should be read as the catalogue being complete.
+
+### Contract change — additive only
+
+`TesseractGameScaffold` was added to `tesseract_game_contract`: the permanent
+Help/Break controls and the pause overlay. **Optional.** Route Quest and
+Marble Maze draw their own and were not modified. No event name, payload
+shape or type was changed by any of this work.
+
+### New event types with no calculator yet
+
+`step_presented`, `attempt_resolved`, `word_found`, `selection_rejected`,
+`all_words_found`, `content_unavailable`, `item_sorted`, `sorting_completed`.
+
+The backend accepts unknown types and falls back to `generic_v1`, so these
+sessions **upload and store correctly but produce no game-specific metric**
+until Pranav writes calculators. `attempt` is carried deliberately so
+first-attempt accuracy can be computed server-side without a game asserting an
+accuracy figure of its own.
+
+### Content boundary
+
+`code/host/lib/src/content/know_me_content.dart` maps caregiver content to
+each game: places for Route Quest, the caregiver's **familiar words** for Word
+Search, the caregiver's **reminders in time order** for Daily Routine, and a
+neutral built-in set for Picture Sorting. Ids are positional and opaque
+(`word_2`, `step_3`), so personal text never enters a payload — asserted by a
+test in each game package.
+
+### Doctor D1-D8
+
+Built as **mobile screens** (the platform decision the user made on
+2026-09-08: doctor sign-in in this app, no web portal). Sign-in offers
+Caregiver or Doctor; the role only chooses a screen and grants nothing,
+because the backend scopes every read by assignment. The doctor view computes
+nothing itself and shows "not measured" wherever the backend reports a metric
+unavailable. No doctor action approves an activity — caregiver approval
+remains the only path.
+
+### Current automated evidence
+
+- `flutter analyze`: clean on host, contract and all five games.
+- Tests: contract 22, route_quest 16, marble_maze 17, word_search 24,
+  routine_recall 11, picture_sorting 9, host 76 — **175 passing**.
+- `flutter build apk --debug` succeeds.
+- Goldens regenerated; new screenshots for all three new games and the role
+  sign-in are in `code/host/test/goldens/`.
+
+### Still NOT TESTED
+
+**No Android device or emulator is connected.** Notifications, reboot and
+time-zone behaviour, the biometric caregiver gate, Marble Maze tilt feel, and
+real emoji rendering are all unverified. **Firebase has never been validated
+against a real project**, so neither caregiver nor doctor sign-in has run end
+to end, and the doctor screens have never been rendered against live data.
