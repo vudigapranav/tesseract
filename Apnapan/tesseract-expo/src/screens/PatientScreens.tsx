@@ -253,6 +253,7 @@ export function PlayScreen({
 
   if (session.current === null) {
     session.current = createOutboxSession({
+      gameConfig: config,
       patientId: app.selectedPatient?.id ?? 'local',
       gameId: config.gameId,
       gameVersion: config.gameVersion,

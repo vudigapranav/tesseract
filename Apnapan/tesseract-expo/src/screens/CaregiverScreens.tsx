@@ -128,6 +128,7 @@ export function CaregiverHomeScreen({
           <BodyMedium tone="soft">{t('noActivityYet')}</BodyMedium>
         ) : (
           app.outbox.sessions
+            .filter((s) => s.snapshot.patientId === patient?.id)
             .slice(-6)
             .reverse()
             .map((s) => (
@@ -247,7 +248,7 @@ export function PatientBasicsScreen({ onDone }: { onDone: () => void }) {
         <BodyMedium>{t('patientLanguage')}</BodyMedium>
         <BodyMedium tone="soft">{t('patientLanguageHelp')}</BodyMedium>
         <View style={{ height: 8 }} />
-        {(['en', 'as', 'bn', 'mni', 'kha', 'lus'] as LanguageCode[]).map((c) => (
+        {(['en', 'hi', 'as', 'bn', 'mni', 'kha', 'lus'] as LanguageCode[]).map((c) => (
           <PillButton
             key={c}
             label={languageByCode(c).endonym}
@@ -290,7 +291,7 @@ export function HandOverScreen({
       <View style={{ height: 12 }} />
       <BodyLarge tone="soft">{t('signInPatientNote')}</BodyLarge>
       <View style={{ height: 28 }} />
-      <PillButton label={t('handOver')} onPress={onConfirm} />
+      <PillButton label={t('handOver')} disabled={!app.selectedPatient} onPress={onConfirm} />
       <PillButton label={t('cancel')} variant="outline" onPress={onCancel} />
     </Screen>
   );

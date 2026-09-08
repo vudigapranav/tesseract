@@ -31,7 +31,7 @@ import {
   type SessionEventUpload,
 } from './apiClient';
 import { CorruptDataError, type ScopedStore } from './storage';
-import type { GameEvent, GameResult } from '../games/contract';
+import type { GameConfig, GameEvent, GameResult } from '../games/contract';
 
 const QUEUE_KEY = 'sessionOutbox';
 
@@ -57,6 +57,8 @@ export interface RecordedEvent {
  * `GameConfig` the game was handed, after content finished loading.
  */
 export interface SessionSnapshot {
+  /** Full local-only content and presentation snapshot; never sent as telemetry. */
+  gameConfig?: GameConfig;
   patientId: string;
   gameId: string;
   gameVersion: string;
@@ -78,6 +80,7 @@ export interface OutboxSession {
   clientSessionId: string;
   snapshot: SessionSnapshot;
   startedAt: string;
+  endedAt?: string;
   events: RecordedEvent[];
   /** Event ids the server has confirmed. Progress is measured by this set. */
   confirmedEventIds: string[];
@@ -99,7 +102,7 @@ export const newId = (): string => Crypto.randomUUID();
 export function createOutboxSession(snapshot: SessionSnapshot): OutboxSession {
   return {
     clientSessionId: newId(),
-    snapshot,
+    snapshot: JSON.parse(JSON.stringify(snapshot)),
     startedAt: new Date().toISOString(),
     events: [],
     confirmedEventIds: [],
@@ -173,6 +176,9 @@ export class SessionOutbox {
     return this.serialize(async () => {
       try {
         this.queue = await this.store.read<OutboxSession[]>(QUEUE_KEY, []);
+        if (!Array.isArray(this.queue) || this.queue.some((s) => !s || !s.snapshot || !Array.isArray(s.events) || !Array.isArray(s.confirmedEventIds) || !Array.isArray(s.rejected))) {
+          throw new CorruptDataError(QUEUE_KEY);
+        }
         this.corrupt = false;
       } catch (e) {
         if (e instanceof CorruptDataError) {
@@ -189,6 +195,17 @@ export class SessionOutbox {
       // intact, so the retry is recognisably the same logical write.
       for (const s of this.queue) {
         if (s.status === 'uploading') s.status = 'pending';
+        if (!s.completed && s.events.length) {
+          const last = s.events[s.events.length - 1];
+          const terminal = last.event.type === 'session_finished' ? last.event.payload.status : 'interrupted';
+          const status = terminal === 'completed' || terminal === 'stopped_by_user' ? terminal : 'interrupted';
+          s.result = { status, finalSeq: last.event.seq, assisted: s.events.some((e) => e.event.type === 'hint_requested') };
+          s.completed = true;
+          s.endedAt = last.occurredAt;
+        }
+      }
+      if (this.queue.length) await this.persist();
+      {
       }
       this.loaded = true;
       this.notify();
@@ -212,13 +229,18 @@ export class SessionOutbox {
 
   enqueue(session: OutboxSession): Promise<void> {
     return this.serialize(async () => {
-      this.queue.push(session);
+      if (this.queue.some((s) => s.clientSessionId === session.clientSessionId)) {
+        throw new Error("Session already queued.");
+      }
+      this.queue.push(JSON.parse(JSON.stringify(session)));
       await this.persist();
     });
   }
 
   /** Records one event, stamped with the time it actually happened. */
   record(clientSessionId: string, event: GameEvent): Promise<void> {
+    const capturedEvent = JSON.parse(JSON.stringify(event)) as GameEvent;
+    const occurredAt = new Date(this.now()).toISOString();
     return this.serialize(async () => {
       const s = this.queue.find((x) => x.clientSessionId === clientSessionId);
       if (!s) return;
@@ -229,11 +251,8 @@ export class SessionOutbox {
           `Event "${event.type}" arrived after session ${clientSessionId} was finalized.`,
         );
       }
-      s.events.push({
-        eventId: newId(),
-        event,
-        occurredAt: new Date(this.now()).toISOString(),
-      });
+      if (capturedEvent.seq !== s.events.length + 1) throw new Error("Event sequence must be contiguous.");
+      s.events.push({ eventId: newId(), event: capturedEvent, occurredAt });
       await this.persist();
     });
   }
@@ -242,13 +261,15 @@ export class SessionOutbox {
     return this.serialize(async () => {
       const s = this.queue.find((x) => x.clientSessionId === clientSessionId);
       if (!s) return;
-      if (s.completed && s.result && s.result.status !== result.status) {
+      if (s.completed && s.result && (s.result.status !== result.status || s.result.finalSeq !== result.finalSeq || s.result.assisted !== result.assisted)) {
         throw new Error(
           `Session ${clientSessionId} was already completed as ` +
             `"${s.result.status}" and cannot also be "${result.status}".`,
         );
       }
-      s.result = result;
+      if (s.completed) return;
+      s.endedAt = new Date(this.now()).toISOString();
+      s.result = { ...result };
       s.completed = true;
       await this.persist();
     });
@@ -266,6 +287,7 @@ export class SessionOutbox {
   private createBody(s: OutboxSession): SessionCreateBody {
     const n = s.snapshot;
     return {
+      started_at: s.startedAt,
       patient_id: n.patientId,
       game_id: n.gameId,
       game_version: n.gameVersion,
@@ -322,6 +344,11 @@ export class SessionOutbox {
               signal,
             );
 
+            const sentIds = new Set(batch.map((e) => e.eventId));
+            const verdictIds = [...result.accepted, ...result.duplicate, ...result.rejected.map((r) => r.event_id)];
+            if (verdictIds.some((id) => !sentIds.has(id)) || new Set(verdictIds).size !== verdictIds.length) {
+              throw new ApiError(422, 'Invalid or conflicting batch verdict IDs.');
+            }
             await this.serialize(async () => {
               // Progress advances over what the server confirmed, never over
               // what was sent.
@@ -351,6 +378,7 @@ export class SessionOutbox {
             }
           }
 
+          if (s.rejected.length) throw new ApiError(422, "Rejected events must be resolved before completion.");
           if (s.completed && s.result && !s.finalized) {
             await api.completeSession(
               s.clientSessionId,
@@ -358,7 +386,7 @@ export class SessionOutbox {
                 status: s.result.status,
                 final_seq: s.result.finalSeq,
                 assisted: s.result.assisted,
-                ended_at: new Date(this.now()).toISOString(),
+                ended_at: s.endedAt ?? s.events[s.events.length - 1]?.occurredAt ?? s.startedAt,
               },
               signal,
             );
@@ -420,6 +448,7 @@ export class SessionOutbox {
       for (const s of this.queue) {
         if (s.status === 'blocked' || s.status === 'paused') {
           s.status = 'pending';
+          s.rejected = [];
           s.attempts = 0;
           s.nextAttemptAt = undefined;
         }

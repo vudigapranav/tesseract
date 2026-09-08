@@ -12,6 +12,7 @@
  * happens to the app's idea of "current" while it is awaiting.
  */
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { openStorage, sealStorage, StorageLockedError } from './storageCipher';
 
 const PREFIX = 'tesseract';
 export const ANON_SCOPE = 'anon';
@@ -55,8 +56,9 @@ export class ScopedStore {
   ): Promise<T> {
     const raw = await AsyncStorage.getItem(this.key(name));
     if (raw == null) return fallback;
+    const plaintext = DEVICE_KEYS.has(name) ? raw : await openStorage(this.key(name), raw);
     try {
-      return JSON.parse(raw) as T;
+      return JSON.parse(plaintext) as T;
     } catch {
       if (options.onCorrupt === 'fallback') return fallback;
       throw new CorruptDataError(name);
@@ -70,13 +72,18 @@ export class ScopedStore {
   ): Promise<{ value: T; corrupt: boolean }> {
     try {
       return { value: await this.read<T>(name, fallback), corrupt: false };
-    } catch {
+    } catch (error) {
+      if (error instanceof StorageLockedError) throw error;
       return { value: fallback, corrupt: true };
     }
   }
 
   async write(name: string, value: unknown): Promise<void> {
-    await AsyncStorage.setItem(this.key(name), JSON.stringify(value));
+    const existing = await AsyncStorage.getItem(this.key(name));
+    if (existing && !DEVICE_KEYS.has(name)) await openStorage(this.key(name), existing);
+    const plaintext = JSON.stringify(value);
+    const raw = DEVICE_KEYS.has(name) ? plaintext : await sealStorage(this.key(name), plaintext);
+    await AsyncStorage.setItem(this.key(name), raw);
   }
 
   async remove(name: string): Promise<void> {

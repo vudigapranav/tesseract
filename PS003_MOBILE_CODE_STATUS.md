@@ -859,3 +859,18 @@ User requested renaming the code folder and reflecting it on GitHub. Renamed roo
 Verification and GitHub push results are recorded below after checks. This is a folder/path change, not new application behavior.
 
 Rename checks: `git diff --check`, Expo `npm run typecheck` and `npm run l10n:check` passed from the new folder. Tracked editable path search found no remaining old application paths outside the intentional rename record. No behavioral tests or builds rerun for this path-only change. User authorized pushing this scoped rename to GitHub remote `github`, branch `codex/patient-caregiver-integration`; push pending at commit time.
+
+
+## 2026-09-08 Phase 1 continuation — persistence milestone
+
+Working directly in the requested isolated checkout on codex/patient-caregiver-integration, starting at 26bc584. No push and no automation changes. Submitted six-slide PPT read via XML without edits; active Expo migration retained. Production-quality target remains the acceptance target, not a current claim.
+
+Changed Expo files: data/outbox.ts, apiClient.ts, storage.ts, new storageCipher.ts, data/config.ts, state/AppState.tsx, Navigation.tsx, App.tsx, screens/PatientScreens.tsx, CaregiverScreens.tsx, RecommendationsScreen.tsx, jest.setup.js and new/expanded data tests.
+
+Implemented: copied local full GameConfig snapshot (items/strings included locally only); copied event inputs at call time; original started/ended timestamps on replay; reject foreign/conflicting batch verdict IDs; do not finalize rejected batches; explicit retry resends rejected IDs; recover killed nonterminal play as interrupted at last observed event time. Encryption uses Expo 57 native AES-256-GCM with a generated SecureStore key and storage address as authenticated data. Existing plaintext remains readable and migrates on subsequent writes; the outbox rewrites on load. No claim that all historical plaintext/quarantines are encrypted or securely erased. Missing key/tampering fails closed, preserving data. Device settings and storage key names remain plaintext. No native AES bridge or physical-device test yet.
+
+Fixed static EXPO_PUBLIC configuration access, stale patient-list response application, awaited patient saves, selected patient language, per-patient history/observations, navigation remount on identity/patient changes, and scope-checked token use. Startup storage failures now show a blocking preservation message rather than indefinitely waiting or exposing caregiver mode.
+
+Checks actually run: Expo strict TypeScript passed; Jest 9 suites / 119 tests passed. Cipher tests exercise real Node AES-GCM through a native API adapter, not the physical Expo bridge. Hardware, real Expo Firebase/API loop and full bundle checks remain pending. Policy question sent for patient update contract/descriptive new-game metrics; no response yet. Speech provider/cost and iPhone/backend URL questions pending. No added games, ML or paid calls.
+
+Next: finish approved-activity propagation into play, persistence/gate/identity regression tests, current backend synthetic HTTP integration, reminders/doctor rendering and remaining acceptance matrix. This milestone is not full Phase 1 completion.

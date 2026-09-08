@@ -465,3 +465,54 @@ describe('identity isolation', () => {
     expect(b.sessions).toHaveLength(0);
   });
 });
+
+describe('remaining audit regressions', () => {
+  it('captures snapshots and events before callers can mutate them', async () => {
+    const o = make(fakeApi().client); await o.load();
+    const config = { ...snapshot, difficultyParams: { gridSize: 8 } };
+    const s = createOutboxSession(config);
+    config.difficultyParams.gridSize = 99;
+    await o.enqueue(s);
+    s.snapshot.level = 99;
+    const event = ev(1); const saving = o.record(s.clientSessionId, event);
+    event.payload.wordId = 'mutated'; await saving;
+    expect(o.sessions[0].snapshot.level).toBe(2);
+    expect(o.sessions[0].snapshot.difficultyParams.gridSize).toBe(8);
+    expect(o.sessions[0].events[0].event.payload.wordId).toBe('w1');
+  });
+  it('keeps completion time stable after a genuinely lost completion response', async () => {
+    const api = fakeApi(); let now = 1000000;
+    const o = make(api.client, () => now); await o.load();
+    const s = createOutboxSession(snapshot); await o.enqueue(s); await o.record(s.clientSessionId, ev(1));
+    await o.finalize(s.clientSessionId, {status: 'completed', finalSeq: 1, assisted: false});
+    const bodies: any[] = [];
+    api.client.completeSession.mockImplementation(async (_id: string, body: any) => {
+      bodies.push(body); if (bodies.length === 1) throw new ApiError(0, 'lost response'); return {};
+    });
+    await o.flush(); now += 60000; await o.flush();
+    expect(bodies).toHaveLength(2); expect(bodies[0]).toEqual(bodies[1]);
+    expect(bodies[0].ended_at).toBe(new Date(1000000).toISOString());
+  });
+  it('does not complete rejected batches and resends them only on explicit retry', async () => {
+    const api = fakeApi(); const o = make(api.client); await o.load();
+    const s = createOutboxSession(snapshot); await o.enqueue(s); await o.record(s.clientSessionId, ev(1));
+    await o.finalize(s.clientSessionId, {status: 'completed', finalSeq: 1, assisted: false});
+    api.respondToBatch(es => ({...okBatch([]), rejected: [{event_id: es[0].event_id, reason:'rejected'}]}));
+    await o.flush(); expect(api.calls.completed).toHaveLength(0); expect(o.sessions[0].status).toBe('blocked');
+    api.respondToBatch(es => okBatch(es.map(e => e.event_id)));
+    await o.retryBlocked(); await o.flush(); expect(api.calls.completed).toHaveLength(1);
+  });
+  it('rejects acknowledgements for events outside the submitted batch', async () => {
+    const api = fakeApi(); const o = make(api.client); await o.load();
+    const s = createOutboxSession(snapshot); await o.enqueue(s); await o.record(s.clientSessionId, ev(1));
+    api.respondToBatch(() => okBatch(['foreign-id'])); await o.flush();
+    expect(o.sessions[0].confirmedEventIds).toEqual([]); expect(o.sessions[0].status).toBe('blocked');
+  });
+  it('recovers killed play as interrupted with the last observed time', async () => {
+    const o = make(null); await o.load(); const s = createOutboxSession(snapshot);
+    await o.enqueue(s); await o.record(s.clientSessionId, ev(1));
+    const restarted = make(null); await restarted.load();
+    expect(restarted.sessions[0].result).toEqual({status:'interrupted', finalSeq:1, assisted:false});
+    expect(restarted.sessions[0].endedAt).toBe(restarted.sessions[0].events[0].occurredAt);
+  });
+});

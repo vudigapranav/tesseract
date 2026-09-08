@@ -41,7 +41,7 @@ function Shell() {
           a running activity's timing across a reopen — the brand is an
           overlay, never a remount. */}
       <View style={{ flex: 1 }}>
-        <Navigation />
+        <Navigation key={`${app.store.scope}:${app.role}:${app.selectedPatient?.id ?? "none"}`} />
       </View>
 
       {opening.visible ? (

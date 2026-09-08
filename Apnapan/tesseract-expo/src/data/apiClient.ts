@@ -189,6 +189,7 @@ export interface SessionEventUpload {
 }
 
 export interface SessionCreateBody {
+  started_at?: string;
   patient_id: string;
   game_id: string;
   game_version: string;
@@ -250,7 +251,9 @@ export class ApiClient {
     body?: unknown,
     signal?: AbortSignal,
   ): Promise<T> {
+    if (signal?.aborted) throw new ApiError(0, "Request cancelled.");
     const token = await this.getToken();
+    if (signal?.aborted) throw new ApiError(0, "Request cancelled.");
     // Every request is bounded. Without this a stalled connection hangs a
     // flush forever and the outbox never makes progress.
     const controller = new AbortController();

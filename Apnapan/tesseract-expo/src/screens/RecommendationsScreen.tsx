@@ -65,8 +65,8 @@ export function RecommendationsScreen({ onBack }: { onBack: () => void }) {
   }, [app.api, patientId]);
 
   const signals = useMemo(
-    () => signalsFrom(app.outbox.sessions),
-    [app.outbox.sessions],
+    () => signalsFrom(app.outbox.sessions.filter((s) => s.snapshot.patientId === patientId)),
+    [app.outbox.sessions, patientId],
   );
 
   const localObservations = useMemo(

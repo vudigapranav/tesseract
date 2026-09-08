@@ -7,7 +7,7 @@
  * the protected gate, which is the point of the hand-over.
  */
 import React, { useState } from 'react';
-import { ActivityIndicator, View } from 'react-native';
+import { ActivityIndicator, Text, View } from 'react-native';
 import { useApp } from './state/AppState';
 import { SignInScreen } from './screens/SignInScreen';
 import {
@@ -69,6 +69,8 @@ export function Navigation() {
   const [level, setLevel] = useState(1);
   const [result, setResult] = useState<GameResult | null>(null);
   const [doctorPatient, setDoctorPatient] = useState<PatientOut | null>(null);
+
+  if (app.startupError) return <View style={{ flex: 1, padding: 32, justifyContent: "center" }}><Text accessibilityRole="alert">{app.startupError}</Text></View>;
 
   if (!app.ready) {
     return (

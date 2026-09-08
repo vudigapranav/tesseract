@@ -67,6 +67,7 @@ const DEFAULT_PREFS: Preferences = {
 
 interface AppStateValue {
   ready: boolean;
+  startupError: string | null;
 
   /* identity */
   identity: IdentityService;
@@ -119,6 +120,7 @@ const Ctx = createContext<AppStateValue | null>(null);
 export function AppStateProvider({ children }: { children: React.ReactNode }) {
   const identity = useRef(new IdentityService()).current;
   const [ready, setReady] = useState(false);
+  const [startupError, setStartupError] = useState<string | null>(null);
   const [role, setRole] = useState<Role | null>(null);
   const [signedIn, setSignedIn] = useState(false);
   const [previewMode, setPreviewMode] = useState(false);
@@ -150,9 +152,15 @@ export function AppStateProvider({ children }: { children: React.ReactNode }) {
   const api = useMemo(
     () =>
       isApiConfigured() && signedIn
-        ? new ApiClient(() => identity.token())
+        ? new ApiClient(async () => {
+            const expected = store.scope;
+            if (identity.uid !== expected) throw new Error('Identity changed.');
+            const token = await identity.token();
+            if (identity.uid !== expected) throw new Error('Identity changed.');
+            return token;
+          })
         : null,
-    [signedIn, identity],
+    [signedIn, identity, store.scope],
   );
   const apiRef = useRef(api);
   apiRef.current = api;
@@ -181,7 +189,7 @@ export function AppStateProvider({ children }: { children: React.ReactNode }) {
     async (uid: string | null) => {
       cancelSync();
       const next = storeFor(uid);
-      const nextOutbox = new SessionOutbox(next, () => apiRef.current);
+      const nextOutbox = new SessionOutbox(next, () => identity.uid === next.scope ? apiRef.current : null);
       await nextOutbox.load();
       setStore(next);
       storeRef.current = next;
@@ -205,7 +213,7 @@ export function AppStateProvider({ children }: { children: React.ReactNode }) {
     );
     // Patient mode is durable: a device handed to someone must not reopen in
     // caregiver mode after a restart or a battery death.
-    setPatientMode((await s.tryRead<boolean>('patientMode', false)).value);
+    setPatientMode(await s.read<boolean>('patientMode', false));
   }, []);
 
   /** Drops everything identity-specific from memory. */
@@ -221,7 +229,7 @@ export function AppStateProvider({ children }: { children: React.ReactNode }) {
   /* ------------------------------------------------------------- boot - */
   useEffect(() => {
     (async () => {
-      const savedScope = await recallActiveScope();
+      try {
       const restored = await identity.restore();
       if (restored && identity.uid) {
         const s = await adoptScope(identity.uid);
@@ -232,11 +240,14 @@ export function AppStateProvider({ children }: { children: React.ReactNode }) {
         // Restoration failed. Do not leave the previous account's data
         // sitting in memory behind a signed-out shell.
         clearInMemory();
-        const s = await adoptScope(savedScope === ANON_SCOPE ? null : null);
+        const s = await adoptScope(null);
         setSignedIn(false);
         setInterfaceLang(
           (await s.tryRead<LanguageCode>('interfaceLanguage', 'en')).value,
         );
+      }
+      } catch {
+        setStartupError("Saved data could not be opened. It has been preserved. Close and reopen Apnapan to retry.");
       }
       setReady(true);
     })();
@@ -325,18 +336,23 @@ export function AppStateProvider({ children }: { children: React.ReactNode }) {
   /* --------------------------------------------------------- patients - */
   const upsertPatient = useCallback(async (p: PatientSnapshot) => {
     const s = storeRef.current;
-    setPatients((prev) => {
-      const next = prev.some((x) => x.id === p.id)
-        ? prev.map((x) => (x.id === p.id ? { ...x, ...p } : x))
-        : [...prev, p];
-      void s.write('patients', next);
-      return next;
-    });
+    const prev = await s.read<PatientSnapshot[]>('patients', []);
+    const next = prev.some((x) => x.id === p.id)
+      ? prev.map((x) => x.id === p.id ? { ...x, ...p } : x) : [...prev, p];
+    await s.write('patients', next);
+    if (storeRef.current === s) setPatients(next);
   }, []);
 
   const selectPatient = useCallback(async (id: string) => {
+    const s = storeRef.current;
+    const savedPatients = await s.read<PatientSnapshot[]>('patients', []);
+    const patient = savedPatients.find((p) => p.id === id);
+    if (!patient) throw new Error('Patient is unavailable.');
+    await s.write('selectedPatient', id);
+    await s.write('patientLanguage', patient.language);
+    if (storeRef.current !== s) return;
+    setPatientLang(patient.language);
     setSelectedId(id);
-    await storeRef.current.write('selectedPatient', id);
   }, []);
 
   const refreshPatients = useCallback(async () => {
@@ -348,6 +364,7 @@ export function AppStateProvider({ children }: { children: React.ReactNode }) {
     const s = storeRef.current;
     try {
       const remote = await client.listPatients();
+      if (storeRef.current !== s) return;
       setPatientsError(null);
       setPatients((prev) => {
         // Local fields the server has no endpoint for are preserved rather
@@ -367,6 +384,7 @@ export function AppStateProvider({ children }: { children: React.ReactNode }) {
         return merged;
       });
     } catch {
+      if (storeRef.current !== s) return;
       setPatientsError(
         'Could not load the patient list. Showing what is saved on this device.',
       );
@@ -399,6 +417,7 @@ export function AppStateProvider({ children }: { children: React.ReactNode }) {
   const value = useMemo<AppStateValue>(
     () => ({
       ready,
+      startupError,
       identity,
       role,
       signedIn,
@@ -431,7 +450,7 @@ export function AppStateProvider({ children }: { children: React.ReactNode }) {
       pendingUploads,
     }),
     [
-      ready, identity, role, signedIn, signIn, signOut, previewMode, enterPreview,
+      ready, startupError, identity, role, signedIn, signIn, signOut, previewMode, enterPreview,
       interfaceLanguage, patientLanguage, setInterfaceLanguage, setPatientLanguage,
       prefs, setPrefs, patients, selectedPatient, selectPatient, upsertPatient,
       refreshPatients, patientsError, patientMode, enterPatientMode,

@@ -37,3 +37,10 @@ jest.mock('expo-notifications', () => ({
   AndroidImportance: { DEFAULT: 3 },
   SchedulableTriggerInputTypes: { DAILY: 'daily' },
 }));
+
+// Consumer tests isolate native encryption; cipher tests unmock this seam.
+jest.mock('./src/data/storageCipher', () => ({
+  sealStorage: jest.fn(async (_address, plaintext) => plaintext),
+  openStorage: jest.fn(async (_address, raw) => raw),
+  StorageLockedError: class StorageLockedError extends Error {},
+}));

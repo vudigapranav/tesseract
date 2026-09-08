@@ -16,10 +16,10 @@ import Constants from 'expo-constants';
  * time from a gitignored `.env`. Nothing is committed, and `.env.example`
  * documents what to set.
  */
-const read = (name: string): string => (process.env[name] ?? '').trim();
+// Expo only inlines statically named EXPO_PUBLIC accesses.
 
 /** Public Firebase Web API key for the Tesseract project. */
-export const FIREBASE_API_KEY = read('EXPO_PUBLIC_FIREBASE_API_KEY');
+export const FIREBASE_API_KEY = (process.env.EXPO_PUBLIC_FIREBASE_API_KEY ?? '').trim();
 
 /**
  * HTTPS base URL of the Tesseract API.
@@ -29,7 +29,7 @@ export const FIREBASE_API_KEY = read('EXPO_PUBLIC_FIREBASE_API_KEY');
  * anyway. A local `http://localhost` backend is therefore refused by design,
  * and reaching one needs a tunnel.
  */
-export const TESSERACT_API_URL = read('EXPO_PUBLIC_TESSERACT_API_URL');
+export const TESSERACT_API_URL = (process.env.EXPO_PUBLIC_TESSERACT_API_URL ?? '').trim().replace(/\/$/, '');
 
 /**
  * True when real sign-in can be attempted.
