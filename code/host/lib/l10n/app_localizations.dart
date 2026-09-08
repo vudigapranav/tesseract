@@ -915,6 +915,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Interrupted'**
   String get outcomeInterrupted;
+
+  /// No description provided for @reminderNotificationTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'A gentle reminder'**
+  String get reminderNotificationTitle;
+
+  /// No description provided for @reminderChannelName.
+  ///
+  /// In en, this message translates to:
+  /// **'Routine reminders'**
+  String get reminderChannelName;
+
+  /// No description provided for @reminderChannelDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Caregiver-created everyday reminders'**
+  String get reminderChannelDescription;
 }
 
 class _AppLocalizationsDelegate

@@ -1,12 +1,13 @@
 {
   "@@locale": "en",
-
   "appName": "Tesseract",
-  "@appName": {"description": "Product name. Not translated."},
-
+  "@appName": {
+    "description": "Product name. Not translated."
+  },
   "languageName": "English",
-  "@languageName": {"description": "This language's own name, in its own script, for the language selector."},
-
+  "@languageName": {
+    "description": "This language's own name, in its own script, for the language selector."
+  },
   "signInTitle": "A familiar moment.\nA little joy.",
   "signInSubtitle": "Set up meaningful activities and everyday reminders, together.",
   "roleCaregiver": "Caregiver",
@@ -20,7 +21,6 @@
   "signInNotConfigured": "Sign-in is not configured in this build. It needs a Firebase project and a backend address, which are supplied at build time. Nothing is signed in until then — there is no offline substitute.",
   "signInPatientNote": "The person using the activities does not sign in. A caregiver sets things up and hands the device over.",
   "openPreview": "Open synthetic development preview",
-
   "languageLabel": "Language",
   "chooseLanguage": "Choose your language",
   "interfaceLanguage": "App language",
@@ -29,20 +29,49 @@
   "patientLanguageHelp": "Activities and instructions use this. It can be different from your own.",
   "draftTranslationNotice": "Draft translation. Not yet checked by a fluent speaker.",
   "translationCoverage": "{percent}% translated",
-  "@translationCoverage": {"placeholders": {"percent": {"type": "int"}}},
+  "@translationCoverage": {
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      }
+    }
+  },
   "awaitingReview": "Awaiting native review",
   "fallsBackToEnglish": "Anything not yet translated is shown in English.",
-
   "caregiverGreeting": "Hello, {name}",
-  "@caregiverGreeting": {"placeholders": {"name": {"type": "String"}}},
+  "@caregiverGreeting": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "welcomeBack": "Welcome back",
   "noPatientYet": "No patient set up yet",
   "needsYourDecision": "Needs your decision",
   "suggestedChange": "A suggested change",
   "levelChange": "{game}: from level {from} to level {to}",
-  "@levelChange": {"placeholders": {"game": {"type": "String"}, "from": {"type": "int"}, "to": {"type": "int"}}},
+  "@levelChange": {
+    "placeholders": {
+      "game": {
+        "type": "String"
+      },
+      "from": {
+        "type": "int"
+      },
+      "to": {
+        "type": "int"
+      }
+    }
+  },
   "useLevel": "Use level {level}",
-  "@useLevel": {"placeholders": {"level": {"type": "int"}}},
+  "@useLevel": {
+    "placeholders": {
+      "level": {
+        "type": "int"
+      }
+    }
+  },
   "chooseLevel": "Choose level",
   "keepAsIs": "Keep as is",
   "suggestionCaveat": "This is a suggestion from recorded activity only, using settings that are still being tested. You decide.",
@@ -61,7 +90,6 @@
   "settingsSubtitle": "Text size, sound, language, sign out",
   "handOver": "Hand over to patient",
   "previewDataWarning": "Preview data. This is not a real patient record.",
-
   "patientHello": "Hello!",
   "patientReady": "Ready for a little activity?",
   "start": "Start",
@@ -76,7 +104,13 @@
   "whatYouHaveBeenDoing": "What you have been doing",
   "nothingYetToday": "Nothing yet today. Whenever you feel like it, there is an activity waiting.",
   "youPlayed": "You played {game}",
-  "@youPlayed": {"placeholders": {"game": {"type": "String"}}},
+  "@youPlayed": {
+    "placeholders": {
+      "game": {
+        "type": "String"
+      }
+    }
+  },
   "allDone": "All done for now!",
   "resting": "Resting",
   "comeBackWhenReady": "Come back whenever you feel ready.",
@@ -85,14 +119,12 @@
   "rest": "Rest",
   "playAgain": "Play again",
   "goBack": "Go back",
-
   "help": "Help",
   "breakLabel": "Break",
   "takingABreak": "Taking a break",
   "takingABreakBody": "Take your time. Tap Continue when you are ready.",
   "continueLabel": "Continue",
   "finishForNow": "Finish for now",
-
   "howToPlayRouteQuest": "Follow the road to the flag. Tap a connected place to move. Pick up the flag, then return home. Help shows the way.",
   "howToPlayMarbleMazeTilt": "Hold your phone comfortably while it settles, then gently tilt to guide the marble to the glowing goal. If tilt is unavailable, use your finger. Help shows the route.",
   "howToPlayMarbleMazeTouch": "Guide the marble along the wooden paths with your finger. Reach the glowing goal. Help shows the route.",
@@ -100,7 +132,6 @@
   "howToPlayRoutineRecall": "You will see a step from the day. Choose what usually comes next. If it is not the one, just try again. Help shows the answer.",
   "howToPlayPictureSorting": "Look at the picture, then choose the group it belongs to. If it is not the one, just try again. Help shows the group.",
   "howToPlayGeneric": "Take your time. Help is always there if you need it, and you can take a break whenever you like.",
-
   "gameRouteQuest": "Route Quest",
   "gameMarbleMaze": "Marble Maze",
   "gameWordSearch": "Word Search",
@@ -111,7 +142,6 @@
   "aboutWordSearch": "Find familiar words hidden in the letters.",
   "aboutRoutineRecall": "Remember what comes next in the day.",
   "aboutPictureSorting": "Put each picture with the ones like it.",
-
   "reminderSeenIt": "OK, I have seen this",
   "reminderLater": "Remind me a bit later",
   "reminderSeen": "You have seen this one.",
@@ -127,14 +157,21 @@
   "signOut": "Sign out",
   "notConnected": "Not connected. Your changes remain on this device.",
   "savedOnDevice": "Saved on this device. Not connected right now.",
-
   "aboutTesseract": "About Tesseract",
   "aboutDescription": "Tesseract offers gentle cognitive activities and everyday reminders for people living with dementia, set up and reviewed by the people who care for them.",
   "builtBy": "Built and developed by the Tesseract Team.",
   "versionLabel": "Version {version} (build {build})",
-  "@versionLabel": {"placeholders": {"version": {"type": "String"}, "build": {"type": "String"}}},
+  "@versionLabel": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      },
+      "build": {
+        "type": "String"
+      }
+    }
+  },
   "languagesLabel": "Languages",
-
   "myPatients": "My patients",
   "assignedToYou": "Patients assigned to you.",
   "noPatientsAssigned": "No patients are assigned to you yet. Assignment is done on the server, not from this app.",
@@ -147,8 +184,13 @@
   "noNotes": "No notes yet.",
   "doctorDisclaimer": "Observed activity in the app. Not a cognitive score, diagnosis, or measure of disease progression.",
   "notMeasured": "Not measured: {metrics}.",
-  "@notMeasured": {"placeholders": {"metrics": {"type": "String"}}},
-
+  "@notMeasured": {
+    "placeholders": {
+      "metrics": {
+        "type": "String"
+      }
+    }
+  },
   "save": "Save",
   "cancel": "Cancel",
   "add": "Add",
@@ -156,5 +198,8 @@
   "couldNotSave": "Could not save on this device. Please try again.",
   "outcomeFinished": "Finished",
   "outcomeStoppedEarly": "Stopped early",
-  "outcomeInterrupted": "Interrupted"
+  "outcomeInterrupted": "Interrupted",
+  "reminderNotificationTitle": "A gentle reminder",
+  "reminderChannelName": "Routine reminders",
+  "reminderChannelDescription": "Caregiver-created everyday reminders"
 }

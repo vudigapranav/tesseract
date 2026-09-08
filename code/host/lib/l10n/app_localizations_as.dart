@@ -94,7 +94,7 @@ class AppLocalizationsAs extends AppLocalizations {
 
   @override
   String caregiverGreeting(String name) {
-    return 'Hello, $name';
+    return 'নমস্কাৰ, $name';
   }
 
   @override
@@ -111,12 +111,12 @@ class AppLocalizationsAs extends AppLocalizations {
 
   @override
   String levelChange(String game, int from, int to) {
-    return '$game: from level $from to level $to';
+    return '$game: স্তৰ $from ৰ পৰা স্তৰ $to লৈ';
   }
 
   @override
   String useLevel(int level) {
-    return 'Use level $level';
+    return 'স্তৰ $level ব্যৱহাৰ কৰক';
   }
 
   @override
@@ -142,7 +142,7 @@ class AppLocalizationsAs extends AppLocalizations {
       'বৰ্তমানৰ কামটোৱেই ৰখা হ\'ল। একো সলনি হোৱা নাই।';
 
   @override
-  String get decisionFailed => 'That could not be saved. Nothing was changed.';
+  String get decisionFailed => 'সংৰক্ষণ কৰিব পৰা নগ’ল। একো সলনি হোৱা নাই।';
 
   @override
   String get recentActivity => 'শেহতীয়া কাম';
@@ -170,14 +170,13 @@ class AppLocalizationsAs extends AppLocalizations {
   String get settingsAndSync => 'ছেটিংছ আৰু ছিংক';
 
   @override
-  String get settingsSubtitle => 'Text size, sound, language, sign out';
+  String get settingsSubtitle => 'লেখাৰ আকাৰ, শব্দ, ভাষা, ছাইন আউট';
 
   @override
   String get handOver => 'ৰোগীৰ হাতত দিয়ক';
 
   @override
-  String get previewDataWarning =>
-      'Preview data. This is not a real patient record.';
+  String get previewDataWarning => 'নমুনা তথ্য। এইটো প্ৰকৃত ৰোগীৰ ৰেকৰ্ড নহয়।';
 
   @override
   String get patientHello => 'নমস্কাৰ!';
@@ -195,7 +194,7 @@ class AppLocalizationsAs extends AppLocalizations {
   String get yourActivityToday => 'আজি আপোনাৰ কাম';
 
   @override
-  String get withPlacesYouKnow => 'With places you know.';
+  String get withPlacesYouKnow => 'আপুনি চিনি পোৱা ঠাইৰ সৈতে।';
 
   @override
   String get chooseSomethingElse => 'আন কিবা বাছনি কৰক';
@@ -221,7 +220,7 @@ class AppLocalizationsAs extends AppLocalizations {
 
   @override
   String youPlayed(String game) {
-    return 'You played $game';
+    return 'আপুনি $game খেলিলে';
   }
 
   @override
@@ -292,7 +291,7 @@ class AppLocalizationsAs extends AppLocalizations {
 
   @override
   String get howToPlayGeneric =>
-      'Take your time. Help is always there if you need it, and you can take a break whenever you like.';
+      'সময় লওক। প্ৰয়োজন হ’লে সহায় পাব, আৰু যেতিয়া ইচ্ছা বিৰতি ল’ব পাৰে।';
 
   @override
   String get gameRouteQuest => 'Route Quest';
@@ -353,13 +352,13 @@ class AppLocalizationsAs extends AppLocalizations {
       'Applies straight away, on top of the Android text-size setting.';
 
   @override
-  String get synchronization => 'Synchronization';
+  String get synchronization => 'ছিংক কৰা';
 
   @override
-  String get syncNow => 'Sync now';
+  String get syncNow => 'এতিয়া ছিংক কৰক';
 
   @override
-  String get pendingUploads => 'Pending session uploads';
+  String get pendingUploads => 'আপলোডৰ অপেক্ষাত থকা খেলৰ ছেছন';
 
   @override
   String get signOut => 'ছাইন আউট';
@@ -382,17 +381,17 @@ class AppLocalizationsAs extends AppLocalizations {
 
   @override
   String versionLabel(String version, String build) {
-    return 'Version $version (build $build)';
+    return 'সংস্কৰণ $version (বিল্ড $build)';
   }
 
   @override
   String get languagesLabel => 'ভাষা';
 
   @override
-  String get myPatients => 'My patients';
+  String get myPatients => 'মোৰ ৰোগীসকল';
 
   @override
-  String get assignedToYou => 'Patients assigned to you.';
+  String get assignedToYou => 'আপোনাৰ দায়িত্বত থকা ৰোগীসকল।';
 
   @override
   String get noPatientsAssigned =>
@@ -402,22 +401,22 @@ class AppLocalizationsAs extends AppLocalizations {
   String get observedMeasures => 'Observed measures';
 
   @override
-  String get sessionHistory => 'Session history';
+  String get sessionHistory => 'খেলৰ ছেছনৰ ইতিহাস';
 
   @override
-  String get draftReport => 'Draft report';
+  String get draftReport => 'খচৰা প্ৰতিবেদন';
 
   @override
-  String get generate => 'Generate';
+  String get generate => 'তৈয়াৰ কৰক';
 
   @override
-  String get notes => 'Notes';
+  String get notes => 'টোকা';
 
   @override
-  String get addNote => 'Add a note';
+  String get addNote => 'টোকা যোগ কৰক';
 
   @override
-  String get noNotes => 'No notes yet.';
+  String get noNotes => 'এতিয়াও কোনো টোকা নাই।';
 
   @override
   String get doctorDisclaimer =>
@@ -425,7 +424,7 @@ class AppLocalizationsAs extends AppLocalizations {
 
   @override
   String notMeasured(String metrics) {
-    return 'Not measured: $metrics.';
+    return 'জোখা হোৱা নাই: $metrics।';
   }
 
   @override
@@ -451,4 +450,14 @@ class AppLocalizationsAs extends AppLocalizations {
 
   @override
   String get outcomeInterrupted => 'বাধা পৰিছে';
+
+  @override
+  String get reminderNotificationTitle => 'এটি সৰু মনত পেলোৱা';
+
+  @override
+  String get reminderChannelName => 'দৈনন্দিন মনত পেলোৱা';
+
+  @override
+  String get reminderChannelDescription =>
+      'যত্নকাৰীয়ে তৈয়াৰ কৰা দৈনন্দিন মনত পেলোৱা';
 }

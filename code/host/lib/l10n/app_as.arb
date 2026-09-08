@@ -1,8 +1,6 @@
 {
   "@@locale": "as",
-
   "languageName": "অসমীয়া",
-
   "signInTitle": "এটি চিনাকি মুহূৰ্ত।\nএষাৰ আনন্দ।",
   "signInSubtitle": "একেলগে অৰ্থপূৰ্ণ কাম আৰু দৈনন্দিন মনত পেলোৱা ব্যৱস্থা কৰক।",
   "roleCaregiver": "যত্নকাৰী",
@@ -14,7 +12,6 @@
   "signingIn": "পৰীক্ষা কৰা হৈছে…",
   "signInFailed": "ছাইন ইন পৰীক্ষা কৰিব পৰা নগ'ল। আপোনাৰ তথ্য আৰু সংযোগ চাওক।",
   "signInPatientNote": "যিয়ে কামবোৰ কৰিব তেওঁ ছাইন ইন নকৰে। এজন যত্নকাৰীয়ে সাজু কৰি ফোনটো হাতত দিয়ে।",
-
   "languageLabel": "ভাষা",
   "chooseLanguage": "আপোনাৰ ভাষা বাছনি কৰক",
   "interfaceLanguage": "এপৰ ভাষা",
@@ -25,7 +22,6 @@
   "draftTranslationNotice": "খচৰা অনুবাদ। এতিয়াও কোনো সাৱলীল বক্তাই পৰীক্ষা কৰা নাই।",
   "awaitingReview": "স্থানীয় পৰ্যালোচনাৰ অপেক্ষাত",
   "fallsBackToEnglish": "যিবোৰ এতিয়াও অনুবাদ হোৱা নাই সেয়া ইংৰাজীত দেখুওৱা হ'ব।",
-
   "welcomeBack": "পুনৰ স্বাগতম",
   "noPatientYet": "এতিয়াও কাকো যোগ কৰা হোৱা নাই",
   "needsYourDecision": "আপোনাৰ সিদ্ধান্ত লাগে",
@@ -43,7 +39,6 @@
   "reminders": "মনত পেলোৱা",
   "settingsAndSync": "ছেটিংছ আৰু ছিংক",
   "handOver": "ৰোগীৰ হাতত দিয়ক",
-
   "patientHello": "নমস্কাৰ!",
   "patientReady": "অলপ কিবা কৰিবলৈ মন গৈছে নেকি?",
   "start": "আৰম্ভ কৰক",
@@ -64,19 +59,16 @@
   "rest": "বিশ্ৰাম",
   "playAgain": "পুনৰ খেলক",
   "goBack": "পিছলৈ যাওক",
-
   "help": "সহায়",
   "breakLabel": "বিৰতি",
   "takingABreak": "অলপ বিৰতি",
   "takingABreakBody": "সময় লওক। সাজু হ'লে আগবাঢ়ক টিপক।",
   "continueLabel": "আগবাঢ়ক",
   "finishForNow": "আপাততঃ শেষ কৰক",
-
   "howToPlayRouteQuest": "পতাকাৰ ফালে বাটেৰে যাওক। যাবলৈ ওচৰৰ ঠাইত টিপক। পতাকা তুলি লৈ ঘৰলৈ ঘূৰি আহক। সহায়ে বাট দেখুৱাব।",
   "howToPlayWordSearch": "আখৰৰ মাজত শব্দবোৰ বিচাৰক। প্ৰথম আখৰত টিপক, তাৰ পিছত শেষ আখৰত। সহায়ে এটা শব্দ দেখুৱাব।",
   "howToPlayRoutineRecall": "দিনটোৰ এটা স্তৰ দেখুওৱা হ'ব। ইয়াৰ পিছত সাধাৰণতে কি হয় বাছনি কৰক। ভুল হ'লে পুনৰ চেষ্টা কৰক।",
   "howToPlayPictureSorting": "ছবিখন চাওক, তাৰ পিছত সেয়া কোন দলত যায় বাছনি কৰক। ভুল হ'লে পুনৰ চেষ্টা কৰক।",
-
   "gameWordSearch": "শব্দ বিচৰা",
   "gameRoutineRecall": "দৈনন্দিন কাম",
   "gamePictureSorting": "ছবি সজোৱা",
@@ -85,7 +77,6 @@
   "aboutWordSearch": "আখৰৰ মাজত লুকাই থকা চিনাকি শব্দ বিচাৰক।",
   "aboutRoutineRecall": "দিনটোত ইয়াৰ পিছত কি হয় মনত পেলাওক।",
   "aboutPictureSorting": "প্ৰতিখন ছবি তাৰ দৰে ছবিৰ লগত ৰাখক।",
-
   "reminderSeenIt": "ঠিক আছে, মই দেখিলোঁ",
   "reminderLater": "অলপ পিছত মনত পেলাব",
   "reminderSeen": "আপুনি এইটো দেখিছে।",
@@ -97,11 +88,9 @@
   "signOut": "ছাইন আউট",
   "notConnected": "সংযোগ নাই। আপোনাৰ সালসলনি এই ফোনতে থাকিব।",
   "savedOnDevice": "এই ফোনত ৰখা আছে। এতিয়া সংযোগ নাই।",
-
   "aboutTesseract": "টেছাৰেক্টৰ বিষয়ে",
   "aboutDescription": "টেছাৰেক্টে ডিমেনচিয়াত ভোগা লোকৰ বাবে সহজ মানসিক কাম আৰু দৈনন্দিন মনত পেলোৱাৰ ব্যৱস্থা কৰে, যিবোৰ তেওঁলোকৰ যত্নকাৰীয়ে সাজু কৰি চাই থাকে।",
   "languagesLabel": "ভাষা",
-
   "save": "সংৰক্ষণ",
   "cancel": "বাতিল",
   "add": "যোগ কৰক",
@@ -109,5 +98,30 @@
   "couldNotSave": "এই ফোনত সংৰক্ষণ কৰিব পৰা নগ'ল। পুনৰ চেষ্টা কৰক।",
   "outcomeFinished": "শেষ হৈছে",
   "outcomeStoppedEarly": "আগতেই ৰ'ল",
-  "outcomeInterrupted": "বাধা পৰিছে"
+  "outcomeInterrupted": "বাধা পৰিছে",
+  "caregiverGreeting": "নমস্কাৰ, {name}",
+  "levelChange": "{game}: স্তৰ {from} ৰ পৰা স্তৰ {to} লৈ",
+  "useLevel": "স্তৰ {level} ব্যৱহাৰ কৰক",
+  "decisionFailed": "সংৰক্ষণ কৰিব পৰা নগ’ল। একো সলনি হোৱা নাই।",
+  "settingsSubtitle": "লেখাৰ আকাৰ, শব্দ, ভাষা, ছাইন আউট",
+  "previewDataWarning": "নমুনা তথ্য। এইটো প্ৰকৃত ৰোগীৰ ৰেকৰ্ড নহয়।",
+  "withPlacesYouKnow": "আপুনি চিনি পোৱা ঠাইৰ সৈতে।",
+  "youPlayed": "আপুনি {game} খেলিলে",
+  "howToPlayGeneric": "সময় লওক। প্ৰয়োজন হ’লে সহায় পাব, আৰু যেতিয়া ইচ্ছা বিৰতি ল’ব পাৰে।",
+  "synchronization": "ছিংক কৰা",
+  "syncNow": "এতিয়া ছিংক কৰক",
+  "pendingUploads": "আপলোডৰ অপেক্ষাত থকা খেলৰ ছেছন",
+  "versionLabel": "সংস্কৰণ {version} (বিল্ড {build})",
+  "myPatients": "মোৰ ৰোগীসকল",
+  "assignedToYou": "আপোনাৰ দায়িত্বত থকা ৰোগীসকল।",
+  "sessionHistory": "খেলৰ ছেছনৰ ইতিহাস",
+  "draftReport": "খচৰা প্ৰতিবেদন",
+  "generate": "তৈয়াৰ কৰক",
+  "notes": "টোকা",
+  "addNote": "টোকা যোগ কৰক",
+  "noNotes": "এতিয়াও কোনো টোকা নাই।",
+  "notMeasured": "জোখা হোৱা নাই: {metrics}।",
+  "reminderNotificationTitle": "এটি সৰু মনত পেলোৱা",
+  "reminderChannelName": "দৈনন্দিন মনত পেলোৱা",
+  "reminderChannelDescription": "যত্নকাৰীয়ে তৈয়াৰ কৰা দৈনন্দিন মনত পেলোৱা"
 }

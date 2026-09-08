@@ -3,78 +3,30 @@
     "appName",
     "signInNotConfigured",
     "openPreview",
-    "caregiverGreeting",
-    "levelChange",
-    "useLevel",
     "decisionApproved",
     "decisionModified",
-    "decisionFailed",
-    "settingsSubtitle",
-    "previewDataWarning",
-    "withPlacesYouKnow",
-    "youPlayed",
     "howToPlayMarbleMazeTilt",
     "howToPlayMarbleMazeTouch",
-    "howToPlayGeneric",
     "gameRouteQuest",
     "gameMarbleMaze",
     "textSizeHelp",
-    "synchronization",
-    "syncNow",
-    "pendingUploads",
     "builtBy",
-    "versionLabel",
-    "myPatients",
-    "assignedToYou",
     "noPatientsAssigned",
     "observedMeasures",
-    "sessionHistory",
-    "draftReport",
-    "generate",
-    "notes",
-    "addNote",
-    "noNotes",
-    "doctorDisclaimer",
-    "notMeasured"
+    "doctorDisclaimer"
   ],
 
   "bn": [
     "appName",
     "signInNotConfigured",
     "openPreview",
-    "caregiverGreeting",
-    "levelChange",
-    "useLevel",
-    "decisionApproved",
-    "decisionModified",
-    "decisionFailed",
-    "settingsSubtitle",
-    "previewDataWarning",
-    "withPlacesYouKnow",
-    "youPlayed",
     "howToPlayMarbleMazeTilt",
     "howToPlayMarbleMazeTouch",
-    "howToPlayGeneric",
     "gameRouteQuest",
     "gameMarbleMaze",
-    "textSizeHelp",
-    "synchronization",
-    "syncNow",
-    "pendingUploads",
     "builtBy",
-    "versionLabel",
-    "myPatients",
-    "assignedToYou",
     "noPatientsAssigned",
-    "observedMeasures",
-    "sessionHistory",
-    "draftReport",
-    "generate",
-    "notes",
-    "addNote",
-    "noNotes",
-    "doctorDisclaimer",
-    "notMeasured"
+    "doctorDisclaimer"
   ],
 
   "kha": [
@@ -198,7 +150,10 @@
     "couldNotSave",
     "outcomeFinished",
     "outcomeStoppedEarly",
-    "outcomeInterrupted"
+    "outcomeInterrupted",
+    "reminderNotificationTitle",
+    "reminderChannelName",
+    "reminderChannelDescription"
   ],
 
   "lus": [
@@ -322,7 +277,10 @@
     "couldNotSave",
     "outcomeFinished",
     "outcomeStoppedEarly",
-    "outcomeInterrupted"
+    "outcomeInterrupted",
+    "reminderNotificationTitle",
+    "reminderChannelName",
+    "reminderChannelDescription"
   ],
 
   "mni": [
@@ -447,6 +405,9 @@
     "couldNotSave",
     "outcomeFinished",
     "outcomeStoppedEarly",
-    "outcomeInterrupted"
+    "outcomeInterrupted",
+    "reminderNotificationTitle",
+    "reminderChannelName",
+    "reminderChannelDescription"
   ]
 }

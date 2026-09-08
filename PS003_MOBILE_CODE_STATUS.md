@@ -489,3 +489,34 @@ localizations.
 TalkBack in non-Latin scripts and localized notifications are unverified on a
 phone. Reminder notification bodies are still untranslated literals in
 `ReminderService`. **No voice/audio support exists in any language.**
+
+
+## 2026-09-08 Codex continuation — translation milestone
+
+Inspected clean HEAD `2d425b16cbae609d9b4d58eeff2abbfd6e868bb0` on
+`codex/patient-caregiver-integration` in the requested nested clone. It is the
+handoff-only commit after `b160220`; the handoff's older HEAD is reconciled.
+Original Desktop checkout and unrelated parent repository remain untouched.
+
+Expanded Assamese/Bengali ARB drafts and added notification localization keys.
+Measured key coverage now: English 100%, Assamese 90%, Bengali 93%, Meitei 9%,
+Khasi 10%, Mizo 10%. Meitei's rounded percentage decreased because the English
+key set grew; no translations were removed. No low-confidence strings were
+invented to raise Meitei/Khasi/Mizo coverage. All non-English languages remain
+draft with English fallback; none is natively reviewed or voice-enabled.
+See `docs/handoffs/TRANSLATION_REVIEW_2026-09-08.md` for wording needing review.
+The exact attribution is preserved.
+
+Regenerated localization sources/report and the three affected goldens
+(Bengali sign-in, large Assamese sign-in, language selector). Visually inspected
+all three: bundled script rendering is present, content scrolls at large text.
+The first host run reported 107 passes and 3 expected changed-golden failures;
+after regeneration the host run passed 110 tests including notification lookup.
+This is automated rendering evidence, not phone/TalkBack validation.
+
+Actual registry: Route Quest (G2), Marble Maze (G3), Word Search (G7), Routine
+Recall (G8), Picture Sorting (extra). Therefore **four of nine required games
+plus one extra**, five registered total; Aryan's G1/G4/G5/G6/G9 are missing.
+Earlier statements '5 of 9 plus one extra' and 'four missing' were incorrect.
+
+Next: finish notification/patient integration regression and record final build.

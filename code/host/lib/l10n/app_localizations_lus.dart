@@ -454,4 +454,14 @@ class AppLocalizationsLus extends AppLocalizations {
 
   @override
   String get outcomeInterrupted => 'Interrupted';
+
+  @override
+  String get reminderNotificationTitle => 'A gentle reminder';
+
+  @override
+  String get reminderChannelName => 'Routine reminders';
+
+  @override
+  String get reminderChannelDescription =>
+      'Caregiver-created everyday reminders';
 }

@@ -94,7 +94,7 @@ class AppLocalizationsBn extends AppLocalizations {
 
   @override
   String caregiverGreeting(String name) {
-    return 'Hello, $name';
+    return 'নমস্কার, $name';
   }
 
   @override
@@ -111,12 +111,12 @@ class AppLocalizationsBn extends AppLocalizations {
 
   @override
   String levelChange(String game, int from, int to) {
-    return '$game: from level $from to level $to';
+    return '$game: স্তর $from থেকে স্তর $to';
   }
 
   @override
   String useLevel(int level) {
-    return 'Use level $level';
+    return 'স্তর $level ব্যবহার করুন';
   }
 
   @override
@@ -130,18 +130,17 @@ class AppLocalizationsBn extends AppLocalizations {
       'এটি কেবল রেকর্ড করা কাজের ভিত্তিতে একটি প্রস্তাব, এমন সেটিংস দিয়ে যা এখনও পরীক্ষা করা হচ্ছে। সিদ্ধান্ত আপনার।';
 
   @override
-  String get decisionApproved =>
-      'Approved. The new activity is ready for the next session.';
+  String get decisionApproved => 'অনুমোদিত। পরের বার নতুন কাজটি করা যাবে।';
 
   @override
   String get decisionModified =>
-      'Saved your choice. That is what will be offered next.';
+      'আপনার পছন্দ সংরক্ষণ করা হয়েছে। পরের বার এটিই দেখানো হবে।';
 
   @override
   String get decisionRejected => 'বর্তমান কাজটিই রাখা হল। কিছু বদলায়নি।';
 
   @override
-  String get decisionFailed => 'That could not be saved. Nothing was changed.';
+  String get decisionFailed => 'সংরক্ষণ করা যায়নি। কিছু বদলায়নি।';
 
   @override
   String get recentActivity => 'সাম্প্রতিক কাজ';
@@ -169,14 +168,13 @@ class AppLocalizationsBn extends AppLocalizations {
   String get settingsAndSync => 'সেটিংস ও সিঙ্ক';
 
   @override
-  String get settingsSubtitle => 'Text size, sound, language, sign out';
+  String get settingsSubtitle => 'লেখার আকার, শব্দ, ভাষা, সাইন আউট';
 
   @override
   String get handOver => 'রোগীর হাতে দিন';
 
   @override
-  String get previewDataWarning =>
-      'Preview data. This is not a real patient record.';
+  String get previewDataWarning => 'নমুনা তথ্য। এটি কোনও আসল রোগীর রেকর্ড নয়।';
 
   @override
   String get patientHello => 'নমস্কার!';
@@ -194,7 +192,7 @@ class AppLocalizationsBn extends AppLocalizations {
   String get yourActivityToday => 'আজ আপনার কাজ';
 
   @override
-  String get withPlacesYouKnow => 'With places you know.';
+  String get withPlacesYouKnow => 'আপনার চেনা জায়গা নিয়ে।';
 
   @override
   String get chooseSomethingElse => 'অন্য কিছু বেছে নিন';
@@ -220,7 +218,7 @@ class AppLocalizationsBn extends AppLocalizations {
 
   @override
   String youPlayed(String game) {
-    return 'You played $game';
+    return 'আপনি $game খেলেছেন';
   }
 
   @override
@@ -291,7 +289,7 @@ class AppLocalizationsBn extends AppLocalizations {
 
   @override
   String get howToPlayGeneric =>
-      'Take your time. Help is always there if you need it, and you can take a break whenever you like.';
+      'সময় নিন। প্রয়োজন হলে সাহায্য পাবেন, আর যখন ইচ্ছে বিরতি নিতে পারেন।';
 
   @override
   String get gameRouteQuest => 'Route Quest';
@@ -349,16 +347,16 @@ class AppLocalizationsBn extends AppLocalizations {
 
   @override
   String get textSizeHelp =>
-      'Applies straight away, on top of the Android text-size setting.';
+      'অ্যান্ড্রয়েডের লেখার আকারের সেটিংসের সঙ্গে সঙ্গে এটি প্রযোজ্য হবে।';
 
   @override
-  String get synchronization => 'Synchronization';
+  String get synchronization => 'সিঙ্ক করা';
 
   @override
-  String get syncNow => 'Sync now';
+  String get syncNow => 'এখন সিঙ্ক করুন';
 
   @override
-  String get pendingUploads => 'Pending session uploads';
+  String get pendingUploads => 'আপলোডের অপেক্ষায় থাকা খেলার সেশন';
 
   @override
   String get signOut => 'সাইন আউট';
@@ -381,42 +379,42 @@ class AppLocalizationsBn extends AppLocalizations {
 
   @override
   String versionLabel(String version, String build) {
-    return 'Version $version (build $build)';
+    return 'সংস্করণ $version (বিল্ড $build)';
   }
 
   @override
   String get languagesLabel => 'ভাষা';
 
   @override
-  String get myPatients => 'My patients';
+  String get myPatients => 'আমার রোগীরা';
 
   @override
-  String get assignedToYou => 'Patients assigned to you.';
+  String get assignedToYou => 'আপনার দায়িত্বে থাকা রোগীরা।';
 
   @override
   String get noPatientsAssigned =>
       'No patients are assigned to you yet. Assignment is done on the server, not from this app.';
 
   @override
-  String get observedMeasures => 'Observed measures';
+  String get observedMeasures => 'পর্যবেক্ষণ করা পরিমাপ';
 
   @override
-  String get sessionHistory => 'Session history';
+  String get sessionHistory => 'খেলার সেশনের ইতিহাস';
 
   @override
-  String get draftReport => 'Draft report';
+  String get draftReport => 'খসড়া প্রতিবেদন';
 
   @override
-  String get generate => 'Generate';
+  String get generate => 'তৈরি করুন';
 
   @override
-  String get notes => 'Notes';
+  String get notes => 'নোট';
 
   @override
-  String get addNote => 'Add a note';
+  String get addNote => 'নোট যোগ করুন';
 
   @override
-  String get noNotes => 'No notes yet.';
+  String get noNotes => 'এখনও কোনও নোট নেই।';
 
   @override
   String get doctorDisclaimer =>
@@ -424,7 +422,7 @@ class AppLocalizationsBn extends AppLocalizations {
 
   @override
   String notMeasured(String metrics) {
-    return 'Not measured: $metrics.';
+    return 'পরিমাপ করা হয়নি: $metrics।';
   }
 
   @override
@@ -450,4 +448,14 @@ class AppLocalizationsBn extends AppLocalizations {
 
   @override
   String get outcomeInterrupted => 'বাধা পড়েছে';
+
+  @override
+  String get reminderNotificationTitle => 'একটি ছোট মনে করিয়ে দেওয়া';
+
+  @override
+  String get reminderChannelName => 'দৈনন্দিন মনে করিয়ে দেওয়া';
+
+  @override
+  String get reminderChannelDescription =>
+      'যত্নকারীর তৈরি দৈনন্দিন মনে করিয়ে দেওয়া';
 }
