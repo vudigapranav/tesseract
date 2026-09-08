@@ -1,15 +1,15 @@
 /**
  * The activity registry.
  *
- * **Catalogue status, stated plainly:** this ships FOUR of the NINE required
- * games — Route Quest (G2), Marble Maze (G3), Word Search (G7) and Daily
- * Routine Recall (G8) — plus Picture Sorting as an extra activity.
+ * **Catalogue status, stated plainly:** this ships FIVE of the NINE required
+ * games — Reveal Match (G1), Route Quest (G2), Marble Maze (G3), Word Search
+ * (G7) and Daily Routine Recall (G8) — plus Picture Sorting as an extra
+ * activity.
  *
- * Still missing, and owned by Aryan: Reveal Match (G1), Trace (G4),
- * Coloring (G5), Spot Difference (G6) and Picture Recall (G9). They are not
- * stubbed, faked or approximated here. When their repositories are available
- * they get integrated through this registry and the shared contract, with
- * ownership preserved.
+ * Still missing, and owned by Aryan: Trace (G4), Coloring (G5), Spot
+ * Difference (G6) and Picture Recall (G9). Their Flutter source is staged at
+ * `tmp/incoming/aryan/extracted/` and triaged, but nothing is ported. They are
+ * not stubbed, faked or approximated here.
  */
 import type React from 'react';
 import type { TesseractGameProps } from './contract';
@@ -19,6 +19,7 @@ import { marbleMazeDifficultyParams } from './marbleMaze/level';
 import { WordSearchGame, WORD_SEARCH_ID, wordSearchDifficultyParams } from './wordSearch/WordSearchGame';
 import { RoutineRecallGame, ROUTINE_RECALL_ID, routineRecallDifficultyParams } from './routineRecall/RoutineRecallGame';
 import { PictureSortingGame, PICTURE_SORTING_ID, pictureSortingDifficultyParams } from './pictureSorting/PictureSortingGame';
+import { RevealMatchGame, REVEAL_MATCH_ID, revealMatchDifficultyParams } from './revealMatch/RevealMatchGame';
 
 export interface GameRegistration {
   gameId: string;
@@ -87,6 +88,16 @@ export const GAME_REGISTRY: readonly GameRegistration[] = [
     owner: 'Ruthika',
     component: PictureSortingGame,
     difficultyParamsForLevel: pictureSortingDifficultyParams,
+    maxLevel: 3,
+  },
+  {
+    gameId: REVEAL_MATCH_ID,
+    displayNameKey: 'gameRevealMatch',
+    instructionKey: 'howToPlayRevealMatch',
+    required: true,
+    owner: 'Aryan',
+    component: RevealMatchGame,
+    difficultyParamsForLevel: revealMatchDifficultyParams,
     maxLevel: 3,
   },
 ];

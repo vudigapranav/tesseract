@@ -25,7 +25,7 @@ import {
 } from '../design/components';
 import { useApp } from '../state/AppState';
 import { translate } from '../l10n/i18n';
-import type { NoteOut, PatientOut, ReportOut } from '../data/apiClient';
+import type { NoteOut, PatientOut } from '../data/apiClient';
 
 // Notes and reports are server-backed. The previous UI claimed there was no
 // notes endpoint; POST/GET /v1/patients/{id}/notes and the reports routes
@@ -97,9 +97,11 @@ export function DoctorPatientsScreen({
 
 export function DoctorPatientDetailScreen({
   patient,
+  onAnalysis,
   onBack,
 }: {
   patient: PatientOut;
+  onAnalysis: () => void;
   onBack: () => void;
 }) {
   const app = useApp();
@@ -112,9 +114,6 @@ export function DoctorPatientDetailScreen({
   const [notesError, setNotesError] = useState<string | null>(null);
   const [draft, setDraft] = useState('');
   const [savingNote, setSavingNote] = useState(false);
-  const [report, setReport] = useState<ReportOut | null>(null);
-  const [reportError, setReportError] = useState<string | null>(null);
-  const [generating, setGenerating] = useState(false);
 
   useEffect(() => {
     void (async () => {
@@ -167,19 +166,6 @@ export function DoctorPatientDetailScreen({
     }
   };
 
-  const generateReport = async () => {
-    if (!app.api) return;
-    setGenerating(true);
-    setReportError(null);
-    try {
-      setReport(await app.api.createReport(patient.patient_id, 30));
-    } catch {
-      setReportError('Could not generate a report.');
-    } finally {
-      setGenerating(false);
-    }
-  };
-
   const measures = summary
     ? Object.entries(summary).filter(
         ([, v]) => typeof v === 'number' || typeof v === 'string',
@@ -209,32 +195,15 @@ export function DoctorPatientDetailScreen({
 
       <SectionHeading title={t('draftReport')} />
       <Card>
-        {report ? (
-          <>
-            <BodyMedium tone="soft">
-              {`${report.generator} ${report.generator_version} \u00b7 ${report.window_days} days \u00b7 ${report.source_session_ids.length} sessions`}
-            </BodyMedium>
-            {Object.entries(report.content).map(([k, v]) => (
-              <View key={k} style={{ paddingVertical: 4 }}>
-                <BodyLarge>{k.replace(/_/g, ' ')}</BodyLarge>
-                <BodyMedium tone="soft">
-                  {typeof v === 'object' ? JSON.stringify(v) : String(v)}
-                </BodyMedium>
-              </View>
-            ))}
-          </>
-        ) : (
-          <BodyMedium tone="soft">{t('noActivityYet')}</BodyMedium>
-        )}
-        {reportError ? (
-          <StatusNote icon="alert" tone="attention" text={reportError} />
-        ) : null}
+        {/* The report was rendered here as raw JSON key/value pairs. It now
+            opens the shared analysis screen, which reads the same server
+            response as prose and states which generator wrote it. */}
+        <BodyMedium tone="soft">{t('analysisWindow')}</BodyMedium>
         <PillButton
-          label={t('generate')}
+          label={t('analysisTitle')}
           variant="outline"
-          busy={generating}
           disabled={!app.api}
-          onPress={generateReport}
+          onPress={onAnalysis}
         />
         <StatusNote icon="info" text={t('doctorDisclaimer')} />
       </Card>

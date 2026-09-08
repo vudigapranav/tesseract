@@ -14,7 +14,7 @@
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import Svg, { Circle, G, Line, Path } from 'react-native-svg';
-import { colors } from '../../design/tokens';
+import { colors, fontScaleCaps } from '../../design/tokens';
 import { BodyLarge } from '../../design/components';
 import { GameScaffold } from '../GameScaffold';
 import { GameLayout, MIN_CELL, Settle } from '../presentation';
@@ -264,8 +264,14 @@ export function RouteQuestGame({ config, onEvent, onFinish }: TesseractGameProps
                         alignItems: 'center',
                       }}
                     >
+                      {/* Sits in a fixed 120px box at a computed map
+                          coordinate, so it cannot grow without colliding with
+                          the next landmark. Capped tightly rather than left
+                          unscaled, and the same name is repeated below the map
+                          in a BodyLarge that scales fully. */}
                       <Text
                         numberOfLines={2}
+                        maxFontSizeMultiplier={fontScaleCaps.buttonLabel}
                         style={[
                           styles.nodeLabel,
                           i === current && styles.nodeLabelHere,

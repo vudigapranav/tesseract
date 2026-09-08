@@ -136,6 +136,7 @@ class TestFallback:
         monkeypatch.setenv("LLM_ENABLED", "true")
         monkeypatch.setenv("LLM_MODEL", "placeholder-model")
         monkeypatch.setenv("LLM_API_KEY", "placeholder-key")
+        monkeypatch.setenv("LLM_PROVIDER", "gemini")
         settings = load_settings(env_file=tmp_path / "absent.env")
 
         class ExplodingProvider:
@@ -155,6 +156,7 @@ class TestFallback:
         monkeypatch.setenv("LLM_ENABLED", "true")
         monkeypatch.setenv("LLM_MODEL", "placeholder-model")
         monkeypatch.setenv("LLM_API_KEY", "placeholder-key")
+        monkeypatch.setenv("LLM_PROVIDER", "gemini")
         settings = load_settings(env_file=tmp_path / "absent.env")
 
         class DiagnosingProvider:
@@ -174,6 +176,7 @@ class TestFallback:
         monkeypatch.setenv("LLM_ENABLED", "true")
         monkeypatch.setenv("LLM_MODEL", "placeholder-model")
         monkeypatch.setenv("LLM_API_KEY", "placeholder-key")
+        monkeypatch.setenv("LLM_PROVIDER", "gemini")
         settings = load_settings(env_file=tmp_path / "absent.env")
 
         seen: dict[str, str] = {}

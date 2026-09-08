@@ -874,3 +874,34 @@ Fixed static EXPO_PUBLIC configuration access, stale patient-list response appli
 Checks actually run: Expo strict TypeScript passed; Jest 9 suites / 119 tests passed. Cipher tests exercise real Node AES-GCM through a native API adapter, not the physical Expo bridge. Hardware, real Expo Firebase/API loop and full bundle checks remain pending. Policy question sent for patient update contract/descriptive new-game metrics; no response yet. Speech provider/cost and iPhone/backend URL questions pending. No added games, ML or paid calls.
 
 Next: finish approved-activity propagation into play, persistence/gate/identity regression tests, current backend synthetic HTTP integration, reminders/doctor rendering and remaining acceptance matrix. This milestone is not full Phase 1 completion.
+
+
+## 2026-09-08 — Aryan package staged; no app changes
+Downloaded the shared Drive archive into gitignored `tmp/incoming/aryan/aryan-drive-20260908.zip`, safely extracted into `tmp/incoming/aryan/extracted/`, and recorded inventory/checksum. See `docs/handoffs/ARYAN_PACKAGE_STAGING_2026-09-08.md`. ZIP CRC/path/symlink/size checks passed: 126 entries, 31,167,216 archive bytes. Source exists for reveal_match, trace, swipe_reveal (Coloring), spot_difference and picture_recall, plus tests and two declared demo JSON assets. No downloaded scripts or tests executed; source presence does not prove functionality. Expo remains four required games plus one extra. Existing seven modified app files and untracked design tests preserved. Next: Prompt 2 Stage A read-only triage, then stop for review; no ports, commit or push in this task. Full production-quality/nine-game target unchanged.
+
+## 2026-09-08 Claude — Expo demo readiness
+
+The Expo app at `Apnapan/tesseract-expo` starts, bundles and serves. The
+blocker was a **zombie Metro server** on port 8081 serving `code/tesseract-expo`,
+a path deleted when `code/` became `Apnapan/`. Replaced with a server on the
+real path.
+
+Verified this pass: `tsc --noEmit` clean (after fixing the one pre-existing
+error in `storageCipher.test.ts`); `jest` 138 passing across 10 suites; iOS
+bundle 200 OK, 1117 modules; LAN manifest returns app name `Apnapan`.
+
+**Catalogue: four of nine required games ship** (Route Quest, Marble Maze,
+Word Search, Daily Routine Recall) plus Picture Sorting as an extra. Aryan's
+five remain unimplemented and are staged-and-triaged only.
+
+**NOT TESTED:** nothing ran on a phone or simulator. Notifications, speech,
+motion and the biometric gate are unverified. No speech provider was exercised
+in any language — translated text is not speech support.
+
+Demo instructions: `docs/handoffs/DEMO_RUNBOOK.md`.
+
+
+## 2026-09-08 — teammate testing publication
+User authorized committing and pushing current accumulated app/backend work to GitHub. Fresh Expo typecheck and 170 tests (11 suites) pass. Corrected TEAMMATE_TESTING_GUIDE.md: API factory startup, HTTPS build-time URL, no nonexistent server settings, isolated preview versus real identity, and secret-free setup. Gemini live calls/backend DB tests not repeated in this publication task. No physical-device verification. Six activities registered: five required plus Picture Sorting extra; four required games remain absent. Secrets, local environments and staged downloads remain ignored. This is a prototype testing handoff, not full production acceptance.
+
+Publication checks continued: fresh iOS and Android Expo exports both passed; staged secret/path scan and git diff whitespace check passed.

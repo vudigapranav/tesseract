@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, fireEvent, screen } from '@testing-library/react-native';
+import { render, fireEvent, screen, act } from '@testing-library/react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import {
@@ -12,6 +12,7 @@ import { GameInputMode } from '../contract';
 import { topologyForLevel, shortestPath } from '../routeQuest/topology';
 import { mazeForLevel, isOpen } from '../marbleMaze/level';
 import { buildWordGrid, lineBetween } from '../wordSearch/grid';
+import { buildDeck } from '../revealMatch/model';
 
 const strings: GameStrings = {
   helpButtonLabel: 'Help',
@@ -40,6 +41,11 @@ const strings: GameStrings = {
     sorting_unavailable: 'No pictures yet',
     category_kitchen: 'Kitchen',
     category_garden: 'Garden',
+    reveal_find_the_pair: 'Find the two that are the same',
+    reveal_preview_hint: 'Have a look at the pictures.',
+    reveal_ready: 'I am ready',
+    reveal_hidden_card: 'A card, face down',
+    reveal_unavailable: 'Not enough pictures yet',
   },
 };
 
@@ -93,28 +99,34 @@ function assertNoPersonalData(events: GameEvent[], labels: string[]) {
 }
 
 describe('the registry states the catalogue honestly', () => {
-  it('registers five activities', () => {
-    expect(GAME_REGISTRY).toHaveLength(5);
+  it('registers six activities', () => {
+    expect(GAME_REGISTRY).toHaveLength(6);
   });
 
-  it('is four of the nine required games plus one extra', () => {
+  it('is five of the nine required games plus one extra', () => {
     const required = GAME_REGISTRY.filter((g) => g.required);
     const extra = GAME_REGISTRY.filter((g) => !g.required);
-    expect(required).toHaveLength(4);
+    expect(required).toHaveLength(5);
     expect(extra).toHaveLength(1);
     expect(REQUIRED_GAME_IDS).toHaveLength(9);
   });
 
-  it('names the five required games that are still missing', () => {
+  it('names the four required games that are still missing', () => {
     // If someone stubs one of these out, this test tells them the count
     // changed rather than letting the catalogue quietly claim completeness.
     expect([...MISSING_REQUIRED_GAME_IDS].sort()).toEqual(
-      ['coloring', 'picture_recall', 'reveal_match', 'spot_difference', 'trace'].sort(),
+      ['coloring', 'picture_recall', 'spot_difference', 'trace'].sort(),
     );
   });
 
   it('attributes every activity to its owner', () => {
-    for (const g of GAME_REGISTRY) expect(g.owner).toBe('Ruthika');
+    // Reveal Match is Aryan's design, ported; the rest are Ruthika's.
+    for (const g of GAME_REGISTRY) {
+      expect(['Ruthika', 'Aryan']).toContain(g.owner);
+    }
+    expect(GAME_REGISTRY.find((g) => g.gameId === 'reveal_match')!.owner).toBe(
+      'Aryan',
+    );
   });
 });
 
@@ -212,7 +224,7 @@ describe('Route Quest gameplay', () => {
   it('plays a whole session and finishes exactly once', () => {
     const events: GameEvent[] = [];
     const results: GameResult[] = [];
-    const reg = GAME_REGISTRY[0];
+    const reg = GAME_REGISTRY.find((g) => g.gameId === 'route_quest')!;
     wrap(
       <reg.component
         config={makeConfig({ gameId: 'route_quest', items, level: 1 })}
@@ -244,7 +256,7 @@ describe('Route Quest gameplay', () => {
 
   it('records a tap on an unconnected place without moving', () => {
     const events: GameEvent[] = [];
-    const reg = GAME_REGISTRY[0];
+    const reg = GAME_REGISTRY.find((g) => g.gameId === 'route_quest')!;
     wrap(
       <reg.component
         config={makeConfig({ gameId: 'route_quest', items, level: 1 })}
@@ -263,7 +275,7 @@ describe('Route Quest gameplay', () => {
   it('Help marks the session assisted', () => {
     const events: GameEvent[] = [];
     const results: GameResult[] = [];
-    const reg = GAME_REGISTRY[0];
+    const reg = GAME_REGISTRY.find((g) => g.gameId === 'route_quest')!;
     wrap(
       <reg.component
         config={makeConfig({ gameId: 'route_quest', items, level: 1 })}
@@ -409,5 +421,176 @@ describe('Marble Maze', () => {
       />,
     );
     expect(await screen.findAllByText('Use your finger')).not.toHaveLength(0);
+  });
+});
+
+describe('Reveal Match gameplay', () => {
+  const items = [
+    { id: 'p1', label: 'Teacup' },
+    { id: 'p2', label: 'Flower' },
+    { id: 'p3', label: 'Umbrella' },
+    { id: 'p4', label: 'Slippers' },
+  ];
+  const reg = () => GAME_REGISTRY.find((g) => g.gameId === 'reveal_match')!;
+
+  /**
+   * The deck is shuffled, so the board is pinned by fixing Math.random and
+   * then asking the model for the same order the component will get. Nothing
+   * about the arrangement is hardcoded here.
+   */
+  const pinnedOrder = (pairs: number) => {
+    jest.spyOn(Math, 'random').mockReturnValue(0);
+    return buildDeck(items.map((i) => i.id), pairs);
+  };
+
+  beforeEach(() => jest.useFakeTimers());
+  afterEach(() => {
+    jest.useRealTimers();
+    jest.restoreAllMocks();
+  });
+
+  const cards = () => screen.getAllByLabelText('A card, face down');
+
+  /**
+   * Presses the card at a position in the pinned deck.
+   *
+   * Only face-down cards carry the hidden-card label, so once some are turned
+   * over the visible list is shorter — `faceUp` is the set of deck positions
+   * already showing, which shifts the query index down.
+   */
+  const pressCard = (deckIndex: number, faceUp: Set<number>) => {
+    const shift = [...faceUp].filter((i) => i < deckIndex).length;
+    fireEvent.press(cards()[deckIndex - shift]);
+    faceUp.add(deckIndex);
+  };
+
+  it('plays a whole session and finishes exactly once', () => {
+    const order = pinnedOrder(2);
+    const events: GameEvent[] = [];
+    const results: GameResult[] = [];
+    const Game = reg().component;
+    wrap(
+      <Game
+        config={makeConfig({ gameId: 'reveal_match', items, level: 1 })}
+        onEvent={(e) => events.push(e)}
+        onFinish={(r) => results.push(r)}
+      />,
+    );
+
+    // Level 1 opens with the guided preview: every card is already face-up,
+    // so there is nothing face-down to tap yet.
+    expect(screen.queryAllByLabelText('A card, face down')).toHaveLength(0);
+    fireEvent.press(screen.getByLabelText('I am ready'));
+
+    // Matched cards stay face-up, so what is revealed accumulates.
+    const faceUp = new Set<number>();
+    for (const pairId of ['pair-0', 'pair-1']) {
+      const idx = order
+        .map((c, i) => (c.pairId === pairId ? i : -1))
+        .filter((i) => i >= 0);
+      pressCard(idx[0], faceUp);
+      pressCard(idx[1], faceUp);
+      act(() => jest.advanceTimersByTime(2000));
+    }
+
+    const types = events.map((e) => e.type);
+    expect(types[0]).toBe('session_started');
+    expect(types.filter((x) => x === 'card_revealed')).toHaveLength(4);
+    expect(types.filter((x) => x === 'pair_resolved')).toHaveLength(2);
+    expect(types).toContain('board_cleared');
+    expect(types.filter((x) => x === 'session_finished')).toHaveLength(1);
+    expect(results).toHaveLength(1);
+    expect(results[0].status).toBe('completed');
+    expect(results[0].assisted).toBe(false);
+
+    // seq is 1-based and gap-free.
+    expect(events.map((e) => e.seq)).toEqual(events.map((_, i) => i + 1));
+    assertNoPersonalData(events, items.map((i) => i.label));
+  });
+
+  it('turns a mismatch back over and tells the patient nothing about it', () => {
+    const order = pinnedOrder(2);
+    const events: GameEvent[] = [];
+    const Game = reg().component;
+    wrap(
+      <Game
+        config={makeConfig({ gameId: 'reveal_match', items, level: 1 })}
+        onEvent={(e) => events.push(e)}
+        onFinish={() => {}}
+      />,
+    );
+    fireEvent.press(screen.getByLabelText('I am ready'));
+
+    const a = order.findIndex((c) => c.pairId === 'pair-0');
+    const b = order.findIndex((c) => c.pairId === 'pair-1');
+    const faceUp = new Set<number>();
+    pressCard(a, faceUp);
+    pressCard(b, faceUp);
+
+    const resolved = events.filter((e) => e.type === 'pair_resolved');
+    expect(resolved).toHaveLength(1);
+    expect(resolved[0].payload.matched).toBe(false);
+    // Nothing about a mismatch reaches the screen: no score, no "wrong".
+    expect(screen.queryByText(/wrong|not quite|try again/i)).toBeNull();
+
+    act(() => jest.advanceTimersByTime(2000));
+    // Both are face-down again, and the session is still going.
+    expect(cards()).toHaveLength(4);
+    expect(events.map((e) => e.type)).not.toContain('session_finished');
+  });
+
+  it('keeps the hidden picture out of the accessibility label', () => {
+    pinnedOrder(2);
+    const Game = reg().component;
+    wrap(
+      <Game
+        config={makeConfig({ gameId: 'reveal_match', items, level: 1 })}
+        onEvent={() => {}}
+        onFinish={() => {}}
+      />,
+    );
+    fireEvent.press(screen.getByLabelText('I am ready'));
+    // A screen reader must not be able to solve the board by listening.
+    for (const label of items.map((i) => i.label)) {
+      expect(screen.queryByLabelText(label)).toBeNull();
+    }
+    expect(cards()).toHaveLength(4);
+  });
+
+  it('Help marks the session assisted and never plays the move', () => {
+    pinnedOrder(2);
+    const events: GameEvent[] = [];
+    const results: GameResult[] = [];
+    const Game = reg().component;
+    wrap(
+      <Game
+        config={makeConfig({ gameId: 'reveal_match', items, level: 1 })}
+        onEvent={(e) => events.push(e)}
+        onFinish={(r) => results.push(r)}
+      />,
+    );
+    fireEvent.press(screen.getByLabelText('I am ready'));
+    fireEvent.press(screen.getByLabelText('Help'));
+    // Help highlights a pair; it does not reveal or match it.
+    expect(cards()).toHaveLength(4);
+    expect(events.map((e) => e.type)).toContain('hint_requested');
+
+    fireEvent.press(screen.getByLabelText('Break'));
+    fireEvent.press(screen.getByLabelText('Finish for now'));
+    expect(results[0].assisted).toBe(true);
+    expect(results[0].status).toBe('stopped_by_user');
+    expect(events.map((e) => e.type).filter((x) => x === 'session_finished')).toHaveLength(1);
+  });
+
+  it('says so plainly when there are too few pictures for a pair', () => {
+    const Game = reg().component;
+    wrap(
+      <Game
+        config={makeConfig({ gameId: 'reveal_match', items: [items[0]], level: 1 })}
+        onEvent={() => {}}
+        onFinish={() => {}}
+      />,
+    );
+    expect(screen.getByText('Not enough pictures yet')).toBeTruthy();
   });
 });

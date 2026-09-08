@@ -28,6 +28,7 @@ from ..auth.dependencies import (
 from ..config import Settings, get_settings
 from ..db import get_db
 from ..errors import no_patient_access, not_found
+from ..llm.providers import provider_for
 from ..llm.summarize import summarize
 from ..models import DoctorAssignment, DoctorNote, GeneratedReport, Patient, User
 from ..schemas import NoteIn, NoteOut, ReportOut, ReportRequestIn
@@ -142,7 +143,9 @@ def create_report(
         for session in game["recent_sessions"]
     ]
 
-    text = summarize(summary, settings)
+    # provider_for returns None whenever summaries are off or unconfigured,
+    # and summarize() falls back to the deterministic template either way.
+    text = summarize(summary, settings, provider_for(settings))
 
     report = GeneratedReport(
         patient_id=patient.id,

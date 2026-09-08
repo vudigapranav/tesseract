@@ -190,6 +190,85 @@ def marble_maze_v1(session: SessionLike, events: list[EventLike]) -> MetricResul
     return result
 
 
+
+# ---------------------------------------------------------------------------
+# Reveal Match (G1)
+# ---------------------------------------------------------------------------
+
+
+def _median(values: list[int]) -> float | None:
+    if not values:
+        return None
+    ordered = sorted(values)
+    mid = len(ordered) // 2
+    if len(ordered) % 2 == 1:
+        return float(ordered[mid])
+    return (ordered[mid - 1] + ordered[mid]) / 2
+
+
+def reveal_match_v1(session: SessionLike, events: list[EventLike]) -> MetricResult:
+    """Descriptive counts for the card-pair activity.
+
+    Everything here is a plain count, a ratio of counts, or a time difference
+    between two of the game's own events. Nothing is a clinical score, and
+    nothing is named as though it were one.
+    """
+    result = MetricResult("reveal_match_v1", METRIC_VERSION, dict(_common(session, events)))
+
+    ordered = sorted(events, key=lambda e: e.seq)
+    resolutions = [e for e in ordered if e.type == "pair_resolved"]
+    attempts = len(resolutions)
+    matched = sum(1 for e in resolutions if e.payload.get("matched") is True)
+
+    # Time from turning the first card of an attempt to turning the second.
+    # Taken from the game's own clock, which already excludes paused time, and
+    # only for attempts where both reveals are present.
+    latencies: list[int] = []
+    pending: int | None = None
+    for event in ordered:
+        if event.type == "card_revealed":
+            if pending is None:
+                pending = event.elapsed_ms
+            else:
+                latencies.append(event.elapsed_ms - pending)
+                pending = None
+        elif event.type == "pair_resolved" and pending is not None:
+            # A reveal without its partner: drop it rather than pair it with
+            # the next attempt's first card, which would invent a latency.
+            pending = None
+
+    result.values.update(
+        {
+            "cards_revealed": _count(events, "card_revealed"),
+            "resolution_attempts": attempts,
+            "pairs_matched": matched,
+            "mismatches": attempts - matched,
+            # None, not 0.0: no attempt is "not observed", not "all wrong".
+            "pair_match_ratio": (matched / attempts) if attempts else None,
+            "board_cleared": _count(events, "board_cleared") > 0,
+            "median_second_card_latency_ms": _median(latencies),
+            "second_card_latencies_counted": len(latencies),
+        }
+    )
+
+    # The game does not export how many pairs the board held, so an attempt
+    # count cannot be compared against a theoretical minimum. difficultyParams
+    # does carry pairCount, but it is the caller's snapshot rather than
+    # something the session proved, so it is reported as configuration only.
+    pair_count = session.difficulty_params.get("pairCount")
+    if isinstance(pair_count, int):
+        result.values["configured_pair_count"] = pair_count
+    else:
+        result.mark_unavailable(
+            "configured_pair_count",
+            "missing_game_export",
+            "The session snapshot does not carry pairCount, so the board size "
+            "this session actually used is unknown.",
+            ["difficulty_params.pairCount"],
+        )
+    return result
+
+
 # ---------------------------------------------------------------------------
 # Games without a calculator yet
 # ---------------------------------------------------------------------------
@@ -218,6 +297,7 @@ Calculator = Callable[[SessionLike, list[EventLike]], MetricResult]
 REGISTRY: dict[tuple[str, str], Calculator] = {
     ("route_quest", METRIC_VERSION): route_quest_v1,
     ("marble_maze", METRIC_VERSION): marble_maze_v1,
+    ("reveal_match", METRIC_VERSION): reveal_match_v1,
 }
 
 

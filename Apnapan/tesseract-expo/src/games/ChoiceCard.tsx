@@ -9,7 +9,7 @@
  */
 import React from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
-import { colors, spacing } from '../design/tokens';
+import { colors, fontScaleCaps, spacing } from '../design/tokens';
 import { Icon } from '../design/Icon';
 import { Settle, tileVisual, type TileState } from './presentation';
 
@@ -45,8 +45,14 @@ export function ChoiceCard({
           pressed && !disabled && styles.pressed,
         ]}
       >
+        {/* Not routed through the shared Text components: this needs its own
+            20pt size and a per-state colour from tileVisual, which those do
+            not express. It shares the same cap constant so there is still one
+            policy. Clamped to 3 lines, so the button-label cap is what keeps a
+            long choice from being truncated. */}
         <Text
           numberOfLines={3}
+          maxFontSizeMultiplier={fontScaleCaps.buttonLabel}
           style={[styles.label, { color: v.fg }, fontFamily ? { fontFamily } : null]}
         >
           {label}

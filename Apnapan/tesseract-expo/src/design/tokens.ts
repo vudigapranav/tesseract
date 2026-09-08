@@ -34,8 +34,32 @@ export const spacing = {
 } as const;
 
 /**
+ * How far the OS font-size setting may scale each kind of text.
+ *
+ * Scaling stays on everywhere — an elderly user with low vision needs it. What
+ * this adds is a ceiling, because uncapped scaling on a phone set to its
+ * largest text size made every screen read as zoomed and burst fixed layouts.
+ *
+ * Three tiers, because the constraint differs:
+ *  - `heading` is already large at 100%, so it needs the least extra room and
+ *    is the first thing to push content off-screen.
+ *  - `body` gets the most, since that is what someone actually has to read.
+ *  - `buttonLabel` gets the least: a pill has a bounded height, and a label
+ *    that outgrows it either clips or bursts the shape. The words matter more
+ *    than the size here, and the label is short by construction.
+ *
+ * Applied centrally in `design/components.tsx`, so screens never set it.
+ */
+export const fontScaleCaps = {
+  heading: 1.3,
+  body: 1.6,
+  buttonLabel: 1.2,
+} as const;
+
+/**
  * Type scale. Sizes are unscaled: every Text in the app allows Dynamic Type
- * to scale them, so these are the 100% values, not caps.
+ * to scale them, so these are the 100% values. `fontScaleCaps` bounds how far
+ * that scaling goes.
  */
 export const type = {
   headlineLarge: { fontSize: 32, fontWeight: '700', letterSpacing: -0.8 },

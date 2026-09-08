@@ -13,6 +13,7 @@ from app.analytics.calculators import (
     CONTACT_DEBOUNCE_MS,
     calculate,
     marble_maze_v1,
+    reveal_match_v1,
     route_quest_v1,
 )
 from tests.helpers import marble_maze_events, play_full_session, route_quest_events
@@ -154,3 +155,89 @@ class TestMetricsThroughTheApi:
         body = client.get(f"/v1/sessions/{session_id}/metrics", headers=caregiver).json()
         assert body["available"]["contact_episodes"] == 2
         assert body["unavailable"]["path_efficiency"]["reason"] == "missing_game_export"
+
+
+class TestRevealMatch:
+    """Reveal Match (G1) — descriptive counts only."""
+
+    @staticmethod
+    def _session(**over):
+        return FakeSession(
+            game_id="reveal_match",
+            difficulty_params={"pairCount": 2, "resolutionMs": 1600},
+            **over,
+        )
+
+    @staticmethod
+    def _attempt(seq: int, at: int, gap: int, matched: bool, ids: tuple[str, str]):
+        """One attempt: two reveals `gap` ms apart, then its resolution."""
+        return [
+            FakeEvent(seq, "card_revealed", at, {"cardId": ids[0]}),
+            FakeEvent(seq + 1, "card_revealed", at + gap, {"cardId": ids[1]}),
+            FakeEvent(
+                seq + 2,
+                "pair_resolved",
+                at + gap,
+                {"attemptId": f"attempt-{seq}", "matched": matched, "cardIds": list(ids)},
+            ),
+        ]
+
+    def test_a_cleared_board(self):
+        events = [FakeEvent(1, "session_started", 0)]
+        events += self._attempt(2, 500, 400, False, ("card-0-0", "card-1-0"))
+        events += self._attempt(5, 3000, 600, True, ("card-0-0", "card-0-1"))
+        events += self._attempt(8, 6000, 200, True, ("card-1-0", "card-1-1"))
+        events.append(FakeEvent(11, "board_cleared", 6300))
+
+        result = reveal_match_v1(self._session(), events)
+        assert result.values["cards_revealed"] == 6
+        assert result.values["resolution_attempts"] == 3
+        assert result.values["pairs_matched"] == 2
+        assert result.values["mismatches"] == 1
+        assert result.values["pair_match_ratio"] == 2 / 3
+        assert result.values["board_cleared"] is True
+        # Latencies 400, 600, 200 -> median 400.
+        assert result.values["median_second_card_latency_ms"] == 400
+        assert result.values["second_card_latencies_counted"] == 3
+        assert result.values["configured_pair_count"] == 2
+
+    def test_no_attempts_reports_none_not_zero(self):
+        result = reveal_match_v1(
+            self._session(status="stopped_by_user"),
+            [FakeEvent(1, "session_started", 0), FakeEvent(2, "session_finished", 900)],
+        )
+        assert result.values["resolution_attempts"] == 0
+        # The distinction the whole module rests on: nothing observed is not
+        # the same as everything wrong.
+        assert result.values["pair_match_ratio"] is None
+        assert result.values["median_second_card_latency_ms"] is None
+        assert result.values["board_cleared"] is False
+
+    def test_an_even_number_of_latencies_is_averaged_at_the_middle(self):
+        events = self._attempt(1, 0, 100, False, ("card-0-0", "card-1-0"))
+        events += self._attempt(4, 2000, 300, False, ("card-0-1", "card-1-1"))
+        result = reveal_match_v1(self._session(), events)
+        assert result.values["median_second_card_latency_ms"] == 200
+
+    def test_an_unpaired_reveal_does_not_invent_a_latency(self):
+        # A first card turned over, then the session ends. That reveal must not
+        # be paired with anything.
+        events = self._attempt(1, 0, 250, True, ("card-0-0", "card-0-1"))
+        events.append(FakeEvent(4, "card_revealed", 5000, {"cardId": "card-1-0"}))
+        events.append(FakeEvent(5, "session_finished", 5200))
+        result = reveal_match_v1(self._session(status="stopped_by_user"), events)
+        assert result.values["cards_revealed"] == 3
+        assert result.values["second_card_latencies_counted"] == 1
+        assert result.values["median_second_card_latency_ms"] == 250
+
+    def test_board_size_is_unavailable_when_the_snapshot_lacks_it(self):
+        result = reveal_match_v1(
+            FakeSession(game_id="reveal_match", difficulty_params={}),
+            [FakeEvent(1, "session_started", 0)],
+        )
+        assert "configured_pair_count" not in result.values
+        assert result.unavailable["configured_pair_count"]["reason"] == "missing_game_export"
+
+    def test_the_registry_routes_reveal_match_to_its_own_calculator(self):
+        result = calculate(self._session(), [FakeEvent(1, "session_started", 0)])
+        assert result.calculator_id == "reveal_match_v1"

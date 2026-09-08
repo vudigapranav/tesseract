@@ -117,6 +117,9 @@ const MINIMUMS: Record<string, { kind: KnowMeKind; min: number }> = {
   routine_recall: { kind: 'step', min: 3 },
   word_search: { kind: 'word', min: 3 },
   picture_sorting: { kind: 'picture', min: 4 },
+  // Four, because the hardest level lays out four pairs and every pair needs
+  // its own picture.
+  reveal_match: { kind: 'picture', min: 4 },
   marble_maze: { kind: 'place', min: 0 },
 };
 
@@ -162,6 +165,10 @@ export function itemsForGame(
       return of('step').map((e) => ({ id: e.id, label: e.label }));
     case 'word_search':
       return of('word').map((e) => ({ id: e.id, label: e.label }));
+    case 'reveal_match':
+      // No category needed: this game only asks whether two cards show the
+      // same picture, so a picture without a group is still usable here.
+      return of('picture').map((e) => ({ id: e.id, label: e.label }));
     case 'picture_sorting':
       return of('picture')
         .filter((e) => !!e.categoryId)

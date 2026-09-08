@@ -6,7 +6,7 @@ jest.mock('expo-crypto', () => {
   const c = require('node:crypto');
   return {
     AESEncryptionKey: {
-      generate: async () => ({ bytes: c.randomBytes(32), encoded() { return Promise.resolve(this.bytes.toString('base64')); } }),
+      generate: async () => { const bytes = c.randomBytes(32); return { bytes, encoded: () => Promise.resolve(bytes.toString('base64')) }; },
       import: async (s: string) => ({ bytes: Buffer.from(s, 'base64') }),
     },
     AESSealedData: { fromCombined: (s: string) => Buffer.from(s, 'base64') },

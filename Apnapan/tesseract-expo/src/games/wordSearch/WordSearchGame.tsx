@@ -231,6 +231,11 @@ export function WordSearchGame({ config, onEvent, onFinish }: TesseractGameProps
                       borderRadius: Math.min(10, cell * 0.22),
                     }}
                   >
+                    {/* Deliberate, not an oversight: a grid cell is a square
+                        of computed side length, so a taller glyph would break
+                        the grid's geometry rather than reflow. The word list
+                        above the grid scales normally and carries the same
+                        words. */}
                     <Text
                       allowFontScaling={false}
                       numberOfLines={1}

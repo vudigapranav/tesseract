@@ -13,6 +13,11 @@ from pathlib import Path
 APP_VERSION = "0.1.0"
 
 _ENVS = ("development", "test", "production")
+# Providers implemented in app/llm/providers.py. Kept here as literals so
+# configuration can be validated at startup without importing the provider
+# module (which imports this one).
+_LLM_PROVIDERS = ("gemini",)
+
 _AUTH_MODES = ("firebase", "demo")
 
 
@@ -119,8 +124,17 @@ def load_settings(env_file: Path | None = None) -> Settings:
     llm_enabled = _bool("LLM_ENABLED", False)
     llm_api_key = os.environ.get("LLM_API_KEY", "").strip() or None
     llm_model = os.environ.get("LLM_MODEL", "").strip() or None
+    llm_provider = os.environ.get("LLM_PROVIDER", "").strip() or None
     if llm_enabled and not (llm_api_key and llm_model):
         raise ConfigError("LLM_ENABLED=true requires LLM_MODEL and LLM_API_KEY.")
+    # Checked at startup rather than at request time: a deployment that asks
+    # for a provider nobody implemented should fail to boot, not quietly serve
+    # template text under a configuration that says otherwise.
+    if llm_enabled and (llm_provider or "").lower() not in _LLM_PROVIDERS:
+        raise ConfigError(
+            f"LLM_ENABLED=true requires LLM_PROVIDER to be one of "
+            f"{', '.join(sorted(_LLM_PROVIDERS))} (got {llm_provider!r})."
+        )
 
     media_root = Path(os.environ.get("MEDIA_ROOT", "./var/media").strip()).resolve()
 
@@ -133,10 +147,10 @@ def load_settings(env_file: Path | None = None) -> Settings:
         media_root=media_root,
         media_max_bytes=_int("MEDIA_MAX_BYTES", 5 * 1024 * 1024),
         llm_enabled=llm_enabled,
-        llm_provider=os.environ.get("LLM_PROVIDER", "").strip() or None,
+        llm_provider=llm_provider,
         llm_model=llm_model,
         llm_api_key=llm_api_key,
-        llm_timeout_seconds=_int("LLM_TIMEOUT_SECONDS", 8),
+        llm_timeout_seconds=_int("LLM_TIMEOUT_SECONDS", 20),
         log_level=os.environ.get("LOG_LEVEL", "INFO").strip().upper(),
     )
 

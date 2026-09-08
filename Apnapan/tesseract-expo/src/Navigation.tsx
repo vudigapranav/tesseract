@@ -7,7 +7,8 @@
  * the protected gate, which is the point of the hand-over.
  */
 import React, { useState } from 'react';
-import { ActivityIndicator, Text, View } from 'react-native';
+import { ActivityIndicator, View } from 'react-native';
+import { BodyLarge } from './design/components';
 import { useApp } from './state/AppState';
 import { SignInScreen } from './screens/SignInScreen';
 import {
@@ -22,6 +23,7 @@ import {
   RemindersScreen,
 } from './screens/RemindersScreen';
 import { RecommendationsScreen } from './screens/RecommendationsScreen';
+import { AnalysisScreen } from './screens/AnalysisScreen';
 import {
   DoctorPatientDetailScreen,
   DoctorPatientsScreen,
@@ -46,7 +48,8 @@ type CaregiverRoute =
   | 'handOver'
   | 'knowMe'
   | 'reminders'
-  | 'recommendations';
+  | 'recommendations'
+  | 'analysis';
 
 type PatientRoute =
   | 'home'
@@ -58,7 +61,7 @@ type PatientRoute =
   | 'reminders'
   | 'gate';
 
-type DoctorRoute = 'list' | 'detail';
+type DoctorRoute = 'list' | 'detail' | 'analysis';
 
 export function Navigation() {
   const app = useApp();
@@ -70,7 +73,13 @@ export function Navigation() {
   const [result, setResult] = useState<GameResult | null>(null);
   const [doctorPatient, setDoctorPatient] = useState<PatientOut | null>(null);
 
-  if (app.startupError) return <View style={{ flex: 1, padding: 32, justifyContent: "center" }}><Text accessibilityRole="alert">{app.startupError}</Text></View>;
+  if (app.startupError) {
+    return (
+      <View style={{ flex: 1, padding: 32, justifyContent: 'center' }}>
+        <BodyLarge accessibilityRole="alert">{app.startupError}</BodyLarge>
+      </View>
+    );
+  }
 
   if (!app.ready) {
     return (
@@ -84,10 +93,22 @@ export function Navigation() {
 
   /* ------------------------------------------------------- doctor mode - */
   if (app.role === 'doctor' && !app.patientMode) {
+    if (doctorRoute === 'analysis' && doctorPatient) {
+      // Same screen the caregiver sees. The difference between the roles is
+      // what the server returns, not what this app renders.
+      return (
+        <AnalysisScreen
+          patientId={doctorPatient.patient_id}
+          patientName={doctorPatient.display_name}
+          onBack={() => setDoctorRoute('detail')}
+        />
+      );
+    }
     if (doctorRoute === 'detail' && doctorPatient) {
       return (
         <DoctorPatientDetailScreen
           patient={doctorPatient}
+          onAnalysis={() => setDoctorRoute('analysis')}
           onBack={() => setDoctorRoute('list')}
         />
       );
@@ -189,6 +210,27 @@ export function Navigation() {
       return <RemindersScreen onBack={() => setCaregiverRoute('home')} />;
     case 'recommendations':
       return <RecommendationsScreen onBack={() => setCaregiverRoute('home')} />;
+    case 'analysis':
+      // The server decides whether this caregiver may read this patient; the
+      // screen only asks. Without a selected patient there is nothing to ask
+      // about, so it falls through to home.
+      return app.selectedPatient ? (
+        <AnalysisScreen
+          patientId={app.selectedPatient.id}
+          patientName={app.selectedPatient.displayName}
+          onBack={() => setCaregiverRoute('home')}
+        />
+      ) : (
+        <CaregiverHomeScreen
+          onHandOver={() => setCaregiverRoute('handOver')}
+          onBasics={() => setCaregiverRoute('basics')}
+          onSettings={() => setCaregiverRoute('settings')}
+          onKnowMe={() => setCaregiverRoute('knowMe')}
+          onReminders={() => setCaregiverRoute('reminders')}
+          onRecommendations={() => setCaregiverRoute('recommendations')}
+          onAnalysis={() => setCaregiverRoute('analysis')}
+        />
+      );
     case 'handOver':
       return (
         <HandOverScreen
@@ -209,6 +251,7 @@ export function Navigation() {
           onKnowMe={() => setCaregiverRoute('knowMe')}
           onReminders={() => setCaregiverRoute('reminders')}
           onRecommendations={() => setCaregiverRoute('recommendations')}
+          onAnalysis={() => setCaregiverRoute('analysis')}
         />
       );
   }

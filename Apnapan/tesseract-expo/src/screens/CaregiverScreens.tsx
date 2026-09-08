@@ -37,6 +37,7 @@ export function CaregiverHomeScreen({
   onKnowMe,
   onReminders,
   onRecommendations,
+  onAnalysis,
 }: {
   onHandOver: () => void;
   onBasics: () => void;
@@ -44,6 +45,7 @@ export function CaregiverHomeScreen({
   onKnowMe: () => void;
   onReminders: () => void;
   onRecommendations: () => void;
+  onAnalysis: () => void;
 }) {
   const app = useApp();
   const t = (k: Parameters<typeof translate>[1]) =>
@@ -118,6 +120,13 @@ export function CaregiverHomeScreen({
           label={t('needsYourDecision')}
           variant="outline"
           onPress={onRecommendations}
+        />
+        <PillButton
+          label={t('analysisTitle')}
+          variant="outline"
+          // Needs a patient to ask about; the server still decides the answer.
+          disabled={!patient}
+          onPress={onAnalysis}
         />
         <PillButton label={t('settingsAndSync')} variant="outline" onPress={onSettings} />
       </Card>

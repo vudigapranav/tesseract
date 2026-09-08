@@ -158,6 +158,43 @@ class TestReports:
         summary = report["content"]["summary"]
         assert summary["games"][0]["sessions_total"] == 1
 
+    def test_an_unassigned_doctor_cannot_generate_a_report(self, client, db, patient_id):
+        """Being a doctor is not access. Only a live assignment is.
+
+        This is the one the UI cannot enforce: a client that simply renders
+        doctor screens must still be refused by the server.
+        """
+        _make_doctor(db, "demo-doctor-a")
+        doctor = auth("doctor-a")
+        response = client.post(
+            f"/v1/patients/{patient_id}/reports", headers=doctor, json={"window_days": 30}
+        )
+        assert response.status_code == 403
+
+    def test_an_unassigned_doctor_cannot_read_a_report_by_direct_id(
+        self, client, db, caregiver, patient_id
+    ):
+        play_full_session(client, caregiver, patient_id)
+        report = client.post(
+            f"/v1/patients/{patient_id}/reports", headers=caregiver, json={"window_days": 30}
+        ).json()
+        _make_doctor(db, "demo-doctor-a")
+        response = client.get(f"/v1/reports/{report['report_id']}", headers=auth("doctor-a"))
+        assert response.status_code == 403
+
+    def test_an_assigned_doctor_can_generate_and_read_a_report(
+        self, client, db, caregiver, patient_id
+    ):
+        play_full_session(client, caregiver, patient_id)
+        _assign(db, _make_doctor(db, "demo-doctor-a"), patient_id)
+        doctor = auth("doctor-a")
+        created = client.post(
+            f"/v1/patients/{patient_id}/reports", headers=doctor, json={"window_days": 30}
+        )
+        assert created.status_code == 201
+        fetched = client.get(f"/v1/reports/{created.json()['report_id']}", headers=doctor)
+        assert fetched.status_code == 200
+
     def test_another_caregiver_cannot_read_the_report(
         self, client, caregiver, other_caregiver, patient_id
     ):

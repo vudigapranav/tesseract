@@ -10,7 +10,7 @@
  */
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
-import { colors } from '../../design/tokens';
+import { colors, fontScaleCaps } from '../../design/tokens';
 import { GameScaffold } from '../GameScaffold';
 import { ChoiceCard } from '../ChoiceCard';
 import { EmptyBoard, GameLayout, GentleCorrection } from '../presentation';
@@ -174,7 +174,14 @@ export function PictureSortingGame({ config, onEvent, onFinish }: TesseractGameP
           // The subject sits alone on the board, large and centred, so it is
           // unmistakably the thing being sorted.
           <View style={styles.subject}>
-            <Text numberOfLines={3} style={styles.subjectLabel}>
+            {/* Its own 30pt display size, so not one of the shared Text
+                components — but it is what the patient reads, so it gets the
+                body cap rather than the tighter label one. */}
+            <Text
+              numberOfLines={3}
+              maxFontSizeMultiplier={fontScaleCaps.body}
+              style={styles.subjectLabel}
+            >
               {current.label ?? ''}
             </Text>
           </View>

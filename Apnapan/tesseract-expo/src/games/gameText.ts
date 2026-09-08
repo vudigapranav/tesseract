@@ -33,6 +33,13 @@ export const GAME_TEXT_EN: Record<string, string> = {
   sorting_where_does_this_go: 'Where does this go?',
   sorting_try_again: 'Not quite. Have another look.',
   sorting_unavailable: 'There are no pictures to sort yet.',
+  reveal_find_the_pair: 'Find the two that are the same',
+  reveal_preview_hint: 'Have a look at the pictures. Tap when you are ready.',
+  reveal_ready: 'I am ready',
+  // Face-down cards read out as this, so a screen reader cannot solve the
+  // board for the patient by announcing the hidden picture.
+  reveal_hidden_card: 'A card, face down',
+  reveal_unavailable: 'There are not enough pictures for this yet.',
   category_kitchen: 'Kitchen',
   category_outside: 'Outside',
 };
@@ -73,6 +80,14 @@ export const PLACEHOLDER_CONTENT: Record<
     { id: 'i2', label: 'Rice pot', extra: { categoryId: 'kitchen' } },
     { id: 'i3', label: 'Flower', extra: { categoryId: 'outside' } },
     { id: 'i4', label: 'Umbrella', extra: { categoryId: 'outside' } },
+  ],
+  // Four distinct pictures: the hardest level asks for four pairs, and a
+  // repeated picture would make two "pairs" nobody could tell apart.
+  reveal_match: [
+    { id: 'p1', label: 'Teacup' },
+    { id: 'p2', label: 'Flower' },
+    { id: 'p3', label: 'Umbrella' },
+    { id: 'p4', label: 'Slippers' },
   ],
   marble_maze: [],
 };

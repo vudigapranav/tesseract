@@ -9,7 +9,11 @@
  *  - Every control declares an accessibility role and label for VoiceOver.
  *  - Targets never go below `spacing.minTarget`, and patient-facing actions
  *    use the larger `spacing.patientTarget`.
- *  - Text sizes are unscaled tokens, so iOS Dynamic Type scales them freely.
+ *  - Text sizes are unscaled tokens, so the OS font-size setting scales them.
+ *    Every Text in this file caps that scaling via `fontScaleCaps`, which is
+ *    why screens never pass `maxFontSizeMultiplier` themselves. Anything that
+ *    renders its own Text instead of using these components has to opt in, and
+ *    the five places that legitimately do are noted where they are.
  */
 import React from 'react';
 import {
@@ -24,7 +28,7 @@ import {
   type ViewStyle,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { colors, spacing, type as typeScale } from './tokens';
+import { colors, fontScaleCaps, spacing, type as typeScale } from './tokens';
 import { Icon, type IconName } from './Icon';
 
 /* ------------------------------------------------------------------ text - */
@@ -46,15 +50,16 @@ interface TxtProps {
   /** Bound to the script of the language being rendered, when it needs one. */
   fontFamily?: string;
   numberOfLines?: number;
-  accessibilityRole?: 'header' | 'text';
+  accessibilityRole?: 'header' | 'text' | 'alert';
 }
 
 const makeText =
-  (base: TextStyle) =>
+  (base: TextStyle, cap: number) =>
   ({ children, tone = 'ink', style, center, fontFamily, numberOfLines, accessibilityRole }: TxtProps) => (
     <Text
       accessibilityRole={accessibilityRole}
       numberOfLines={numberOfLines}
+      maxFontSizeMultiplier={cap}
       style={[
         base,
         { color: toneColor[tone] },
@@ -67,11 +72,26 @@ const makeText =
     </Text>
   );
 
-export const HeadlineLarge = makeText(typeScale.headlineLarge as TextStyle);
-export const HeadlineSmall = makeText(typeScale.headlineSmall as TextStyle);
-export const TitleLarge = makeText(typeScale.titleLarge as TextStyle);
-export const BodyLarge = makeText(typeScale.bodyLarge as TextStyle);
-export const BodyMedium = makeText(typeScale.bodyMedium as TextStyle);
+export const HeadlineLarge = makeText(
+  typeScale.headlineLarge as TextStyle,
+  fontScaleCaps.heading,
+);
+export const HeadlineSmall = makeText(
+  typeScale.headlineSmall as TextStyle,
+  fontScaleCaps.heading,
+);
+export const TitleLarge = makeText(
+  typeScale.titleLarge as TextStyle,
+  fontScaleCaps.heading,
+);
+export const BodyLarge = makeText(
+  typeScale.bodyLarge as TextStyle,
+  fontScaleCaps.body,
+);
+export const BodyMedium = makeText(
+  typeScale.bodyMedium as TextStyle,
+  fontScaleCaps.body,
+);
 
 /* ---------------------------------------------------------------- screen - */
 
@@ -201,6 +221,7 @@ export function PillButton({
         <ActivityIndicator color={primary ? colors.white : colors.ink} />
       ) : (
         <Text
+          maxFontSizeMultiplier={fontScaleCaps.buttonLabel}
           style={[
             styles.pillLabel,
             { color: primary ? colors.white : colors.ink },
@@ -248,6 +269,7 @@ export function BigPatientAction({
       ]}
     >
       <Text
+        maxFontSizeMultiplier={fontScaleCaps.buttonLabel}
         style={[
           styles.bigActionLabel,
           { color: primary ? colors.white : colors.ink },
@@ -258,6 +280,7 @@ export function BigPatientAction({
       </Text>
       {subtitle ? (
         <Text
+          maxFontSizeMultiplier={fontScaleCaps.buttonLabel}
           style={[
             styles.bigActionSubtitle,
             { color: primary ? colors.white : colors.inkSoft },
@@ -293,7 +316,10 @@ export function StatusNote({
       <View style={styles.statusIcon}>
         <Icon name={icon ?? (tone === 'attention' ? 'alert' : 'info')} color={color} />
       </View>
-      <Text style={[typeScale.bodyMedium as TextStyle, { color, flex: 1 }]}>
+      <Text
+        maxFontSizeMultiplier={fontScaleCaps.body}
+        style={[typeScale.bodyMedium as TextStyle, { color, flex: 1 }]}
+      >
         {text}
       </Text>
     </View>
@@ -304,7 +330,12 @@ export function StatusNote({
 export function Badge({ label }: { label: string }) {
   return (
     <View style={styles.badge}>
-      <Text style={styles.badgeLabel}>{label}</Text>
+      <Text
+        maxFontSizeMultiplier={fontScaleCaps.buttonLabel}
+        style={styles.badgeLabel}
+      >
+        {label}
+      </Text>
     </View>
   );
 }

@@ -1591,3 +1591,69 @@ Fixed static EXPO_PUBLIC configuration access, stale patient-list response appli
 Checks actually run: Expo strict TypeScript passed; Jest 9 suites / 119 tests passed. Cipher tests exercise real Node AES-GCM through a native API adapter, not the physical Expo bridge. Hardware, real Expo Firebase/API loop and full bundle checks remain pending. Policy question sent for patient update contract/descriptive new-game metrics; no response yet. Speech provider/cost and iPhone/backend URL questions pending. No added games, ML or paid calls.
 
 Next: finish approved-activity propagation into play, persistence/gate/identity regression tests, current backend synthetic HTTP integration, reminders/doctor rendering and remaining acceptance matrix. This milestone is not full Phase 1 completion.
+
+
+## 2026-09-08 — Aryan package staged; no app changes
+Downloaded the shared Drive archive into gitignored `tmp/incoming/aryan/aryan-drive-20260908.zip`, safely extracted into `tmp/incoming/aryan/extracted/`, and recorded inventory/checksum. See `docs/handoffs/ARYAN_PACKAGE_STAGING_2026-09-08.md`. ZIP CRC/path/symlink/size checks passed: 126 entries, 31,167,216 archive bytes. Source exists for reveal_match, trace, swipe_reveal (Coloring), spot_difference and picture_recall, plus tests and two declared demo JSON assets. No downloaded scripts or tests executed; source presence does not prove functionality. Expo remains four required games plus one extra. Existing seven modified app files and untracked design tests preserved. Next: Prompt 2 Stage A read-only triage, then stop for review; no ports, commit or push in this task. Full production-quality/nine-game target unchanged.
+
+### 2026-09-08 Claude — timeboxed demo readiness (Expo app)
+
+Timeboxed 30-40 min pass to get Apnapan demonstrable. Prompt 1 Stage A work
+(text-scaling caps) preserved untouched; Prompt 2 Stage A triage was
+read-only and remains valid.
+
+**The blocker was not code.** A dev server was running on port 8081 serving
+`code/tesseract-expo` — a directory that no longer exists, deleted when
+`code/` was renamed to `Apnapan/` in `26bc584`. It was a zombie from before
+the rename, holding the port and serving a dead path, so any phone that
+connected would not have been running this app at all. Killed it (pid 13742)
+and restarted Metro from `Apnapan/tesseract-expo`.
+
+**Fixed:** the one pre-existing TypeScript error, in
+`src/data/__tests__/storageCipher.test.ts` — `this.bytes` inside an object
+literal returned from an async arrow was not typed. Hoisted to a local. This
+was the only thing failing typecheck.
+
+**Checked and already in place, so not rebuilt:** Apnapan branding and icons
+in `app.json` plus `assets/branding/`; the in-app opening screen; the
+explicitly labelled preview entry (`AppState.enterPreview`, its own storage
+scope and outbox, reachable only as a deliberate choice from sign-in and never
+as a fallback from failed sign-in); language picker on both sign-in and
+settings across seven languages; `CaregiverGate` wired into `Navigation.tsx`.
+
+**Files changed this pass:** `src/data/__tests__/storageCipher.test.ts`, plus
+new `docs/handoffs/DEMO_RUNBOOK.md`.
+
+**Checks actually run:**
+- `npx tsc --noEmit` — **clean**, first time this session.
+- `npx jest` — **138 passed, 10 suites**.
+- Metro serves the correct project: manifest over LAN returns app name
+  `Apnapan`.
+- iOS bundle built on demand: HTTP 200, 5,748,842 bytes, 1117 modules, ~3s.
+- Dev server left running at `exp://192.168.31.215:8081`.
+
+**NOT TESTED — no device evidence exists.** No simulator was booted and Expo
+Go is not installed in one; booting and downloading it would have consumed the
+timebox. Nothing was observed rendering on a phone or simulator. Notifications,
+speech, tilt/motion and the biometric gate are unverified. Bundling proves the
+JavaScript compiles and serves — it does not prove a single screen draws.
+
+**Catalogue, stated honestly:** five activities registered — Route Quest,
+Marble Maze, Word Search, Daily Routine Recall, and Picture Sorting as an
+extra. That is **four of the nine required games**. Reveal Match, Trace,
+Coloring, Spot Difference and Picture Recall remain unimplemented; Aryan's
+Flutter source is staged at `tmp/incoming/aryan/extracted/` and triaged, but
+nothing is ported.
+
+**Next:** port G1 Reveal Match first (Prompt 2 Stage B) — smallest surface, no
+canvas, three real difficulty tiers already in its config. Then G9, then G6.
+G4 and G5 need rendering decisions first: G4 emits one event per stroke sample
+up to 4096 and carries raw coordinates, which conflicts with the payload rule;
+G5's reveal mask is up to 4096 cells, which needs run-length merging before it
+can render in RN SVG.
+
+
+## 2026-09-08 — teammate testing publication
+User authorized committing and pushing current accumulated app/backend work to GitHub. Fresh Expo typecheck and 170 tests (11 suites) pass. Corrected TEAMMATE_TESTING_GUIDE.md: API factory startup, HTTPS build-time URL, no nonexistent server settings, isolated preview versus real identity, and secret-free setup. Gemini live calls/backend DB tests not repeated in this publication task. No physical-device verification. Six activities registered: five required plus Picture Sorting extra; four required games remain absent. Secrets, local environments and staged downloads remain ignored. This is a prototype testing handoff, not full production acceptance.
+
+Publication checks continued: fresh iOS and Android Expo exports both passed; staged secret/path scan and git diff whitespace check passed.
