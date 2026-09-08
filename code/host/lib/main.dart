@@ -24,8 +24,9 @@ Future<void> main() async {
     final flow = HostFlowState(repository: repository);
     await flow.restore();
     try {
-      await flow.reminderService
-          .restore(flow.reminders, sound: flow.audioEnabled);
+      await flow.reminderService.restore(flow.reminders,
+          sound: flow.audioEnabled,
+          languageCode: flow.effectivePatientLanguageCode);
     } catch (_) {
       flow.reminderService.status =
           'Notification scheduling unavailable. Your reminders are saved.';

@@ -29,6 +29,8 @@ class _PatientBasicsScreenState extends State<PatientBasicsScreen> {
   late final TextEditingController _ageController = TextEditingController(
       text: widget.flowState.patientAge?.toString() ?? '');
   String? _condition;
+  bool _busy = false;
+  String? _error;
 
   @override
   void initState() {
@@ -49,19 +51,35 @@ class _PatientBasicsScreenState extends State<PatientBasicsScreen> {
           .showSnackBar(const SnackBar(content: Text('Please enter a name.')));
       return;
     }
-    widget.flowState.patientName = _nameController.text.trim();
-    widget.flowState.patientAge = int.tryParse(_ageController.text.trim());
-    widget.flowState.knownConditionType = _condition;
-    await widget.flowState.save();
-    if (!mounted) {
-      return;
+    setState(() {
+      _busy = true;
+      _error = null;
+    });
+    try {
+      widget.flowState.patientName = _nameController.text.trim();
+      widget.flowState.patientAge = int.tryParse(_ageController.text.trim());
+      widget.flowState.knownConditionType = _condition;
+      await widget.flowState.save();
+      if (widget.flowState.api != null && widget.flowState.patientId.isEmpty) {
+        await widget.flowState.createPatient();
+      }
+      if (!mounted) {
+        return;
+      }
+      Navigator.of(context).push(
+        MaterialPageRoute<void>(
+          builder: (BuildContext context) =>
+              KnowMeScreen(flowState: widget.flowState),
+        ),
+      );
+    } catch (_) {
+      if (mounted) {
+        setState(() => _error =
+            'Could not finish saving. Your entries remain here. If creation lost its response, check the patient list before retrying to avoid a duplicate.');
+      }
+    } finally {
+      if (mounted) setState(() => _busy = false);
     }
-    Navigator.of(context).push(
-      MaterialPageRoute<void>(
-        builder: (BuildContext context) =>
-            KnowMeScreen(flowState: widget.flowState),
-      ),
-    );
   }
 
   @override
@@ -72,6 +90,10 @@ class _PatientBasicsScreenState extends State<PatientBasicsScreen> {
         child: ListView(
           padding: const EdgeInsets.all(16),
           children: <Widget>[
+            if (widget.flowState.patientId.isNotEmpty)
+              const Text(
+                  'Edits to these basics are saved on this device only. Server updates are not available yet.'),
+            if (_error != null) Text(_error!, semanticsLabel: _error),
             TextField(
               controller: _nameController,
               decoration: const InputDecoration(
@@ -103,8 +125,9 @@ class _PatientBasicsScreenState extends State<PatientBasicsScreen> {
             const SizedBox(height: 32),
             SizedBox(
               height: 56,
-              child:
-                  FilledButton(onPressed: _next, child: const Text('Continue')),
+              child: FilledButton(
+                  onPressed: _busy ? null : _next,
+                  child: const Text('Continue')),
             ),
           ],
         ),

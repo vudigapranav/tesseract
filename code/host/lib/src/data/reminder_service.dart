@@ -4,8 +4,13 @@ import 'package:flutter_timezone/flutter_timezone.dart';
 import 'package:timezone/data/latest.dart' as tzdata;
 import 'package:timezone/timezone.dart' as tz;
 import '../host_flow_state.dart';
+import '../../l10n/app_localizations.dart';
+import '../l10n/language_catalogue.dart';
 
 class ReminderService {
+  static AppLocalizations notificationStrings(String code) =>
+      lookupAppLocalizations(LanguageCatalogue.byCode(code).locale);
+
   final plugin = FlutterLocalNotificationsPlugin();
   bool ready = false;
   String status = 'Notifications not checked';
@@ -60,7 +65,7 @@ class ReminderService {
   }
 
   Future<void> restore(List<ReminderItem> reminders,
-      {required bool sound}) async {
+      {required bool sound, String languageCode = 'en'}) async {
     if (!ready) {
       await initialize();
     }
@@ -91,12 +96,13 @@ class ReminderService {
         next = tz.TZDateTime(tz.local, now.year, now.month, now.day + 1,
             r.time.hour, r.time.minute);
       }
-      await schedule(r, r.id, next, sound: sound, repeat: true);
+      await schedule(r, r.id, next,
+          sound: sound, languageCode: languageCode, repeat: true);
       if (r.postponedUntil != null &&
           r.postponedUntil!.isAfter(DateTime.now())) {
         await schedule(r, r.id + 1000000000,
             tz.TZDateTime.from(r.postponedUntil!, tz.local),
-            sound: sound);
+            sound: sound, languageCode: languageCode);
       }
     }
     final allowed = await plugin
@@ -109,17 +115,20 @@ class ReminderService {
   }
 
   Future<void> schedule(ReminderItem r, int id, tz.TZDateTime time,
-          {required bool sound, bool repeat = false}) =>
+          {required bool sound,
+          String languageCode = 'en',
+          bool repeat = false}) =>
       plugin.zonedSchedule(
         id: id,
-        title: 'A gentle reminder',
+        title: notificationStrings(languageCode).reminderNotificationTitle,
         body: r.title,
         scheduledDate: time,
         notificationDetails: NotificationDetails(
             android: AndroidNotificationDetails(
                 sound ? 'routine_sound_v1' : 'routine_silent_v1',
-                'Routine reminders',
-                channelDescription: 'Caregiver-created everyday reminders',
+                notificationStrings(languageCode).reminderChannelName,
+                channelDescription: notificationStrings(languageCode)
+                    .reminderChannelDescription,
                 playSound: sound,
                 enableVibration: sound,
                 visibility: NotificationVisibility.private)),

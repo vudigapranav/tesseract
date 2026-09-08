@@ -29,6 +29,63 @@ class _CaregiverHomeScreenState extends State<CaregiverHomeScreen> {
 
   HostFlowState get flow => widget.flowState;
 
+  Future<void> _selectPatient() async {
+    setState(() => _busy = true);
+    try {
+      await flow.refreshPatients();
+    } catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+            content: Text(
+                'Could not load patients. Check connection and try again.')));
+      }
+      return;
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+    if (!mounted) return;
+    final id = await showDialog<String>(
+        context: context,
+        builder: (context) =>
+            SimpleDialog(title: const Text('Choose a patient'), children: [
+              for (final p in flow.availablePatients)
+                SimpleDialogOption(
+                    onPressed: () =>
+                        Navigator.pop(context, p['patient_id'] as String),
+                    child: Padding(
+                        padding: const EdgeInsets.all(12),
+                        child: Text(p['display_name'] as String))),
+              SimpleDialogOption(
+                  onPressed: () => Navigator.pop(context, 'new'),
+                  child: const Padding(
+                      padding: EdgeInsets.all(12),
+                      child: Text('Create a patient'))),
+            ]));
+    if (id == null || !mounted) return;
+    setState(() => _busy = true);
+    try {
+      if (id == 'new') {
+        await flow.startNewPatient();
+      } else {
+        await flow.selectPatient(id);
+      }
+      if (mounted && id == 'new') {
+        await Navigator.push(
+            context,
+            MaterialPageRoute<void>(
+                builder: (_) => PatientBasicsScreen(flowState: flow)));
+      }
+    } catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+            content: Text(
+                'Could not change patient. Check your connection and try again.')));
+      }
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
   Future<void> _refresh() async {
     setState(() => _busy = true);
     try {
@@ -173,6 +230,11 @@ class _CaregiverHomeScreenState extends State<CaregiverHomeScreen> {
                   for (final ActivityRecord record in recent)
                     _activityRow(theme, record),
                 const SectionHeading('Set up'),
+                if (flow.api != null)
+                  OutlinedButton.icon(
+                      onPressed: _busy ? null : _selectPatient,
+                      icon: const Icon(Icons.people_outline),
+                      label: const Text('Choose or create a patient')),
                 _navCard(
                   icon: Icons.badge_outlined,
                   title: 'Patient basics',

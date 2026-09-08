@@ -520,3 +520,81 @@ plus one extra**, five registered total; Aryan's G1/G4/G5/G6/G9 are missing.
 Earlier statements '5 of 9 plus one extra' and 'four missing' were incorrect.
 
 Next: finish notification/patient integration regression and record final build.
+
+
+## 2026-09-08 Codex continuation — patient integration and final checks
+
+Implemented in host only; no API contract, backend, game dependency or event
+payload changes. Translation milestone committed as `8d72e4c`.
+
+- `ReminderService.schedule` resolves notification title/channel metadata from
+  patient language, passed by startup, reminder editing, postponement and
+  language-change rescheduling. Untranslated keys fall back to English;
+  caregiver-written reminder bodies are preserved verbatim. Scheduling errors
+  retain preferences and expose retry status. Android channel metadata updates,
+  delivery, denial, reboot/time zone and cancellation remain device-unverified.
+- Caregiver home loads the authorized server patient list and offers explicit
+  selection/creation. Patient Basics creates using existing POST contract and
+  remembers the returned id. Age is local-only; existing basics edits are
+  explicitly local-only because no update endpoint exists. Failed creation
+  preserves form input; after an ambiguous network response check the refreshed
+  list before retrying because the backend has no creation idempotency key.
+- `HostFlowState` keeps durable patient snapshots inside the caregiver partition,
+  preserving offline edits, activity selection/level, patient language, profile
+  and config versions. Switching fetches access-controlled data before changing
+  selection; history is filtered by patient id. Interface language remains
+  separate. Server refresh does not silently replace an existing local activity
+  choice; explicit recommendation acceptance refreshes approved activity.
+- Know Me provides explicit version-checked personalization upload. Person/place
+  kind is chosen rather than inferred from names; legacy untyped entries must be
+  classified. Existing media references, preferences and retained word locales
+  round-trip. A 409 leaves edits and the original version intact; no blind retry
+  with a newer version. Review server copy shows local/remote text; only an
+  explicit choice replaces local personalization, retaining a pre-reload backup
+  in repository meta (`personalization_backup:<patient_id>`). No backup-restore
+  UI is implemented. Legacy offline profiles lacking a content baseline must
+  review the server copy before upload.
+- `PlayScreen` supplies actual activity config_version/config parameters when
+  game and level match the server activity. Local preset configurations use
+  `local-v1`, not a fabricated server version. Content uses the returned profile
+  revision for clean server content and a persisted local revision for changed
+  content or local reminders. `SessionController` freezes these values for the
+  session instead of hardcoding config/content version '1'. Schema and metric
+  versions are unchanged. Personal words/names remain outside event payloads.
+
+### Fresh verification (this continuation)
+
+- `flutter analyze`: clean for host, contract, all five games and harness.
+- `flutter test`: host **120**, contract **22**, Route Quest **16**, Marble Maze
+  **17**, Word Search **24**, Routine Recall **11**, Picture Sorting **9** —
+  **219 passing**. Harness has no test directory; no harness tests claimed.
+- Ten new integration regressions cover patient switching/restart isolation,
+  retained API fields, stale upload retries, access/fetch failure, creation,
+  untyped legacy entries, explicit server review/backups, large-text patient form
+  to Know Me, and frozen session versions/parameters. Added notification-locale
+  fallback coverage; measured language coverage now requires exact rounding.
+- `flutter build apk --debug`: success; APK at
+  `code/host/build/app/outputs/flutter-apk/app-debug.apk`. Build emits a plugin
+  Kotlin migration warning but completes. `git diff --check` clean.
+- Three updated localization goldens inspected; patient creation widget tested
+  with 2x text. These are automated checks, not live API/device evidence.
+- `adb devices` outside sandbox: empty device list. All on-device behavior,
+  TalkBack, biometrics, tilt feel, notification delivery, real wrapping/glyphs
+  remain **NOT TESTED**. No live Firebase or backend sign-in path validated.
+
+### Confirmed configuration and remaining dependencies
+
+User confirmed Firebase project **tesseract-3ac5a**, provider **Email/Password**.
+Public `FIREBASE_API_KEY` and HTTPS `TESSERACT_API_URL` will be supplied later.
+No credentials or private keys were requested/stored. Real authentication was
+not replaced with synthetic access. Paused automation remains paused.
+
+All non-English translations remain draft; fluent-speaker review is required,
+especially for Meitei/Khasi/Mizo expansion. No languages added for uncovered
+regions, no voice support claimed. Backend still needs calculators for
+step_presented, attempt_resolved, word_found, selection_rejected,
+all_words_found, content_unavailable, item_sorted, sorting_completed; and a
+patient-basics update endpoint. Ruthika review and five missing required games
+remain outstanding. Next action: supply public config and a phone, then run real
+sign-in, patient creation/selection/upload/conflict and offline reminder checks.
+No push; original Desktop/SIH and unrelated parent repository untouched.

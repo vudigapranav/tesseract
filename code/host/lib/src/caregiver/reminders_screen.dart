@@ -15,7 +15,8 @@ class _RemindersScreenState extends State<RemindersScreen> {
     try {
       await widget.flowState.save();
       await widget.flowState.reminderService.restore(widget.flowState.reminders,
-          sound: widget.flowState.audioEnabled);
+          sound: widget.flowState.audioEnabled,
+          languageCode: widget.flowState.effectivePatientLanguageCode);
     } catch (_) {
       widget.flowState.reminderService.status =
           'Could not save or schedule. Please try again.';

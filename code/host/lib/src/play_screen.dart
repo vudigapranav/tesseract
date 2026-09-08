@@ -33,6 +33,11 @@ class PlayScreen extends StatefulWidget {
 }
 
 class _PlayScreenState extends State<PlayScreen> {
+  bool get _usesServerActivity =>
+      widget.flowState.serverActivity?['game_id'] ==
+          widget.registration.gameId &&
+      widget.flowState.serverActivity?['level'] == widget.level;
+
   late final SessionController _session = SessionController(
     registration: widget.registration,
     level: widget.level,
@@ -40,6 +45,14 @@ class _PlayScreenState extends State<PlayScreen> {
     repository: widget.flowState.repository,
     patientId: widget.flowState.patientId,
     preferTouch: widget.flowState.preferTouch,
+    configVersion: _usesServerActivity
+        ? widget.flowState.configVersion.toString()
+        : 'local-v1',
+    contentVersion: widget.flowState.contentVersion,
+    approvedParams: _usesServerActivity
+        ? (widget.flowState.serverActivity?['config'] as Map?)
+            ?.cast<String, Object?>()
+        : null,
     patientLanguageCode: widget.flowState.effectivePatientLanguageCode,
     // Caregiver-entered Know Me content, as opaque-id items. Falls back to
     // neutral places when Know Me was skipped or is short.

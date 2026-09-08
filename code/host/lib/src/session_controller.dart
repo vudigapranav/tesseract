@@ -36,6 +36,9 @@ class SessionController {
       this.patientId = '',
       this.preferTouch = false,
       this.patientLanguageCode = 'en',
+      this.configVersion = 'local-v1',
+      this.contentVersion = 'local-0',
+      this.approvedParams,
       this.items})
       : _random = Random.secure() {
     sessionId = generateUuidV4(_random);
@@ -43,6 +46,9 @@ class SessionController {
 
   final LocalRepository? repository;
   final String patientId;
+  final String configVersion;
+  final String contentVersion;
+  final Map<String, Object?>? approvedParams;
   final bool preferTouch;
 
   /// The language the person playing reads. Drives the game's own Help,
@@ -90,11 +96,14 @@ class SessionController {
       gameId: registration.gameId,
       gameVersion: registration.gameVersion,
       schemaVersion: '1',
-      configVersion: '1',
-      contentVersion: '1',
+      configVersion: configVersion,
+      contentVersion: contentVersion,
       metricVersion: '1',
       level: level,
-      difficultyParams: registration.difficultyParamsFor(level),
+      difficultyParams: {
+        ...registration.difficultyParamsFor(level),
+        ...?approvedParams
+      },
       items: items == null || items!.isEmpty ? defaultGameItems() : items!,
       strings: localizedGameStrings(patientLanguageCode),
       textScale: textScale,

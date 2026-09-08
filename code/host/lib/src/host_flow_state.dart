@@ -12,7 +12,9 @@ import '../games/game_registry.dart';
 
 /// One Know Me entry (C3): a person, place, or interest.
 class KnowMeItem {
-  KnowMeItem({required this.label, this.caption});
+  KnowMeItem({required this.label, this.caption, this.kind, this.mediaAssetId});
+  String? kind;
+  String? mediaAssetId;
   String label;
   String? caption;
 }
@@ -53,13 +55,8 @@ class ActivityRecord {
   final String status;
 }
 
-/// Cross-screen state for one app run.
-///
-/// This is the in-memory stand-in for everything that eventually comes from
-/// real caregiver sign-in, Know Me content, reminders, settings and the
-/// session outbox. Nothing here persists past an app restart, and none of
-/// it is real caregiver-entered data yet — each screen that reads or writes
-/// a field says what it's standing in for.
+/// Host state backed by caregiver-scoped durable settings and patient snapshots.
+/// Server access is verified separately; offline data never grants access.
 class HostFlowState extends ChangeNotifier {
   HostFlowState({this.repository});
 
@@ -85,6 +82,187 @@ class HostFlowState extends ChangeNotifier {
   String patientId = '';
   int profileVersion = 1;
   int configVersion = 0;
+  Map<String, dynamic>? serverActivity;
+  Map<String, dynamic> personalizationPreferences = {};
+  bool personalizationDirty = false;
+  bool personalizationLoaded = false;
+  List<Map<String, dynamic>> serverWords = [];
+  String localContentVersion = 'local-0';
+  String _savedContent = '';
+  final Map<String, dynamic> _patientSnapshots = {};
+
+  String get contentVersion =>
+      personalizationDirty || patientId.isEmpty || reminders.isNotEmpty
+          ? localContentVersion
+          : profileVersion.toString();
+
+  Future<void> refreshPatients() async {
+    if (api == null) throw StateError('Connect to load patients.');
+    final result = await api!.request('GET', '/v1/patients');
+    availablePatients = (result['items'] as List).cast<Map<String, dynamic>>();
+  }
+
+  Future<void> selectPatient(String id) async {
+    if (api == null || !availablePatients.any((p) => p['patient_id'] == id)) {
+      throw StateError('Patient access must be verified before selection.');
+    }
+    if (id == patientId) return;
+    // Fetch before changing local state. An access/network failure keeps the
+    // current patient and all unsent edits intact.
+    final patient = await api!.request('GET', '/v1/patients/$id');
+    final content =
+        await api!.request('GET', '/v1/patients/$id/personalization');
+    await save();
+    if (patientId.isNotEmpty) {
+      _patientSnapshots[patientId] =
+          jsonDecode(jsonEncode(toJson(includeSnapshots: false)));
+    }
+    final interfaceCode = interfaceLanguageCode;
+    final wasSynthetic = synthetic;
+    final cached = _patientSnapshots[id];
+    _clearPatientScopedState();
+    if (cached is Map) {
+      _restoreSettings(cached.cast<String, dynamic>());
+    } else {
+      patientId = id;
+      patientName = patient['display_name'] as String;
+      patientLanguageCode = patient['language'] as String? ?? 'en';
+      knownConditionType = patient['known_type'] as String?;
+      _adoptPersonalization(content);
+    }
+    interfaceLanguageCode = interfaceCode;
+    synthetic = wasSynthetic;
+    patientMode = false;
+    await save();
+    await refreshHistory();
+    await synchronize();
+    await rescheduleReminders();
+    notifyListeners();
+  }
+
+  void _adoptPersonalization(Map<String, dynamic> content) {
+    profileVersion = content['version'] as int;
+    personalizationLoaded = true;
+    serverWords =
+        (content['personal_words'] as List).cast<Map<String, dynamic>>();
+    knowMeWords
+      ..clear()
+      ..addAll(
+          (content['personal_words'] as List).map((w) => w['text'] as String));
+    knowMePeoplePlaces
+      ..clear()
+      ..addAll((content['people_places'] as List).map((p) => KnowMeItem(
+          label: p['label'] as String,
+          kind: p['kind'] as String?,
+          mediaAssetId: p['media_asset_id'] as String?)));
+    personalizationPreferences =
+        (content['preferences'] as Map? ?? {}).cast<String, dynamic>();
+    personalizationDirty = false;
+    _savedContent = _contentSignature();
+  }
+
+  Future<void> startNewPatient() async {
+    await save();
+    if (patientId.isNotEmpty) {
+      _patientSnapshots[patientId] =
+          jsonDecode(jsonEncode(toJson(includeSnapshots: false)));
+    }
+    _clearPatientScopedState();
+    await save();
+    await rescheduleReminders();
+    notifyListeners();
+  }
+
+  Future<void> createPatient() async {
+    if (api == null || patientId.isNotEmpty) {
+      throw StateError('Connect before creating a patient.');
+    }
+    final patient = await api!.request('POST', '/v1/patients', {
+      'display_name': patientName,
+      'language': effectivePatientLanguageCode,
+      'known_type': knownConditionType,
+      'accessibility': {
+        'text_scale': textScalePreference,
+        'reduced_motion': reducedMotion
+      },
+    });
+    patientId = patient['patient_id'] as String;
+    profileVersion = patient['version'] as int;
+    availablePatients.add(patient);
+    personalizationLoaded = true;
+    await save();
+  }
+
+  Future<Map<String, dynamic>> readServerPersonalization() async {
+    if (api == null || patientId.isEmpty) {
+      throw StateError('Connect and select a patient.');
+    }
+    return api!.request('GET', '/v1/patients/$patientId/personalization');
+  }
+
+  /// Called only after the caregiver reviews and chooses the server copy.
+  Future<void> useReviewedPersonalization(Map<String, dynamic> content) async {
+    await save();
+    await repository?.putMeta('personalization_backup:$patientId',
+        jsonEncode(toJson(includeSnapshots: false)));
+    _adoptPersonalization(content);
+    await save();
+    notifyListeners();
+  }
+
+  Future<void> uploadPersonalization() async {
+    await save();
+    if (api == null || patientId.isEmpty) {
+      throw StateError(
+          'Saved on device. Connect and select a patient to upload.');
+    }
+    if (!personalizationLoaded) {
+      throw StateError(
+          'This offline profile has no server content baseline. Review server content before uploading.');
+    }
+    if (knowMePeoplePlaces.any((p) => p.kind == null)) {
+      throw StateError(
+          'Choose Person or Place for each entry before uploading.');
+    }
+    // Never refetch a version and blindly retry a rejected replacement.
+    final result =
+        await api!.request('PUT', '/v1/patients/$patientId/personalization', {
+      'version': profileVersion,
+      'personal_words': knowMeWords
+          .asMap()
+          .entries
+          .map((e) => {
+                'text': e.value,
+                'locale': e.key < serverWords.length &&
+                        serverWords[e.key]['text'] == e.value
+                    ? serverWords[e.key]['locale']
+                    : effectivePatientLanguageCode
+              })
+          .toList(),
+      'people_places': knowMePeoplePlaces
+          .map((p) => {
+                'kind': p.kind,
+                'label': p.label,
+                'media_asset_id': p.mediaAssetId,
+              })
+          .toList(),
+      'preferences': personalizationPreferences,
+    });
+    profileVersion = result['version'] as int;
+    personalizationDirty = false;
+    await save();
+  }
+
+  String _contentSignature() => jsonEncode({
+        'words': knowMeWords,
+        'people': knowMePeoplePlaces
+            .map((p) => [p.label, p.caption, p.kind, p.mediaAssetId])
+            .toList(),
+        'reminders': reminders
+            .map((r) => [r.id, r.title, r.time.hour, r.time.minute, r.enabled])
+            .toList(),
+        'language': effectivePatientLanguageCode,
+      });
   List<Map<String, dynamic>> recommendations = [];
   String syncStatus = 'Saved on device; not connected';
 
@@ -113,19 +291,16 @@ class HostFlowState extends ChangeNotifier {
     if (matching.isNotEmpty) {
       final p = matching.first;
       patientId = p['patient_id'] as String;
-      patientName = p['display_name'] as String;
-      profileVersion = p['version'] as int;
+      if (patientName.isEmpty) patientName = p['display_name'] as String;
     } else if (patientId.isNotEmpty) {
       // The remembered patient is not accessible to this identity. Adopting
       // whichever patient happens to be first would attach this caregiver's
       // session history to a stranger, so drop the stale selection and make
       // the caller choose.
-      _clearPatientSelection();
+      _clearPatientScopedState();
     } else if (patients.length == 1) {
       final p = patients.single;
-      patientId = p['patient_id'] as String;
-      patientName = p['display_name'] as String;
-      profileVersion = p['version'] as int;
+      await selectPatient(p['patient_id'] as String);
     }
 
     if (repository != null) {
@@ -151,6 +326,7 @@ class HostFlowState extends ChangeNotifier {
       return;
     }
     _clearPatientScopedState();
+    _patientSnapshots.clear();
     await repository!.useScope(uid);
     await restore();
   }
@@ -176,6 +352,13 @@ class HostFlowState extends ChangeNotifier {
     approvedActivity = null;
     approvedLevel = 1;
     configVersion = 0;
+    serverActivity = null;
+    patientLanguageCode = '';
+    personalizationPreferences = {};
+    personalizationLoaded = false;
+    serverWords = [];
+    personalizationDirty = false;
+    _savedContent = '';
     recommendations = <Map<String, dynamic>>[];
   }
 
@@ -191,11 +374,12 @@ class HostFlowState extends ChangeNotifier {
             await api!.request('GET', '/v1/patients/$patientId/activity');
         final games =
             gameRegistry.where((g) => g.gameId == activity['game_id']);
-        if (games.isNotEmpty) {
+        serverActivity = activity;
+        if (games.isNotEmpty && approvedActivity == null) {
           approvedActivity = games.first;
           approvedLevel = activity['level'] as int;
-          configVersion = activity['config_version'] as int;
         }
+        configVersion = activity['config_version'] as int;
         final proposals = await api!
             .request('GET', '/v1/patients/$patientId/recommendations');
         recommendations =
@@ -243,6 +427,7 @@ class HostFlowState extends ChangeNotifier {
         'expected_config_version': configVersion,
       },
     );
+    approvedActivity = null;
     await synchronize();
   }
 
@@ -270,12 +455,25 @@ class HostFlowState extends ChangeNotifier {
     interfaceLanguageCode = code;
     displayPreferencesChanged();
     await save();
+    await rescheduleReminders();
   }
 
   Future<void> setPatientLanguage(String code) async {
     patientLanguageCode = code;
     displayPreferencesChanged();
     await save();
+    await rescheduleReminders();
+  }
+
+  Future<void> rescheduleReminders() async {
+    if (reminders.isEmpty && !reminderService.ready) return;
+    try {
+      await reminderService.restore(reminders,
+          sound: audioEnabled, languageCode: effectivePatientLanguageCode);
+    } catch (_) {
+      reminderService.status =
+          'Language saved. Could not reschedule reminders; retry from Reminders.';
+    }
   }
 
   bool patientMode = false;
@@ -285,6 +483,13 @@ class HostFlowState extends ChangeNotifier {
   String? storageError;
   Future<void> save() async {
     try {
+      final signature = _contentSignature();
+      if (signature != _savedContent) {
+        personalizationDirty = true;
+        localContentVersion =
+            'l${DateTime.now().microsecondsSinceEpoch.toRadixString(36)}';
+        _savedContent = signature;
+      }
       await repository?.saveSettings(toJson());
       storageError = null;
     } catch (_) {
@@ -293,7 +498,16 @@ class HostFlowState extends ChangeNotifier {
     }
   }
 
-  Map<String, Object?> toJson() => {
+  Map<String, Object?> toJson({bool includeSnapshots = true}) => {
+        if (includeSnapshots) 'patient_snapshots': _patientSnapshots,
+        'personalization_loaded': personalizationLoaded,
+        'server_words': serverWords,
+        'profile_version': profileVersion,
+        'config_version': configVersion,
+        'server_activity': serverActivity,
+        'personalization_preferences': personalizationPreferences,
+        'personalization_dirty': personalizationDirty,
+        'local_content_version': localContentVersion,
         'patient_id': patientId,
         'patient_name': patientName,
         'patient_age': patientAge,
@@ -313,7 +527,12 @@ class HostFlowState extends ChangeNotifier {
         'approved_level': approvedLevel,
         'words': knowMeWords,
         'people': knowMePeoplePlaces
-            .map((e) => {'label': e.label, 'caption': e.caption})
+            .map((e) => {
+                  'label': e.label,
+                  'caption': e.caption,
+                  'kind': e.kind,
+                  'media_asset_id': e.mediaAssetId
+                })
             .toList(),
         'reminders': reminders
             .map((e) => {
@@ -329,50 +548,69 @@ class HostFlowState extends ChangeNotifier {
       };
   Future<void> restore() async {
     final data = await repository?.readSettings();
-    if (data != null) {
-      patientId = data['patient_id'] as String? ?? '';
-      patientName = data['patient_name'] as String? ?? '';
-      patientAge = data['patient_age'] as int?;
-      patientLanguage = data['language'] as String?;
-      knownConditionType = data['condition'] as String?;
-      caregiverName = data['caregiver_name'] as String? ?? '';
-      patientMode = data['patient_mode'] == true;
-      synthetic = data['synthetic'] == true;
-      reducedMotion = data['reduced_motion'] == true;
-      preferTouch = data['prefer_touch'] == true;
-      audioEnabled = data['audio'] != false;
-      interfaceLanguageCode = data['interface_language'] as String? ?? 'en';
-      patientLanguageCode = data['patient_language_code'] as String? ?? '';
-      textScalePreference = (data['text_scale'] as num? ?? 1).toDouble();
-      tutorialShownGameIds
-          .addAll((data['tutorials'] as List? ?? []).cast<String>());
-      approvedLevel = data['approved_level'] as int? ?? 1;
-      for (final game in gameRegistry) {
-        if (game.gameId == data['approved_game']) {
-          approvedActivity = game;
-        }
-      }
-      knowMeWords.addAll((data['words'] as List? ?? []).cast<String>());
-      for (final item in data['people'] as List? ?? []) {
-        knowMePeoplePlaces.add(KnowMeItem(
-            label: item['label'] as String,
-            caption: item['caption'] as String?));
-      }
-      for (final item in data['reminders'] as List? ?? []) {
-        reminders.add(ReminderItem(
-            id: item['id'] as int?,
-            postponedUntil:
-                DateTime.tryParse(item['postponed_until'] as String? ?? ''),
-            acknowledgedAt:
-                DateTime.tryParse(item['acknowledged_at'] as String? ?? ''),
-            title: item['title'] as String,
-            time: TimeOfDay(
-                hour: item['hour'] as int, minute: item['minute'] as int),
-            enabled: item['enabled'] == true));
-      }
-    }
+    if (data != null) _restoreSettings(data);
     await repository?.recoverInterrupted();
     await refreshHistory();
+  }
+
+  void _restoreSettings(Map<String, dynamic> data) {
+    _patientSnapshots.addAll(
+        (data['patient_snapshots'] as Map? ?? {}).cast<String, dynamic>());
+    personalizationLoaded = data['personalization_loaded'] == true;
+    serverWords = (data['server_words'] as List? ?? [])
+        .map((w) => (w as Map).cast<String, dynamic>())
+        .toList();
+    profileVersion = data['profile_version'] as int? ?? 1;
+    configVersion = data['config_version'] as int? ?? 0;
+    serverActivity = (data['server_activity'] as Map?)?.cast<String, dynamic>();
+    personalizationPreferences =
+        (data['personalization_preferences'] as Map? ?? {})
+            .cast<String, dynamic>();
+    personalizationDirty = data['personalization_dirty'] == true;
+    localContentVersion = data['local_content_version'] as String? ?? 'local-0';
+    patientId = data['patient_id'] as String? ?? '';
+    patientName = data['patient_name'] as String? ?? '';
+    patientAge = data['patient_age'] as int?;
+    patientLanguage = data['language'] as String?;
+    knownConditionType = data['condition'] as String?;
+    caregiverName = data['caregiver_name'] as String? ?? '';
+    patientMode = data['patient_mode'] == true;
+    synthetic = data['synthetic'] == true;
+    reducedMotion = data['reduced_motion'] == true;
+    preferTouch = data['prefer_touch'] == true;
+    audioEnabled = data['audio'] != false;
+    interfaceLanguageCode = data['interface_language'] as String? ?? 'en';
+    patientLanguageCode = data['patient_language_code'] as String? ?? '';
+    textScalePreference = (data['text_scale'] as num? ?? 1).toDouble();
+    tutorialShownGameIds
+        .addAll((data['tutorials'] as List? ?? []).cast<String>());
+    approvedLevel = data['approved_level'] as int? ?? 1;
+    for (final game in gameRegistry) {
+      if (game.gameId == data['approved_game']) {
+        approvedActivity = game;
+      }
+    }
+    knowMeWords.addAll((data['words'] as List? ?? []).cast<String>());
+    for (final item in data['people'] as List? ?? []) {
+      knowMePeoplePlaces.add(KnowMeItem(
+          label: item['label'] as String,
+          caption: item['caption'] as String?,
+          kind: item['kind'] as String?,
+          mediaAssetId: item['media_asset_id'] as String?));
+    }
+    for (final item in data['reminders'] as List? ?? []) {
+      reminders.add(ReminderItem(
+          id: item['id'] as int?,
+          postponedUntil:
+              DateTime.tryParse(item['postponed_until'] as String? ?? ''),
+          acknowledgedAt:
+              DateTime.tryParse(item['acknowledged_at'] as String? ?? ''),
+          title: item['title'] as String,
+          time: TimeOfDay(
+              hour: item['hour'] as int, minute: item['minute'] as int),
+          enabled: item['enabled'] == true));
+    }
+    _savedContent = _contentSignature();
   }
 
   Future<void> refreshHistory() async {
@@ -386,6 +624,7 @@ class HostFlowState extends ChangeNotifier {
         continue;
       }
       final body = jsonDecode(row['body'] as String) as Map;
+      if (body['patient_id'] != patientId) continue;
       final result = jsonDecode(row['completion'] as String) as Map;
       final games = gameRegistry.where((g) => g.gameId == body['game_id']);
       if (games.isEmpty) {
@@ -407,7 +646,7 @@ class HostFlowState extends ChangeNotifier {
   int completedActivitiesCount = 0;
   final List<ActivityRecord> activityHistory = <ActivityRecord>[];
 
-  // C1 Sign In — placeholder only; no real identity provider yet.
+  // C1 sign-in status; only connect() establishes real caregiver access.
   bool caregiverSignedIn = false;
   String caregiverName = '';
 

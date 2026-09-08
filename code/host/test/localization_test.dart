@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:tesseract_host/src/data/reminder_service.dart';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -51,7 +52,7 @@ void main() {
         final int translated = translatableKeys(readArb(option.code));
         final int actual = ((translated / templateKeys) * 100).round();
         expect(
-          (option.coveragePercent - actual).abs() <= 1,
+          option.coveragePercent == actual,
           isTrue,
           reason: '${option.englishName} claims ${option.coveragePercent}% '
               'but the ARB files measure $actual%',
@@ -96,6 +97,19 @@ void main() {
       expect(LanguageCatalogue.uncoveredRegions, contains('Sikkim'));
       expect(LanguageCatalogue.uncoveredRegions, contains('Arunachal Pradesh'));
     });
+  });
+
+  test('notification text uses patient locale with safe English fallback', () {
+    expect(
+        ReminderService.notificationStrings('bn').reminderNotificationTitle,
+        isNot(ReminderService.notificationStrings('en')
+            .reminderNotificationTitle));
+    expect(
+        ReminderService.notificationStrings('unknown')
+            .reminderNotificationTitle,
+        ReminderService.notificationStrings('en').reminderNotificationTitle);
+    expect(ReminderService.notificationStrings('mni').reminderNotificationTitle,
+        ReminderService.notificationStrings('en').reminderNotificationTitle);
   });
 
   group('translations actually load', () {

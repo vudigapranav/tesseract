@@ -32,8 +32,9 @@ class _PatientRemindersScreenState extends State<PatientRemindersScreen> {
       // cannot act on.
     }
     try {
-      await flow.reminderService
-          .restore(flow.reminders, sound: flow.audioEnabled);
+      await flow.reminderService.restore(flow.reminders,
+          sound: flow.audioEnabled,
+          languageCode: flow.effectivePatientLanguageCode);
     } catch (_) {
       // Rescheduling can fail if notifications are not permitted. The
       // in-app list below still shows the reminder.
