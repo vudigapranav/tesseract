@@ -52,7 +52,8 @@ void main() {
     final TesseractEventRecorder recorder = TesseractEventRecorder();
 
     controller.recordEvent(recorder.sessionStarted());
-    controller.recordEvent(recorder.custom('location_entered', <String, Object?>{'nodeId': 'n1'}));
+    controller.recordEvent(
+        recorder.custom('location_entered', <String, Object?>{'nodeId': 'n1'}));
     final GameEvent finished =
         recorder.sessionFinished(GameResultStatus.completed);
     controller.recordEvent(finished);
@@ -94,8 +95,14 @@ void main() {
     final List<Map<String, dynamic>> stored =
         await repo.events(controller.sessionId);
     expect(stored.map((e) => e['seq']), <int>[1, 2, 3, 4]);
-    expect(stored.map((e) => e['type']), containsAllInOrder(
-        <String>['session_started', 'paused', 'resumed', 'session_finished']));
+    expect(
+        stored.map((e) => e['type']),
+        containsAllInOrder(<String>[
+          'session_started',
+          'paused',
+          'resumed',
+          'session_finished'
+        ]));
     expect(stored[1]['payload']['reason'], 'backgrounded');
   });
 
@@ -185,8 +192,9 @@ void main() {
     controller.recordEvent(recorder.sessionStarted());
     await controller.flush();
 
-    final Map<String, dynamic> body = jsonDecode(
-        (await repo.sessions()).single['body'] as String) as Map<String, dynamic>;
+    final Map<String, dynamic> body =
+        jsonDecode((await repo.sessions()).single['body'] as String)
+            as Map<String, dynamic>;
     expect(body['requested_input_mode'], 'touch');
     expect(body['actual_input_mode'], 'touch');
   });
@@ -197,15 +205,16 @@ void main() {
     controller.buildConfig(textScale: 1);
     final TesseractEventRecorder recorder = TesseractEventRecorder();
     controller.recordEvent(recorder.sessionStarted());
-    controller.recordEvent(recorder.custom('location_entered', <String, Object?>{'nodeId': 'n1'}));
+    controller.recordEvent(
+        recorder.custom('location_entered', <String, Object?>{'nodeId': 'n1'}));
     await controller.flush();
     // Process dies here: finish() is never called.
 
     await repo.recoverInterrupted();
 
-    final Map<String, dynamic> completion = jsonDecode(
-        (await repo.sessions()).single['completion'] as String)
-        as Map<String, dynamic>;
+    final Map<String, dynamic> completion =
+        jsonDecode((await repo.sessions()).single['completion'] as String)
+            as Map<String, dynamic>;
     expect(completion['status'], 'interrupted');
     expect(completion['final_seq'], 2);
     final List<Map<String, dynamic>> stored =

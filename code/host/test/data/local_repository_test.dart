@@ -47,7 +47,8 @@ void main() {
 
       final LocalRepository first = await LocalRepository.open(path: path);
       await first.useScope('caregiver-a');
-      await first.saveSettings(<String, Object?>{'patient_name': 'Synthetic A'});
+      await first
+          .saveSettings(<String, Object?>{'patient_name': 'Synthetic A'});
       await first.db.close();
 
       final LocalRepository second = await LocalRepository.open(path: path);
@@ -64,10 +65,13 @@ void main() {
 
       final LocalRepository first = await LocalRepository.open(path: path);
       await first.useScope('caregiver-a');
-      await first.createSession('s1', <String, Object?>{'game_id': 'route_quest'});
+      await first
+          .createSession('s1', <String, Object?>{'game_id': 'route_quest'});
       await first.appendEvent('s1', event(1, 'session_started'));
-      await first.appendEvent('s1', event(2, 'session_finished', status: 'completed'));
-      await first.complete('s1', <String, Object?>{'status': 'completed', 'final_seq': 2});
+      await first.appendEvent(
+          's1', event(2, 'session_finished', status: 'completed'));
+      await first.complete(
+          's1', <String, Object?>{'status': 'completed', 'final_seq': 2});
       await first.db.close();
 
       final LocalRepository second = await LocalRepository.open(path: path);
@@ -100,7 +104,8 @@ void main() {
     test('a second caregiver cannot see the first caregiver\'s sessions',
         () async {
       await repo.useScope('caregiver-a');
-      await repo.createSession('s1', <String, Object?>{'game_id': 'route_quest'});
+      await repo
+          .createSession('s1', <String, Object?>{'game_id': 'route_quest'});
       await repo.appendEvent('s1', event(1, 'session_started'));
 
       await repo.useScope('caregiver-b');
@@ -150,7 +155,8 @@ void main() {
     setUp(() async {
       repo = await LocalRepository.open(path: pathFor('completion'));
       await repo.useScope('caregiver-a');
-      await repo.createSession('s1', <String, Object?>{'game_id': 'route_quest'});
+      await repo
+          .createSession('s1', <String, Object?>{'game_id': 'route_quest'});
       await repo.appendEvent('s1', event(1, 'session_started'));
     });
 
@@ -169,18 +175,19 @@ void main() {
     });
 
     test('a differing completion is refused rather than overwriting', () async {
-      await repo.complete('s1',
-          <String, Object?>{'status': 'completed', 'final_seq': 1});
+      await repo.complete(
+          's1', <String, Object?>{'status': 'completed', 'final_seq': 1});
       expect(
-        () => repo.complete('s1',
-            <String, Object?>{'status': 'interrupted', 'final_seq': 1}),
+        () => repo.complete(
+            's1', <String, Object?>{'status': 'interrupted', 'final_seq': 1}),
         throwsA(isA<StateError>()),
       );
     });
 
     test('completing an unknown session in this scope is refused', () async {
       expect(
-        () => repo.complete('does-not-exist', <String, Object?>{'status': 'completed'}),
+        () => repo.complete(
+            'does-not-exist', <String, Object?>{'status': 'completed'}),
         throwsA(isA<StateError>()),
       );
     });
@@ -197,7 +204,8 @@ void main() {
     tearDown(() async => repo.db.close());
 
     test('a session whose last event is terminal keeps that status', () async {
-      await repo.createSession('s1', <String, Object?>{'game_id': 'route_quest'});
+      await repo
+          .createSession('s1', <String, Object?>{'game_id': 'route_quest'});
       await repo.appendEvent('s1', event(1, 'session_started'));
       await repo.appendEvent(
           's1', event(2, 'session_finished', status: 'completed'));
@@ -210,7 +218,8 @@ void main() {
     });
 
     test('a session cut off mid-play is recorded as interrupted', () async {
-      await repo.createSession('s1', <String, Object?>{'game_id': 'route_quest'});
+      await repo
+          .createSession('s1', <String, Object?>{'game_id': 'route_quest'});
       await repo.appendEvent('s1', event(1, 'session_started'));
       await repo.appendEvent('s1', event(2, 'location_entered'));
 
@@ -222,8 +231,10 @@ void main() {
       expect(row['completion'], contains('"final_seq":2'));
     });
 
-    test('help used before the interruption is preserved as assisted', () async {
-      await repo.createSession('s1', <String, Object?>{'game_id': 'route_quest'});
+    test('help used before the interruption is preserved as assisted',
+        () async {
+      await repo
+          .createSession('s1', <String, Object?>{'game_id': 'route_quest'});
       await repo.appendEvent('s1', event(1, 'session_started'));
       await repo.appendEvent('s1', event(2, 'hint_requested'));
 
@@ -235,7 +246,8 @@ void main() {
 
     test('a session that never recorded an event is dropped, not left open',
         () async {
-      await repo.createSession('s1', <String, Object?>{'game_id': 'route_quest'});
+      await repo
+          .createSession('s1', <String, Object?>{'game_id': 'route_quest'});
 
       await repo.recoverInterrupted();
 
@@ -245,7 +257,8 @@ void main() {
     });
 
     test('recovery is idempotent across repeated launches', () async {
-      await repo.createSession('s1', <String, Object?>{'game_id': 'route_quest'});
+      await repo
+          .createSession('s1', <String, Object?>{'game_id': 'route_quest'});
       await repo.appendEvent('s1', event(1, 'session_started'));
 
       await repo.recoverInterrupted();
@@ -257,7 +270,8 @@ void main() {
 
     test('recovery only touches the active caregiver\'s sessions', () async {
       await repo.useScope('caregiver-a');
-      await repo.createSession('a1', <String, Object?>{'game_id': 'route_quest'});
+      await repo
+          .createSession('a1', <String, Object?>{'game_id': 'route_quest'});
       await repo.appendEvent('a1', event(1, 'session_started'));
 
       await repo.useScope('caregiver-b');

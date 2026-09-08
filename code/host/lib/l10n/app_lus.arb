@@ -1,0 +1,19 @@
+{
+  "@@locale": "lus",
+
+  "languageName": "Mizo ṭawng",
+
+  "help": "Ṭanpuina",
+  "home": "In",
+  "today": "Vawiin",
+  "languageLabel": "Ṭawng",
+  "start": "Ṭan",
+  "continueLabel": "Chhunzawm",
+  "cancel": "Bansan",
+  "save": "Dah",
+  "roleCaregiver": "Enkawltu",
+  "roleDoctor": "Doctor",
+  "signIn": "Lut",
+  "signOut": "Chhuak",
+  "password": "Password"
+}

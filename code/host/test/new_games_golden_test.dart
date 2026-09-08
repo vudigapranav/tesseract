@@ -53,8 +53,8 @@ void main() {
     await pumpForGolden(
       tester,
       WordSearchGame(
-        config: configFor('word_search', 1,
-            WordSearchGame.difficultyParamsForLevel(1), flow),
+        config: configFor(
+            'word_search', 1, WordSearchGame.difficultyParamsForLevel(1), flow),
         onEvent: (_) {},
         onFinish: (_) {},
       ),

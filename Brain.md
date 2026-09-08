@@ -841,3 +841,92 @@ Ruthika reviews `docs/handoffs/RUTHIKA_GAME_INTEGRATION.md`. Pranav adds
 backend calculators for the eight new event types. Someone runs the APK on a
 real phone. Public Firebase config + HTTPS backend URL remain the blocker for
 every authenticated path.
+
+### 2026-09-08 Claude — North Eastern Region localization + About Tesseract
+
+**Confirmed language list.** The records named Assamese, Bengali, Meitei, Khasi
+and Mizo — but in a *review of the PPT's risk slide*, not as an approved list,
+and `PS003_MASTER_CONTEXT.md` still lists "pilot language/native reviewer" as
+unconfirmed. Asked the user; they confirmed **English + those five**, shipped
+as clearly-labelled drafts. Recorded here as the approved list.
+
+**These five cover only 4 of the 8 NE states.** Nagaland, Tripura, Arunachal
+Pradesh and Sikkim have no language at all. That gap is named in
+`LanguageCatalogue.uncoveredRegions`, shown on the About screen, and asserted
+by a test so it cannot quietly disappear.
+
+#### What was built
+
+- `flutter_localizations` + `gen_l10n`. ARB files in `code/host/lib/l10n/` for
+  en, as, bn, mni, kha, lus. 135 translatable keys.
+- `src/l10n/language_catalogue.dart` — endonym, English name, script, region,
+  measured coverage and review status per language.
+- `src/l10n/language_selector.dart` — selector plus `DraftLanguageBanner`.
+- `src/caregiver/about_screen.dart` — About Tesseract.
+- Bundled `NotoSansBengali` and `NotoSansMeeteiMayek` (SIL OFL, licence in
+  `code/host/fonts/LICENSE-NOTO.txt`) and wired `fontFamilyFallback`, because
+  an entry-level Android device may not ship those scripts.
+
+#### Measured coverage — not claimed, computed
+
+| Language | Script | Coverage | Review |
+|---|---|---|---|
+| English | Latin | 100% | source |
+| অসমীয়া Assamese | Bengali-Assamese | 73% | draft, awaiting native review |
+| বাংলা Bengali | Bengali-Assamese | 73% | draft, awaiting native review |
+| ꯃꯤꯇꯩꯂꯣꯟ Meitei | Meetei Mayek | 10% | draft, awaiting native review |
+| Ka Ktien Khasi | Latin | 10% | draft, awaiting native review |
+| Mizo ṭawng | Latin | 10% | draft, awaiting native review |
+
+Meitei, Khasi and Mizo are deliberately low: only strings I had genuine
+confidence in were drafted. Fabricating the rest would have looked complete
+and been worse. A test recomputes every figure from the ARB files, so the
+catalogue cannot drift into overclaiming.
+
+**No language has been reviewed by a fluent speaker.** Every non-English
+option is labelled draft with its coverage in the selector, carries a
+persistent banner while in use, and states that untranslated text falls back
+to English.
+
+#### Behaviour
+
+- Selector on the sign-in screen, usable **before** authentication; each
+  language shown in its own script.
+- Also in Settings, with **interface language and patient language separate** —
+  the patient's follows the setup language until set, then stays put when the
+  caregiver changes their own.
+- Switching applies immediately: no restart, no sign-out, no lost form entry
+  (asserted by a test that types an email, switches language, and checks it
+  survived).
+- Both persist per caregiver scope and survive restart.
+- Game Help/Break/pause text and per-game instructions are looked up in the
+  **patient's** language through `localizedGameStrings` /
+  `localizedInstructions`, so the game boundary carries localized strings
+  without games gaining any new dependency.
+- About Tesseract: activity mark (**no approved logo exists** in the records,
+  so none was invented), description, the exact line "Built and developed by
+  the Tesseract Team.", real version/build read from package metadata with a
+  bounded timeout, and the per-language coverage table.
+
+#### Checks actually run
+
+- `flutter analyze`: clean.
+- Host tests **109 passing** (was 76; +28 localization, +5 l10n goldens).
+  Other packages unchanged this pass: contract 22, route_quest 16,
+  marble_maze 17, word_search 24, routine_recall 11, picture_sorting 9 —
+  **208 project-wide**.
+- Goldens regenerated and **inspected**. The first Bengali/Assamese/Meitei
+  render showed **tofu boxes** — widget tests do not auto-load pubspec fonts.
+  Loading the bundled Noto faces in the golden harness fixed it, which is real
+  evidence the theme's font fallback works rather than an assumption.
+- `flutter build apk --debug` **succeeds** with fonts and localizations
+  included: `code/host/build/app/outputs/flutter-apk/app-debug.apk`, 191 MB.
+
+#### NOT TESTED
+
+No Android device (`adb devices` empty). Script rendering, missing glyphs,
+text wrapping, TalkBack in non-Latin scripts, **localized notification text**,
+and language switching on a real phone are all unverified. Goldens are not
+device evidence. **Voice/audio is not implemented in any language** —
+translated text is not a voice capability. Reminder bodies are still built in
+`ReminderService` from untranslated literals.

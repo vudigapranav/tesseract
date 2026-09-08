@@ -454,3 +454,38 @@ time-zone behaviour, the biometric caregiver gate, Marble Maze tilt feel, and
 real emoji rendering are all unverified. **Firebase has never been validated
 against a real project**, so neither caregiver nor doctor sign-in has run end
 to end, and the doctor screens have never been rendered against live data.
+
+## 2026-09-08 Claude — localization (en, as, bn, mni, kha, lus)
+
+Approved list confirmed by the user: English, Assamese, Bengali, Meitei,
+Khasi, Mizo. **Covers 4 of 8 NE states**; Nagaland, Tripura, Arunachal Pradesh
+and Sikkim have no language and this is stated in the app and asserted by a
+test.
+
+`flutter_localizations` + `gen_l10n`; ARB files in `code/host/lib/l10n/`.
+`NotoSansBengali` and `NotoSansMeeteiMayek` bundled under SIL OFL and wired as
+theme `fontFamilyFallback`.
+
+Measured coverage: en 100%, as 73%, bn 73%, mni/kha/lus 10%. **Every
+non-English language is a machine draft awaiting fluent-speaker review**,
+labelled as such in the selector and by a persistent banner, with English
+fallback disclosed. A test recomputes coverage from the ARB files so the
+published figures cannot drift.
+
+Interface language and patient language are separate settings. Game
+Help/Break and per-game instructions resolve in the **patient's** language
+through the existing `GameConfig`/`GameStrings` boundary — games gained no new
+dependency. Language is selectable before sign-in, changeable in Settings,
+applies without restart or losing form entry, and persists per caregiver.
+
+Settings → About Tesseract shows the activity mark (no approved logo exists),
+the description, "Built and developed by the Tesseract Team.", real
+version/build from package metadata, and the coverage table.
+
+Host tests 109 passing; 208 project-wide. Debug APK builds with fonts and
+localizations.
+
+**NOT TESTED:** no Android device. Script rendering, glyph coverage, wrapping,
+TalkBack in non-Latin scripts and localized notifications are unverified on a
+phone. Reminder notification bodies are still untranslated literals in
+`ReminderService`. **No voice/audio support exists in any language.**

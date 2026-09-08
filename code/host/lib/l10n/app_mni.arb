@@ -1,0 +1,18 @@
+{
+  "@@locale": "mni",
+
+  "languageName": "ꯃꯤꯇꯩꯂꯣꯟ",
+
+  "help": "ꯃꯇꯦꯡ",
+  "home": "ꯌꯨꯝ",
+  "today": "ꯉꯁꯤ",
+  "languageLabel": "ꯂꯣꯟ",
+  "start": "ꯍꯧꯒꯠꯄ",
+  "continueLabel": "ꯃꯈꯥ ꯆꯠꯄ",
+  "cancel": "ꯀꯛꯊꯠꯄ",
+  "save": "ꯊꯝꯖꯤꯟꯕ",
+  "roleCaregiver": "ꯌꯦꯡꯁꯤꯅꯕ",
+  "roleDoctor": "ꯗꯣꯛꯇꯔ",
+  "signIn": "ꯁꯥꯏꯟ ꯏꯟ",
+  "password": "ꯄꯥꯁꯋꯥꯔꯗ"
+}

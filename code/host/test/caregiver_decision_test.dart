@@ -47,15 +47,15 @@ void main() {
     flow.caregiverName = 'Asha';
     flow.patientName = 'Synthetic Patient';
     flow.patientId = 'patient-1';
-    flow.recommendations = recommendations ?? <Map<String, dynamic>>[proposal()];
+    flow.recommendations =
+        recommendations ?? <Map<String, dynamic>>[proposal()];
     flow.api = ApiClient(
       baseUrl: Uri.parse('https://example.invalid'),
       token: () async => 'test-token',
       client: MockClient((http.Request request) async {
         calls.add('${request.method} ${request.url.path}');
         if (request.url.path.endsWith('/decision')) {
-          decisions.add(
-              jsonDecode(request.body) as Map<String, Object?>);
+          decisions.add(jsonDecode(request.body) as Map<String, Object?>);
           return http.Response(jsonEncode(<String, Object?>{}), 200);
         }
         if (request.url.path.endsWith('/activity')) {
@@ -90,8 +90,7 @@ void main() {
 
     expect(find.text('A suggested change'), findsOneWidget);
     expect(find.textContaining('level 1'), findsWidgets);
-    expect(
-        find.textContaining('completed without help'), findsOneWidget);
+    expect(find.textContaining('completed without help'), findsOneWidget);
   });
 
   testWidgets('the suggestion says it is not a clinical judgement',
@@ -188,8 +187,8 @@ void main() {
 
   testWidgets('with no pending suggestion the section is absent',
       (tester) async {
-    await tester.pumpWidget(
-        wrap(flowWith(recommendations: <Map<String, dynamic>>[])));
+    await tester
+        .pumpWidget(wrap(flowWith(recommendations: <Map<String, dynamic>>[])));
     await tester.pumpAndSettle();
 
     expect(find.text('Needs your decision'), findsNothing);
@@ -209,7 +208,8 @@ void main() {
 
   testWidgets('history shows recorded outcomes in words, not scores',
       (tester) async {
-    final HostFlowState flow = flowWith(recommendations: <Map<String, dynamic>>[]);
+    final HostFlowState flow =
+        flowWith(recommendations: <Map<String, dynamic>>[]);
     flow.activityHistory.addAll(<ActivityRecord>[
       ActivityRecord(
           gameId: 'route_quest',
@@ -232,8 +232,8 @@ void main() {
   });
 
   testWidgets('with no history it says so plainly', (tester) async {
-    await tester.pumpWidget(
-        wrap(flowWith(recommendations: <Map<String, dynamic>>[])));
+    await tester
+        .pumpWidget(wrap(flowWith(recommendations: <Map<String, dynamic>>[])));
     await tester.pumpAndSettle();
 
     expect(find.textContaining('No activities recorded yet'), findsOneWidget);

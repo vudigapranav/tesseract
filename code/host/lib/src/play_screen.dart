@@ -40,6 +40,7 @@ class _PlayScreenState extends State<PlayScreen> {
     repository: widget.flowState.repository,
     patientId: widget.flowState.patientId,
     preferTouch: widget.flowState.preferTouch,
+    patientLanguageCode: widget.flowState.effectivePatientLanguageCode,
     // Caregiver-entered Know Me content, as opaque-id items. Falls back to
     // neutral places when Know Me was skipped or is short.
     items: KnowMeContent.itemsFor(widget.flowState, widget.registration.gameId),

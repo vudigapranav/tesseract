@@ -3,7 +3,9 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:tesseract_host/l10n/app_localizations.dart';
 import 'package:tesseract_host/src/design_system.dart';
+import 'package:tesseract_host/src/l10n/language_catalogue.dart';
 import 'package:tesseract_host/src/phone_frame.dart';
 
 /// Loads real Roboto weights and the Material Icons font (all shipped with
@@ -27,6 +29,15 @@ Future<void> loadAppFonts() async {
   ]);
   await loadFamily(
       'MaterialIcons', <String>['test/fonts/MaterialIcons-Regular.otf']);
+
+  // The scripts the app bundles fonts for. Widget tests do not pick up
+  // pubspec-declared fonts automatically, so without these the Bengali,
+  // Assamese and Meitei goldens render as empty boxes and would hide whether
+  // the theme's font fallback actually works.
+  await loadFamily(
+      'NotoSansBengali', <String>['fonts/NotoSansBengali-Regular.ttf']);
+  await loadFamily(
+      'NotoSansMeeteiMayek', <String>['fonts/NotoSansMeeteiMayek-Regular.ttf']);
 }
 
 /// Pumps [screen] at exactly 360x740 dp (device pixel ratio 1), optionally
@@ -37,7 +48,7 @@ Future<void> loadAppFonts() async {
 /// `pumpAndSettle` would hang waiting for a frame that never stops being
 /// scheduled. A golden only needs one stable frame anyway.
 Future<void> pumpForGolden(WidgetTester tester, Widget screen,
-    {double textScale = 1.0}) async {
+    {double textScale = 1.0, String locale = 'en'}) async {
   tester.view.devicePixelRatio = 1.0;
   tester.view.physicalSize = const Size(kHostFrameWidth, kHostFrameHeight);
   addTearDown(tester.view.resetPhysicalSize);
@@ -52,6 +63,11 @@ Future<void> pumpForGolden(WidgetTester tester, Widget screen,
       // The app's real theme, so a golden shows what ships rather than a
       // stand-in palette that no screen actually uses.
       theme: TesseractDesign.theme,
+      // Every screen now reads localized strings, so a golden without these
+      // delegates would throw rather than render.
+      locale: Locale(locale),
+      supportedLocales: LanguageCatalogue.supportedLocales,
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
       home: screen,
     ),
   );

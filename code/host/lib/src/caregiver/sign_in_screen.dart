@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 
+import '../../l10n/app_localizations.dart';
 import '../data/identity_service.dart';
 import '../design_system.dart';
+import '../l10n/language_catalogue.dart';
+import '../l10n/language_selector.dart';
 import '../doctor/doctor_patients_screen.dart';
 import '../host_flow_state.dart';
 import 'caregiver_home_screen.dart';
@@ -58,8 +61,7 @@ class _SignInScreenState extends State<SignInScreen> {
       if (mounted) {
         // Never fall through to any offline or synthetic access on a failed
         // real sign-in: a refused identity must stay refused.
-        setState(() => error =
-            'Could not verify sign-in and access. Check your details and connection.');
+        setState(() => error = AppLocalizations.of(context).signInFailed);
       }
     } finally {
       if (mounted) {
@@ -82,9 +84,41 @@ class _SignInScreenState extends State<SignInScreen> {
         builder: (_) => CaregiverHomeScreen(flowState: widget.flowState)));
   }
 
+  /// Language can be chosen before signing in — someone who cannot read the
+  /// English form should not have to authenticate first to fix that.
+  Future<void> _pickLanguage() async {
+    await showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: TesseractDesign.cream,
+      shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(top: Radius.circular(28))),
+      builder: (BuildContext sheetContext) => SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(24),
+          child: LanguageSelector(
+            selectedCode: widget.flowState.interfaceLanguageCode,
+            onSelected: (String code) async {
+              Navigator.of(sheetContext).pop();
+              // Applies immediately, without restarting or losing what has
+              // already been typed into the form above.
+              await widget.flowState.setInterfaceLanguage(code);
+              if (mounted) {
+                setState(() {});
+              }
+            },
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
+    final AppLocalizations l10n = AppLocalizations.of(context);
+    final LanguageOption language =
+        LanguageCatalogue.byCode(widget.flowState.interfaceLanguageCode);
     return Scaffold(
       backgroundColor: Colors.transparent,
       body: TesseractBackground(
@@ -92,27 +126,38 @@ class _SignInScreenState extends State<SignInScreen> {
           child: ListView(
             padding: const EdgeInsets.all(28),
             children: <Widget>[
+              Align(
+                alignment: Alignment.centerRight,
+                child: TextButton.icon(
+                  onPressed: _pickLanguage,
+                  icon: const Icon(Icons.translate, size: 22),
+                  // The current language shows in its own script, so it is
+                  // recognisable without reading English.
+                  label: Text(language.endonym),
+                ),
+              ),
               const Center(child: ActivityIllustration()),
               const SizedBox(height: 8),
-              Text('A familiar moment.\nA little joy.',
-                  style: theme.textTheme.headlineMedium),
+              Text(l10n.signInTitle, style: theme.textTheme.headlineMedium),
               const SizedBox(height: 12),
               Text(
-                'Set up meaningful activities and everyday reminders, together.',
+                l10n.signInSubtitle,
                 style: theme.textTheme.bodyLarge
                     ?.copyWith(color: TesseractDesign.inkSoft),
               ),
+              DraftLanguageBanner(
+                  languageCode: widget.flowState.interfaceLanguageCode),
               const SizedBox(height: 24),
               SegmentedButton<String>(
-                segments: const <ButtonSegment<String>>[
+                segments: <ButtonSegment<String>>[
                   ButtonSegment<String>(
                       value: 'caregiver',
-                      label: Text('Caregiver'),
-                      icon: Icon(Icons.favorite_border)),
+                      label: Text(l10n.roleCaregiver),
+                      icon: const Icon(Icons.favorite_border)),
                   ButtonSegment<String>(
                       value: 'doctor',
-                      label: Text('Doctor'),
-                      icon: Icon(Icons.medical_information_outlined)),
+                      label: Text(l10n.roleDoctor),
+                      icon: const Icon(Icons.medical_information_outlined)),
                 ],
                 selected: <String>{role},
                 onSelectionChanged: (Set<String> value) =>
@@ -124,15 +169,16 @@ class _SignInScreenState extends State<SignInScreen> {
                 keyboardType: TextInputType.emailAddress,
                 autofillHints: const <String>[AutofillHints.username],
                 decoration: InputDecoration(
-                    labelText:
-                        role == 'doctor' ? 'Doctor email' : 'Caregiver email'),
+                    labelText: role == 'doctor'
+                        ? l10n.emailDoctor
+                        : l10n.emailCaregiver),
               ),
               const SizedBox(height: 16),
               TextField(
                 controller: password,
                 obscureText: true,
                 autofillHints: const <String>[AutofillHints.password],
-                decoration: const InputDecoration(labelText: 'Password'),
+                decoration: InputDecoration(labelText: l10n.password),
               ),
               if (error != null)
                 Padding(
@@ -145,19 +191,16 @@ class _SignInScreenState extends State<SignInScreen> {
                 ),
               const SizedBox(height: 24),
               PillButton(
-                label: busy ? 'Verifying access…' : 'Sign in',
+                label: busy ? l10n.signingIn : l10n.signIn,
                 onPressed: busy || !IdentityService.configured ? null : signIn,
               ),
               if (!IdentityService.configured)
-                const Padding(
-                  padding: EdgeInsets.symmetric(vertical: 14),
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 14),
                   child: StatusNote(
                     icon: Icons.info_outline,
                     tone: StatusTone.attention,
-                    text: 'Sign-in is not configured in this build. It needs a '
-                        'Firebase project and a backend address, which are '
-                        'supplied at build time. Nothing is signed in until '
-                        'then — there is no offline substitute.',
+                    text: l10n.signInNotConfigured,
                   ),
                 ),
               if (const bool.fromEnvironment('TESSERACT_ALLOW_PREVIEW'))
@@ -167,8 +210,7 @@ class _SignInScreenState extends State<SignInScreen> {
                 ),
               const SizedBox(height: 8),
               Text(
-                'The person using the activities does not sign in. A caregiver '
-                'sets things up and hands the device over.',
+                l10n.signInPatientNote,
                 style: theme.textTheme.bodyMedium
                     ?.copyWith(color: TesseractDesign.inkSoft),
               ),

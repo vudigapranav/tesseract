@@ -246,6 +246,38 @@ class HostFlowState extends ChangeNotifier {
     await synchronize();
   }
 
+  /// The caregiver's or doctor's own interface language.
+  String interfaceLanguageCode = 'en';
+
+  /// The language the person playing sees: activity instructions, Help and
+  /// Break, and game content. Configured by the caregiver and deliberately
+  /// **independent** of the interface language, because the caregiver and the
+  /// person they care for may not read the same language.
+  ///
+  /// Empty means "not chosen yet", in which case it follows the interface
+  /// language, matching "default it to the setup language".
+  String patientLanguageCode = '';
+
+  /// The language actually used for patient-facing text.
+  String get effectivePatientLanguageCode =>
+      patientLanguageCode.isEmpty ? interfaceLanguageCode : patientLanguageCode;
+
+  /// Change the interface language and apply it immediately.
+  ///
+  /// Does not touch the patient's language once that has been chosen
+  /// separately, and does not sign anyone out or disturb a running session.
+  Future<void> setInterfaceLanguage(String code) async {
+    interfaceLanguageCode = code;
+    displayPreferencesChanged();
+    await save();
+  }
+
+  Future<void> setPatientLanguage(String code) async {
+    patientLanguageCode = code;
+    displayPreferencesChanged();
+    await save();
+  }
+
   bool patientMode = false;
   bool reducedMotion = false;
   bool preferTouch = false;
@@ -269,6 +301,8 @@ class HostFlowState extends ChangeNotifier {
         'condition': knownConditionType,
         'caregiver_name': caregiverName,
         'patient_mode': patientMode,
+        'interface_language': interfaceLanguageCode,
+        'patient_language_code': patientLanguageCode,
         'text_scale': textScalePreference,
         'audio': audioEnabled,
         'reduced_motion': reducedMotion,
@@ -307,6 +341,8 @@ class HostFlowState extends ChangeNotifier {
       reducedMotion = data['reduced_motion'] == true;
       preferTouch = data['prefer_touch'] == true;
       audioEnabled = data['audio'] != false;
+      interfaceLanguageCode = data['interface_language'] as String? ?? 'en';
+      patientLanguageCode = data['patient_language_code'] as String? ?? '';
       textScalePreference = (data['text_scale'] as num? ?? 1).toDouble();
       tutorialShownGameIds
           .addAll((data['tutorials'] as List? ?? []).cast<String>());

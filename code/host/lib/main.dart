@@ -1,5 +1,8 @@
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
+
+import 'l10n/app_localizations.dart';
+import 'src/l10n/language_catalogue.dart';
 import 'src/caregiver/sign_in_screen.dart';
 import 'src/host_flow_state.dart';
 import 'src/home_screen.dart';
@@ -92,6 +95,11 @@ class _HostAppState extends State<HostApp> {
       navigatorKey: _navigatorKey,
       debugShowCheckedModeBanner: false,
       theme: TesseractDesign.theme,
+      // Changing this rebuilds the tree in place: the language switch is
+      // immediate, and does not restart, sign out or drop a running session.
+      locale: Locale(flow.interfaceLanguageCode),
+      supportedLocales: LanguageCatalogue.supportedLocales,
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
       home: flow.patientMode
           ? HomeScreen(flowState: flow)
           : SignInScreen(flowState: flow),

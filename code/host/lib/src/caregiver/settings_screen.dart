@@ -1,5 +1,10 @@
 import 'package:flutter/material.dart';
+import '../../l10n/app_localizations.dart';
+import '../design_system.dart';
 import '../host_flow_state.dart';
+import '../l10n/language_catalogue.dart';
+import '../l10n/language_selector.dart';
+import 'about_screen.dart';
 import 'sign_in_screen.dart';
 
 class SettingsScreen extends StatefulWidget {
@@ -42,6 +47,49 @@ class _SettingsScreenState extends State<SettingsScreen> {
         (_) => false);
   }
 
+  /// Opens the picker for either the interface or the patient language.
+  ///
+  /// The two are deliberately separate: the caregiver and the person they
+  /// care for may not read the same language.
+  Future<void> _pickLanguage({required bool forPatient}) async {
+    final flow = widget.flowState;
+    final l10n = AppLocalizations.of(context);
+    await showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: TesseractDesign.cream,
+      shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(top: Radius.circular(28))),
+      builder: (sheetContext) => SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(24),
+          child: LanguageSelector(
+            title: forPatient ? l10n.patientLanguage : l10n.interfaceLanguage,
+            subtitle: forPatient
+                ? l10n.patientLanguageHelp
+                : l10n.interfaceLanguageHelp,
+            selectedCode: forPatient
+                ? flow.effectivePatientLanguageCode
+                : flow.interfaceLanguageCode,
+            onSelected: (code) async {
+              Navigator.of(sheetContext).pop();
+              // Applies at once; does not restart, sign out or disturb a
+              // running session.
+              if (forPatient) {
+                await flow.setPatientLanguage(code);
+              } else {
+                await flow.setInterfaceLanguage(code);
+              }
+              if (mounted) {
+                setState(() {});
+              }
+            },
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final flow = widget.flowState;
@@ -49,6 +97,21 @@ class _SettingsScreenState extends State<SettingsScreen> {
         appBar: AppBar(title: const Text('Settings & sync')),
         body: SafeArea(
             child: ListView(padding: const EdgeInsets.all(24), children: [
+          DraftLanguageBanner(languageCode: flow.interfaceLanguageCode),
+          ListTile(
+              leading: const Icon(Icons.translate),
+              title: Text(AppLocalizations.of(context).interfaceLanguage),
+              subtitle: Text(
+                  LanguageCatalogue.byCode(flow.interfaceLanguageCode).endonym),
+              onTap: () => _pickLanguage(forPatient: false)),
+          ListTile(
+              leading: const Icon(Icons.record_voice_over_outlined),
+              title: Text(AppLocalizations.of(context).patientLanguage),
+              subtitle: Text(
+                  LanguageCatalogue.byCode(flow.effectivePatientLanguageCode)
+                      .endonym),
+              onTap: () => _pickLanguage(forPatient: true)),
+          const Divider(height: 32),
           SwitchListTile(
               title: const Text('Reminder sound'),
               subtitle: const Text(
@@ -112,8 +175,16 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   title: const Text('Pending session uploads'),
                   subtitle: Text(
                       '${snapshot.data?.length ?? 0} retained on this device'))),
+          const SizedBox(height: 12),
+          ListTile(
+              leading: const Icon(Icons.info_outline),
+              title: Text(AppLocalizations.of(context).aboutTesseract),
+              onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(
+                  builder: (_) => const AboutScreen()))),
           const SizedBox(height: 24),
-          OutlinedButton(onPressed: signOut, child: const Text('Sign out')),
+          OutlinedButton(
+              onPressed: signOut,
+              child: Text(AppLocalizations.of(context).signOut)),
         ])));
   }
 }

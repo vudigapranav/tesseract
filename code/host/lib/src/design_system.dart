@@ -37,6 +37,13 @@ abstract final class TesseractDesign {
         // their style outside textTheme, so without this they fall back to a
         // family the golden renderer has no glyphs for and draw as blocks.
         fontFamily: 'Roboto',
+        // Bengali-Assamese and Meetei Mayek fall back to bundled Noto faces,
+        // so those scripts render even on a device without system fonts for
+        // them. Without this they would draw as empty boxes.
+        fontFamilyFallback: const <String>[
+          'NotoSansBengali',
+          'NotoSansMeeteiMayek',
+        ],
         scaffoldBackgroundColor: cream,
         colorScheme: ColorScheme.fromSeed(
             seedColor: coral,
@@ -68,6 +75,13 @@ abstract final class TesseractDesign {
                 // inside a button theme, so the family is named again here.
                 textStyle: const TextStyle(
                     fontFamily: 'Roboto',
+                    // Bengali-Assamese and Meetei Mayek fall back to bundled Noto faces,
+                    // so those scripts render even on a device without system fonts for
+                    // them. Without this they would draw as empty boxes.
+                    fontFamilyFallback: <String>[
+                      'NotoSansBengali',
+                      'NotoSansMeeteiMayek',
+                    ],
                     fontSize: 18,
                     fontWeight: FontWeight.w600),
                 shape: const StadiumBorder())),

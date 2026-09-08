@@ -76,7 +76,8 @@ void main() {
     );
   }
 
-  http.Response acknowledgeAll(http.Request request, {required bool asDuplicate}) {
+  http.Response acknowledgeAll(http.Request request,
+      {required bool asDuplicate}) {
     if (request.url.path.endsWith('events:batch')) {
       final Map<String, dynamic> body =
           jsonDecode(request.body) as Map<String, dynamic>;

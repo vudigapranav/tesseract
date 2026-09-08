@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../games/game_registry.dart';
+import 'default_content.dart';
 import 'host_flow_state.dart';
 import 'host_strings.dart';
 import 'play_screen.dart';
@@ -44,7 +45,9 @@ class HowToPlayScreen extends StatelessWidget {
               Icon(registration.icon, size: 56),
               const SizedBox(height: 16),
               Text(
-                _instructionsFor(registration.gameId, flowState.preferTouch),
+                localizedInstructions(
+                    flowState.effectivePatientLanguageCode, registration.gameId,
+                    preferTouch: flowState.preferTouch),
                 style: Theme.of(context).textTheme.titleLarge,
                 textAlign: TextAlign.center,
               ),
@@ -74,38 +77,5 @@ class HowToPlayScreen extends StatelessWidget {
         )),
       ),
     );
-  }
-}
-
-/// One short, concrete instruction per activity.
-///
-/// Written for the person playing, not for a reviewer: what to do first, what
-/// finishes it, and the reassurance that Help is there. Every game says Help
-/// is available, because a patient who cannot find it will simply stop.
-String _instructionsFor(String gameId, bool preferTouch) {
-  switch (gameId) {
-    case 'route_quest':
-      return 'Follow the road to the flag. Tap a connected place to move. '
-          'Pick up the flag, then return home. Help shows the way.';
-    case 'marble_maze':
-      return preferTouch
-          ? 'Guide the marble along the wooden paths with your finger. Reach '
-              'the glowing goal. Help shows the route.'
-          : 'Hold your phone comfortably while it settles, then gently tilt to '
-              'guide the marble to the glowing goal. If tilt is unavailable, '
-              'use your finger. Help shows the route.';
-    case 'word_search':
-      return 'Find each word in the letters. Tap the first letter, then tap '
-          'the last letter. Words go across, down, and sometimes at an angle. '
-          'Help points out a word.';
-    case 'routine_recall':
-      return 'You will see a step from the day. Choose what usually comes '
-          'next. If it is not the one, just try again. Help shows the answer.';
-    case 'picture_sorting':
-      return 'Look at the picture, then choose the group it belongs to. If it '
-          'is not the one, just try again. Help shows the group.';
-    default:
-      return 'Take your time. Help is always there if you need it, and you '
-          'can take a break whenever you like.';
   }
 }

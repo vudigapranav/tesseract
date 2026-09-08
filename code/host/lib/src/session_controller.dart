@@ -35,6 +35,7 @@ class SessionController {
       this.repository,
       this.patientId = '',
       this.preferTouch = false,
+      this.patientLanguageCode = 'en',
       this.items})
       : _random = Random.secure() {
     sessionId = generateUuidV4(_random);
@@ -43,6 +44,10 @@ class SessionController {
   final LocalRepository? repository;
   final String patientId;
   final bool preferTouch;
+
+  /// The language the person playing reads. Drives the game's own Help,
+  /// Break and pause text.
+  final String patientLanguageCode;
   final List<GameItem>? items;
   Future<void> _writes = Future<void>.value();
   Object? persistenceError;
@@ -91,7 +96,7 @@ class SessionController {
       level: level,
       difficultyParams: registration.difficultyParamsFor(level),
       items: items == null || items!.isEmpty ? defaultGameItems() : items!,
-      strings: defaultGameStrings(),
+      strings: localizedGameStrings(patientLanguageCode),
       textScale: textScale,
       inputMode: registration.gameId == 'marble_maze' && !preferTouch
           ? GameInputMode.tilt

@@ -14,6 +14,10 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+  intl: any
+  package_info_plus: ^8.1.2
   tesseract_game_contract:
     path: ../packages/tesseract_game_contract
   route_quest:
@@ -48,3 +52,14 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+  generate: true
+  fonts:
+    # Bundled so Bengali-Assamese and Meetei Mayek render on entry-level
+    # Android devices that may not ship those system fonts. SIL Open Font
+    # License — see fonts/LICENSE-NOTO.txt.
+    - family: NotoSansBengali
+      fonts:
+        - asset: fonts/NotoSansBengali-Regular.ttf
+    - family: NotoSansMeeteiMayek
+      fonts:
+        - asset: fonts/NotoSansMeeteiMayek-Regular.ttf

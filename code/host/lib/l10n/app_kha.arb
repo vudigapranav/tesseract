@@ -1,0 +1,19 @@
+{
+  "@@locale": "kha",
+
+  "languageName": "Ka Ktien Khasi",
+
+  "help": "Iarap",
+  "home": "Ïing",
+  "today": "Mynta ka sngi",
+  "languageLabel": "Ktien",
+  "start": "Bad",
+  "continueLabel": "Pyntip",
+  "cancel": "Bret",
+  "save": "Buh",
+  "roleCaregiver": "Nongri",
+  "roleDoctor": "Doktor",
+  "signIn": "Rung",
+  "signOut": "Mih",
+  "password": "Jingbatai"
+}
