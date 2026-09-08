@@ -194,6 +194,42 @@ class HostFlowState {
     }
   }
 
+  /// Pending proposals only. A decided one is removed by refetching.
+  List<Map<String, dynamic>> get pendingRecommendations => recommendations
+      .where((r) => r['status'] == 'pending')
+      .toList(growable: false);
+
+  /// Send a caregiver's decision on a proposed activity change.
+  ///
+  /// The reviewer is taken from the bearer token by the server, never sent
+  /// from here. `expected_config_version` guards against a stale proposal
+  /// overwriting a newer approved configuration — the server answers 409
+  /// rather than applying it, and that surfaces to the caregiver instead of
+  /// being retried silently.
+  ///
+  /// Nothing local is treated as approved: the approved activity is only
+  /// updated from the server's own activity endpoint afterwards.
+  Future<void> decideRecommendation(
+    String recommendationId, {
+    required String decision,
+    Map<String, Object?>? modifiedConfig,
+  }) async {
+    if (api == null) {
+      throw StateError(
+          'Not connected. A change can only be approved while signed in.');
+    }
+    await api!.request(
+      'POST',
+      '/v1/recommendations/$recommendationId/decision',
+      <String, Object?>{
+        'decision': decision,
+        if (modifiedConfig != null) 'modified_config': modifiedConfig,
+        'expected_config_version': configVersion,
+      },
+    );
+    await synchronize();
+  }
+
   bool patientMode = false;
   bool reducedMotion = false;
   bool preferTouch = false;

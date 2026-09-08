@@ -682,3 +682,55 @@ propagation, and real session history — then the patient-facing visual pass.
 Ask the user for the Firebase project/provider choice and HTTPS backend URL,
 and for an Android device for the reminder and tilt checks that cannot be
 verified in this environment.
+
+### 2026-09-08 Claude — second pass: caregiver decision loop and design system
+
+Continued in the same clone after the verification/repair pass above.
+
+**Reusable design system before applying it.** `design_system.dart` gained
+tokens (`inkSoft`, `pageGradient`, `gutter`, `cardRadius`, `patientTarget` at
+64dp) and components: `TesseractBackground`, `TesseractCard` (with a peach
+`accent` variant), `SectionHeading`, `PillButton`, `StatusNote` and
+`BigPatientAction`. Coral stays decorative: `StatusNote` and the activity rows
+carry meaning in icon **and** words, so nothing depends on colour alone.
+
+**C4 Caregiver Home rebuilt** (`caregiver_home_screen.dart`, was untouched
+skeleton): real recent activity from stored sessions, truthful sync status,
+a preview-data warning when synthetic, storage-error surfacing, and the
+**pending recommendation card with accept / choose level / keep as is**, wired
+to `POST /v1/recommendations/{id}/decision` through the new
+`HostFlowState.decideRecommendation`. `expected_config_version` is always sent
+so a stale proposal cannot overwrite newer approved config; a 409 surfaces to
+the caregiver as "nothing was changed" instead of being retried silently. The
+card states in plain words that the thresholds are still being tested and that
+the caregiver decides.
+
+**Two real defects found by looking at the generated screenshots, not by
+assuming they were fine:**
+
+1. Filled button labels rendered as blank white blocks. `ThemeData.fontFamily`
+   reaches `textTheme` but not a raw `TextStyle` inside `filledButtonTheme`, so
+   every black pill button in the app was drawing `.notdef` boxes. Fixed by
+   naming the family in both places.
+2. Game names displayed as raw ids (`route_quest`). The registry stores
+   `route_quest_name`; the recommendation card was passing the bare `game_id`.
+   Added `HostStrings.gameName()` for the API's id form. Also replaced a `→`
+   glyph (no glyph in the loaded faces, drew as a box) with the words "from
+   level 1 to level 2", which also reads correctly aloud.
+
+Also fixed: the golden helper rendered every screenshot with an old green
+placeholder theme that no screen uses, so goldens did not show the shipping
+design. It now uses `TesseractDesign.theme`; all goldens regenerated.
+
+**Checks run:** `flutter analyze` clean. Host suite **71 passing** (56 → 71:
+12 caregiver-decision behavioural tests plus 3 caregiver goldens). Whole
+project **126 passing** (contract 22, route_quest 16, marble_maze 17, host 71).
+`flutter build apk --debug` succeeds against the current code. Screenshots
+inspected directly: caregiver home at 1x and 2x text scale (wraps cleanly, no
+overflow, no clipping) and patient home.
+
+**Still NOT TESTED and unchanged from above:** no Android device is connected,
+so notifications, the biometric gate and tilt remain unverified; Firebase has
+never run against a real project; the outbox has never reached the live
+backend. The decision loop is proven against a mocked client shaped to the
+contract, not against the running service.

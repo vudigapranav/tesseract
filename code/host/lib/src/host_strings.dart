@@ -8,4 +8,10 @@ abstract final class HostStrings {
   };
 
   static String displayName(String key) => _displayNames[key] ?? key;
+
+  /// Display name from a bare `game_id` (as the API returns it), rather than
+  /// from a registry display key. Without this the caregiver sees the raw
+  /// identifier, e.g. "route_quest".
+  static String gameName(String gameId) =>
+      _displayNames['${gameId}_name'] ?? _displayNames[gameId] ?? gameId;
 }

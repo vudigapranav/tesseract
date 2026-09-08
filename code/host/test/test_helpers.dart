@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:tesseract_host/src/design_system.dart';
 import 'package:tesseract_host/src/phone_frame.dart';
 
 /// Loads real Roboto weights and the Material Icons font (all shipped with
@@ -48,8 +49,9 @@ Future<void> pumpForGolden(WidgetTester tester, Widget screen,
   await tester.pumpWidget(
     MaterialApp(
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-          colorSchemeSeed: const Color(0xFF2E7D5B), useMaterial3: true),
+      // The app's real theme, so a golden shows what ships rather than a
+      // stand-in palette that no screen actually uses.
+      theme: TesseractDesign.theme,
       home: screen,
     ),
   );
