@@ -13,12 +13,13 @@
  * Events: collision {wallId}, dead_end_entered {deadEndId}, goal_reached.
  */
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { StyleSheet, View, useWindowDimensions } from 'react-native';
-import Svg, { Circle, Rect } from 'react-native-svg';
+import { View } from 'react-native';
+import Svg, { Circle, Defs, G, RadialGradient, Rect, Stop } from 'react-native-svg';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
-import { colors, spacing } from '../../design/tokens';
-import { BodyMedium, StatusNote, TitleLarge } from '../../design/components';
+import { colors } from '../../design/tokens';
+import { BodyMedium, StatusNote } from '../../design/components';
 import { GameScaffold } from '../GameScaffold';
+import { GameLayout } from '../presentation';
 import {
   GameInputMode,
   GameResultStatus,
@@ -48,9 +49,10 @@ export function MarbleMazeGame({
 }) {
   const recorder = useRef(new TesseractEventRecorder()).current;
   const maze = useMemo(() => mazeForLevel(config.level), [config.level]);
-  const { width } = useWindowDimensions();
-  const size = Math.min(width - spacing.gutter * 2, 380);
-  const cell = size / maze.cols;
+  // Cell size is resolved by GameLayout from the real board width, so the
+  // maze fits any screen instead of assuming one.
+  const cellFor = (boardSize: number) => (boardSize - 20) / maze.cols;
+  const cell = 24;
 
   const [pos, setPos] = useState({ x: maze.start[0] + 0.5, y: maze.start[1] + 0.5 });
   const [paused, setPaused] = useState(false);
@@ -213,83 +215,122 @@ export function MarbleMazeGame({
         finish(GameResultStatus.stoppedByUser);
       }}
     >
-      <View style={styles.body}>
-        <TitleLarge center>{gameText(config.strings, 'maze_title')}</TitleLarge>
+      <GameLayout
+        prompt={gameText(config.strings, 'maze_title')}
+        // The control mode in effect, stated plainly and never guessed.
+        subPrompt={
+          motionOffered && !motionReady
+            ? gameText(config.strings, 'maze_hold_still')
+            : usingMotion
+              ? gameText(config.strings, 'maze_motion_mode')
+              : gameText(config.strings, 'maze_touch_mode')
+        }
+        boardAspect={maze.rows / maze.cols}
+        board={(size) => {
+          const c = cellFor(size);
+          const w = c * maze.cols;
+          const h = c * maze.rows;
+          return (
+            <GestureDetector gesture={pan}>
+              <View
+                style={{ width: w, height: h }}
+                accessible
+                accessibilityRole="adjustable"
+                accessibilityLabel={gameText(config.strings, 'maze_title')}
+                accessibilityHint={gameText(config.strings, 'maze_touch_mode')}
+              >
+                <Svg width={w} height={h}>
+                  <Defs>
+                    <RadialGradient id="goalGlow" cx="50%" cy="50%" r="50%">
+                      <Stop offset="0%" stopColor={colors.coral} stopOpacity={0.9} />
+                      <Stop offset="100%" stopColor={colors.coral} stopOpacity={0.15} />
+                    </RadialGradient>
+                  </Defs>
 
-        {motionOffered && !motionReady ? (
-          <StatusNote glyph="◎" text={gameText(config.strings, 'maze_hold_still')} />
-        ) : null}
+                  {/* Corridors are drawn as one rounded path per open cell
+                      with a slight overlap, so the route reads as a
+                      continuous channel rather than a grid of tiles. */}
+                  {maze.open.map((row, r) =>
+                    row.map((open, col) =>
+                      open ? (
+                        <Rect
+                          key={`${r}-${col}`}
+                          x={col * c - 0.5}
+                          y={r * c - 0.5}
+                          width={c + 1}
+                          height={c + 1}
+                          rx={c * 0.28}
+                          fill={colors.peach}
+                        />
+                      ) : null,
+                    ),
+                  )}
+
+                  {/* The goal glows, so it is findable at a glance. */}
+                  <Circle
+                    cx={(maze.goal[0] + 0.5) * c}
+                    cy={(maze.goal[1] + 0.5) * c}
+                    r={c * 0.95}
+                    fill="url(#goalGlow)"
+                  />
+                  <Circle
+                    cx={(maze.goal[0] + 0.5) * c}
+                    cy={(maze.goal[1] + 0.5) * c}
+                    r={c * 0.34}
+                    fill={colors.coral}
+                  />
+
+                  {showHint
+                    ? maze.deadEndCells.map((d) => (
+                        <Rect
+                          key={d.id}
+                          x={d.col * c + 2}
+                          y={d.row * c + 2}
+                          width={c - 4}
+                          height={c - 4}
+                          rx={c * 0.24}
+                          fill="none"
+                          stroke={colors.attention}
+                          strokeWidth={2}
+                          strokeDasharray="3 4"
+                        />
+                      ))
+                    : null}
+
+                  {/* The marble gets a soft contact shadow and a highlight so
+                      it reads as an object on the board, not a flat dot. */}
+                  <G>
+                    <Circle
+                      cx={pos.x * c}
+                      cy={pos.y * c + c * 0.12}
+                      r={c * 0.34}
+                      fill={colors.ink}
+                      opacity={0.16}
+                    />
+                    <Circle cx={pos.x * c} cy={pos.y * c} r={c * 0.34} fill={colors.ink} />
+                    <Circle
+                      cx={pos.x * c - c * 0.1}
+                      cy={pos.y * c - c * 0.12}
+                      r={c * 0.1}
+                      fill="#FFFFFF"
+                      opacity={0.5}
+                    />
+                  </G>
+                </Svg>
+              </View>
+            </GestureDetector>
+          );
+        }}
+      >
         {!motionOffered ? (
-          // Says plainly that motion is not being used, rather than silently
-          // behaving like a touch game and reporting tilt.
-          <StatusNote glyph="✋" text={gameText(config.strings, 'maze_touch_mode')} />
+          <StatusNote icon="hand" text={gameText(config.strings, 'maze_touch_mode')} />
         ) : null}
-
-        <GestureDetector gesture={pan}>
-          <View
-            style={{ width: size, height: (size / maze.cols) * maze.rows, alignSelf: 'center', marginTop: 8 }}
-            accessible
-            accessibilityRole="adjustable"
-            accessibilityLabel={gameText(config.strings, 'maze_title')}
-            accessibilityHint={gameText(config.strings, 'maze_touch_mode')}
-          >
-            <Svg width={size} height={(size / maze.cols) * maze.rows}>
-              {maze.open.map((rowCells, r) =>
-                rowCells.map((open, c) =>
-                  open ? (
-                    <Rect
-                      key={`${r}-${c}`}
-                      x={c * cell}
-                      y={r * cell}
-                      width={cell}
-                      height={cell}
-                      fill={colors.peach}
-                    />
-                  ) : null,
-                ),
-              )}
-              <Rect
-                x={maze.goal[0] * cell}
-                y={maze.goal[1] * cell}
-                width={cell}
-                height={cell}
-                fill={colors.coral}
-                rx={4}
-              />
-              {showHint
-                ? maze.deadEndCells.map((d) => (
-                    <Rect
-                      key={d.id}
-                      x={d.col * cell}
-                      y={d.row * cell}
-                      width={cell}
-                      height={cell}
-                      fill="none"
-                      stroke={colors.attention}
-                      strokeWidth={2}
-                    />
-                  ))
-                : null}
-              <Circle
-                cx={pos.x * cell}
-                cy={pos.y * cell}
-                r={cell * 0.34}
-                fill={colors.ink}
-              />
-            </Svg>
-          </View>
-        </GestureDetector>
-
-        <BodyMedium tone="soft" center style={{ marginTop: 10 }}>
-          {usingMotion
-            ? gameText(config.strings, 'maze_motion_mode')
-            : gameText(config.strings, 'maze_touch_mode')}
+        <BodyMedium center tone="soft">
+          {gameText(config.strings, 'maze_touch_mode')}
         </BodyMedium>
-      </View>
+      </GameLayout>
     </GameScaffold>
   );
 }
 
-const styles = StyleSheet.create({
-  body: { flex: 1, paddingHorizontal: spacing.gutter, paddingTop: 8 },
-});
+

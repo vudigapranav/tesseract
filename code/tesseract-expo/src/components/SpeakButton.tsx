@@ -59,7 +59,7 @@ export function SpeakButton({
                 language: languageByCode(languageCode).endonym,
               })
             : translate(languageCode, 'speechFailed');
-    return <StatusNote glyph="🔇" text={message} />;
+    return <StatusNote icon="speakerOff" text={message} />;
   }
 
   const label = speaking

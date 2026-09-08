@@ -791,3 +791,32 @@ biometric caregiver gate, bundled Noto fonts, clean first-run language picker.
 Verified: TypeScript clean, **50 tests**, expo-doctor 21/21, iOS bundle builds,
 opening screen + sign-in captured on **iOS Simulator** (iPhone 17 Pro, iOS 26.5,
 Expo Go 57.0.9). **No iPhone hardware verification has been performed.**
+
+
+## 2026-09-08 — Hindi and game presentation layer
+
+**Hindi** added as a seventh language: all 168 translatable keys, covering every
+screen, game string, reminder and speech/voice string. Coverage **hi 100%**,
+**still draft** — no fluent-speaker review. `NotoSansDevanagari` bundled.
+Adding Hindi does not change the NER gap: mni/kha/lus remain 8% and draft, and
+a test asserts it.
+
+Hindi TTS: Apple ships a hi-IN voice, so it is expected to work, but the app
+probes the device rather than assuming. Hindi STT: **impossible in Expo Go**,
+like every language. Device result **NOT TESTED**.
+
+**Game presentation.** Shared standards added (`src/games/presentation.tsx`,
+`src/games/ChoiceCard.tsx`) plus a 16-icon SVG set replacing emoji/dingbats in
+14 files. Boards now size against the screen and cap, one feedback vocabulary
+carried by shape as well as colour, forgiving 44pt targets, restrained motion
+that respects reduce-motion. Per-game fixes to grid alignment, path/landmark
+readability, maze geometry and marble/goal visibility, sequence context and
+placement feedback.
+
+**No behavioural change:** rules, difficulty, event names, payloads, sequencing
+and exactly-once finalization are untouched — 65 tests pass unchanged.
+
+Verified: TypeScript clean, 65 tests, expo-doctor 21/21, iOS bundle builds.
+**NOT TESTED:** all gameplay on iPhone hardware — touch precision, motion feel,
+performance, Devanagari wrapping at large text, VoiceOver order, before/after
+device comparison.

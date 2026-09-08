@@ -77,7 +77,7 @@ export function DoctorPatientsScreen({
       <HeadlineLarge>{t('myPatients')}</HeadlineLarge>
       <BodyMedium tone="soft">{t('assignedToYou')}</BodyMedium>
 
-      {error ? <StatusNote glyph="!" tone="attention" text={error} /> : null}
+      {error ? <StatusNote icon="alert" tone="attention" text={error} /> : null}
 
       {patients && patients.length === 0 && !error ? (
         <Card>
@@ -171,7 +171,7 @@ export function DoctorPatientDetailScreen({
 
       <SectionHeading title={t('observedMeasures')} />
       <Card>
-        {error ? <StatusNote glyph="!" tone="attention" text={error} /> : null}
+        {error ? <StatusNote icon="alert" tone="attention" text={error} /> : null}
         {!error && measures.length === 0 ? (
           // Never a fabricated zero: an absent measure is shown as absent.
           <BodyLarge tone="soft">{t('notMeasured')}</BodyLarge>
@@ -182,7 +182,7 @@ export function DoctorPatientDetailScreen({
             <BodyLarge tone="soft">{String(v)}</BodyLarge>
           </View>
         ))}
-        <StatusNote glyph="ℹ" text={t('doctorDisclaimer')} />
+        <StatusNote icon="info" text={t('doctorDisclaimer')} />
       </Card>
 
       <SectionHeading title={t('notes')} />
@@ -215,7 +215,7 @@ export function DoctorPatientDetailScreen({
           onPress={addNote}
         />
         <StatusNote
-          glyph="ℹ"
+          icon="info"
           text="Notes are stored on this device only. There is no notes endpoint in the API yet."
         />
       </Card>

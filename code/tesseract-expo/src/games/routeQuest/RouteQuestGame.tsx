@@ -12,11 +12,12 @@
  * destination_reached, item_collected, return_completed — opaque ids only.
  */
 import React, { useCallback, useMemo, useRef, useState } from 'react';
-import { Pressable, StyleSheet, View, useWindowDimensions } from 'react-native';
-import Svg, { Circle, Line } from 'react-native-svg';
-import { colors, spacing } from '../../design/tokens';
-import { BodyLarge, TitleLarge } from '../../design/components';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
+import Svg, { Circle, G, Line, Path } from 'react-native-svg';
+import { colors } from '../../design/tokens';
+import { BodyLarge } from '../../design/components';
 import { GameScaffold } from '../GameScaffold';
+import { GameLayout, MIN_CELL, Settle } from '../presentation';
 import {
   GameResultStatus,
   TesseractEventRecorder,
@@ -48,7 +49,6 @@ export function RouteQuestGame({ config, onEvent, onFinish }: TesseractGameProps
   const recorder = useRef(new TesseractEventRecorder()).current;
   const topology = useMemo(() => topologyForLevel(config.level), [config.level]);
   const layout = useMemo(() => layoutForLevel(config.level), [config.level]);
-  const { width } = useWindowDimensions();
 
   const [current, setCurrent] = useState(topology.homeIndex);
   const [phase, setPhase] = useState<Phase>('outbound');
@@ -120,9 +120,9 @@ export function RouteQuestGame({ config, onEvent, onFinish }: TesseractGameProps
     setHinted(path.length > 1 ? path[1] : null);
   };
 
-  const size = Math.min(width - spacing.gutter * 2, 420);
   const target =
     phase === 'outbound' ? topology.destinationIndex : topology.homeIndex;
+  const reachable = neighbours(topology, current);
 
   return (
     <GameScaffold
@@ -142,97 +142,160 @@ export function RouteQuestGame({ config, onEvent, onFinish }: TesseractGameProps
         finish(GameResultStatus.stoppedByUser);
       }}
     >
-      <View style={styles.body}>
-        <TitleLarge center>
-          {phase === 'outbound'
+      <GameLayout
+        prompt={
+          phase === 'outbound'
             ? gameText(config.strings, 'route_go_to')
-            : gameText(config.strings, 'route_return_home')}
-        </TitleLarge>
-        <BodyLarge center tone="soft" style={{ marginTop: 4 }}>
-          {config.showLabels ? (itemFor(target).label ?? '') : ''}
-        </BodyLarge>
+            : gameText(config.strings, 'route_return_home')
+        }
+        subPrompt={config.showLabels ? (itemFor(target).label ?? '') : undefined}
+        board={(size) => {
+          const inner = size - 20;
+          const px = (i: number) => layout[i][0] * inner;
+          const py = (i: number) => layout[i][1] * inner;
+          return (
+            <View style={{ width: inner, height: inner }}>
+              <Svg width={inner} height={inner}>
+                {/* Roads are drawn twice: a wide soft bed and a lighter
+                    centre line, so a path reads as a road rather than a
+                    connector, and stays visible against the board. */}
+                {topology.edges.map(([a, b], i) => (
+                  <G key={`e${i}`}>
+                    <Line
+                      x1={px(a)} y1={py(a)} x2={px(b)} y2={py(b)}
+                      stroke={colors.peach} strokeWidth={22} strokeLinecap="round"
+                    />
+                    <Line
+                      x1={px(a)} y1={py(a)} x2={px(b)} y2={py(b)}
+                      stroke="#FFFFFF" strokeWidth={4} strokeLinecap="round"
+                      strokeDasharray="1 10"
+                    />
+                  </G>
+                ))}
 
-        <View style={{ height: size, width: size, alignSelf: 'center', marginTop: 12 }}>
-          <Svg width={size} height={size}>
-            {topology.edges.map(([a, b], i) => (
-              <Line
-                key={`e${i}`}
-                x1={layout[a][0] * size}
-                y1={layout[a][1] * size}
-                x2={layout[b][0] * size}
-                y2={layout[b][1] * size}
-                stroke={colors.peach}
-                strokeWidth={14}
-                strokeLinecap="round"
-              />
-            ))}
-            {Array.from({ length: topology.nodeCount }).map((_, i) => (
-              <Circle
-                key={`n${i}`}
-                cx={layout[i][0] * size}
-                cy={layout[i][1] * size}
-                r={i === current ? 26 : 22}
-                fill={i === current ? colors.ink : colors.white}
-                stroke={
-                  i === hinted
-                    ? colors.coral
-                    : i === target
-                      ? colors.ink
-                      : colors.inkSoft
-                }
-                strokeWidth={i === hinted ? 5 : 2}
-              />
-            ))}
-          </Svg>
+                {Array.from({ length: topology.nodeCount }).map((_, i) => {
+                  const isHere = i === current;
+                  const isTarget = i === target;
+                  const isOpen = reachable.includes(i);
+                  const isHint = i === hinted;
+                  // Where you can go is drawn as an open ring, so a valid
+                  // move is obvious without relying on colour alone.
+                  return (
+                    <G key={`n${i}`}>
+                      {isOpen && !isHere ? (
+                        <Circle
+                          cx={px(i)} cy={py(i)} r={30}
+                          fill="none" stroke={colors.coral}
+                          strokeWidth={2} strokeDasharray="4 5"
+                        />
+                      ) : null}
+                      <Circle
+                        cx={px(i)} cy={py(i)} r={isHere ? 24 : 20}
+                        fill={isHere ? colors.ink : colors.white}
+                        stroke={isHint ? colors.coral : isTarget ? colors.ink : colors.inkSoft}
+                        strokeWidth={isHint ? 4 : isTarget ? 3 : 1.5}
+                      />
+                      {/* The destination carries a flag, not just a heavier
+                          outline — shape, not colour, says where to go. */}
+                      {isTarget ? (
+                        <Path
+                          d={`M${px(i) - 5} ${py(i) + 8} L${px(i) - 5} ${py(i) - 9} L${px(i) + 8} ${py(i) - 5} L${px(i) - 5} ${py(i) - 1}`}
+                          fill={colors.coral}
+                          stroke={colors.coral}
+                          strokeWidth={2}
+                          strokeLinejoin="round"
+                        />
+                      ) : null}
+                      {isHere ? (
+                        <Circle cx={px(i)} cy={py(i)} r={7} fill={colors.white} />
+                      ) : null}
+                    </G>
+                  );
+                })}
+              </Svg>
 
-          {/* Touch targets sit above the drawing so each place is a real,
-              labelled, large control rather than a hit-test on a path. */}
-          {Array.from({ length: topology.nodeCount }).map((_, i) => {
-            const item = itemFor(i);
-            const label = item.label ?? `Place ${i + 1}`;
-            const isTarget = i === target;
-            return (
-              <Pressable
-                key={`t${i}`}
-                accessibilityRole="button"
-                accessibilityLabel={label}
-                accessibilityHint={
-                  i === current
-                    ? gameText(config.strings, 'route_you_are_here')
-                    : isTarget
-                      ? gameText(config.strings, 'route_destination')
-                      : undefined
-                }
-                accessibilityState={{ selected: i === current }}
-                onPress={() => onTapNode(i)}
-                style={[
-                  styles.hit,
-                  {
-                    left: layout[i][0] * size - 32,
-                    top: layout[i][1] * size - 32,
-                  },
-                ]}
-              />
-            );
-          })}
-        </View>
+              {/* Real, labelled controls over the drawing: each place is a
+                  button a screen reader can find, not a hit-test on a path. */}
+              {Array.from({ length: topology.nodeCount }).map((_, i) => {
+                const item = itemFor(i);
+                const label = item.label ?? `Place ${i + 1}`;
+                const isOpen = reachable.includes(i);
+                return (
+                  <Pressable
+                    key={`t${i}`}
+                    accessibilityRole="button"
+                    accessibilityLabel={label}
+                    accessibilityState={{
+                      selected: i === current,
+                      disabled: !isOpen && i !== current,
+                    }}
+                    accessibilityHint={
+                      i === current
+                        ? gameText(config.strings, 'route_you_are_here')
+                        : i === target
+                          ? gameText(config.strings, 'route_destination')
+                          : undefined
+                    }
+                    onPress={() => onTapNode(i)}
+                    style={{
+                      position: 'absolute',
+                      left: px(i) - MIN_CELL / 2,
+                      top: py(i) - MIN_CELL / 2,
+                      width: MIN_CELL,
+                      height: MIN_CELL,
+                      borderRadius: MIN_CELL / 2,
+                    }}
+                  />
+                );
+              })}
 
-        {config.showLabels ? (
-          <View style={styles.legend}>
-            {Array.from({ length: topology.nodeCount }).map((_, i) => (
-              <BodyLarge key={`l${i}`} tone={i === current ? 'ink' : 'soft'}>
-                {`${i === current ? '● ' : '○ '}${itemFor(i).label ?? ''}`}
-              </BodyLarge>
-            ))}
-          </View>
-        ) : null}
-      </View>
+              {/* Landmark names sit beside their place rather than in a
+                  detached legend, so the map is readable on its own. */}
+              {config.showLabels
+                ? Array.from({ length: topology.nodeCount }).map((_, i) => (
+                    <View
+                      key={`l${i}`}
+                      pointerEvents="none"
+                      style={{
+                        position: 'absolute',
+                        left: px(i) - 60,
+                        top: py(i) + 24,
+                        width: 120,
+                        alignItems: 'center',
+                      }}
+                    >
+                      <Text
+                        numberOfLines={2}
+                        style={[
+                          styles.nodeLabel,
+                          i === current && styles.nodeLabelHere,
+                        ]}
+                      >
+                        {itemFor(i).label ?? ''}
+                      </Text>
+                    </View>
+                  ))
+                : null}
+            </View>
+          );
+        }}
+      >
+        <Settle trigger={current}>
+          <BodyLarge center tone="soft">
+            {config.showLabels ? (itemFor(current).label ?? '') : ''}
+          </BodyLarge>
+        </Settle>
+      </GameLayout>
     </GameScaffold>
   );
 }
 
 const styles = StyleSheet.create({
-  body: { flex: 1, paddingHorizontal: spacing.gutter, paddingTop: 8 },
-  hit: { position: 'absolute', width: 64, height: 64, borderRadius: 32 },
-  legend: { marginTop: 12, gap: 2 },
+  nodeLabel: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: colors.inkSoft,
+    textAlign: 'center',
+  },
+  nodeLabelHere: { color: colors.ink, fontWeight: '700' },
 });

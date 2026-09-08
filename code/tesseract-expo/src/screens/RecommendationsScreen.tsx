@@ -116,13 +116,13 @@ export function RecommendationsScreen({ onBack }: { onBack: () => void }) {
       <HeadlineLarge>{t('needsYourDecision')}</HeadlineLarge>
       <BodyMedium tone="soft">{t('suggestionCaveat')}</BodyMedium>
 
-      {status ? <StatusNote glyph="ℹ" text={status} /> : null}
+      {status ? <StatusNote icon="info" text={status} /> : null}
 
       {actionable.length === 0 ? (
         <Card>
           <BodyLarge>{t('noActivityYet')}</BodyLarge>
           <StatusNote
-            glyph="ℹ"
+            icon="info"
             text="Suggestions appear once there are enough finished sessions to base one on."
           />
         </Card>
@@ -146,7 +146,7 @@ export function RecommendationsScreen({ onBack }: { onBack: () => void }) {
             {/* The counts behind the suggestion, so it can be checked. */}
             <BodyMedium tone="soft">{s.reason}</BodyMedium>
             <View style={{ height: 6 }} />
-            <StatusNote glyph="ℹ" text={s.caveat} />
+            <StatusNote icon="info" text={s.caveat} />
 
             <View style={{ height: 8 }} />
             <PillButton
@@ -183,7 +183,7 @@ export function RecommendationsScreen({ onBack }: { onBack: () => void }) {
           ))
         )}
         {/* Never a cognitive score, a diagnosis, or a progression measure. */}
-        <StatusNote glyph="ℹ" text={t('doctorDisclaimer')} />
+        <StatusNote icon="info" text={t('doctorDisclaimer')} />
       </Card>
 
       <View style={{ height: 8 }} />

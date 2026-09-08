@@ -158,10 +158,10 @@ export function SettingsScreen({ onBack }: { onBack: () => void }) {
 
         {/* Applies to every row above, including any that came back available.
             A working voice is not a good voice. */}
-        <StatusNote glyph="🗣" text={t('speechDraftWarning')} />
+        <StatusNote icon="speaker" text={t('speechDraftWarning')} />
         {/* The Expo Go limitation, stated where it is relevant. */}
         <StatusNote
-          glyph="!"
+          icon="alert"
           tone="attention"
           text={
             'Speaking to the app is not possible in Expo Go: speech recognition ' +
@@ -208,7 +208,7 @@ export function SettingsScreen({ onBack }: { onBack: () => void }) {
         <BodyMedium tone="soft">{`Running in: ${version.runtime}`}</BodyMedium>
         {version.isExpoGo ? (
           <StatusNote
-            glyph="ℹ"
+            icon="info"
             text={
               'This is the Tesseract version. Expo Go has its own separate ' +
               'version number, which is not ours.'

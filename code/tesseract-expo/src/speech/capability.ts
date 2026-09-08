@@ -57,6 +57,22 @@ export const SPEECH_MATRIX: readonly SpeechLanguageRow[] = [
     review: 'notReviewed',
   },
   {
+    code: 'hi',
+    englishName: 'Hindi',
+    script: 'Devanagari',
+    preferredTags: ['hi-IN', 'hi'],
+    outputExpectation: 'documented',
+    inputExpectation: 'documented',
+    notes:
+      'Apple ships a Hindi (hi-IN) voice and iOS dictation lists Hindi, so ' +
+      'reading aloud is expected to work once the voice is present on the ' +
+      'device — which the probe checks rather than assumes. Recognition is a ' +
+      'separate matter: it is unavailable in Expo Go for every language, ' +
+      'because that needs a native module the container cannot load. Adding ' +
+      'Hindi does not improve any North Eastern Region language.',
+    review: 'notReviewed',
+  },
+  {
     code: 'bn',
     englishName: 'Bengali',
     script: 'Bengali-Assamese',

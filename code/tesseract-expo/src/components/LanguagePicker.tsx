@@ -87,7 +87,7 @@ export function LanguagePicker({
           where the information is actionable. */}
       {!compact ? (
         <StatusNote
-          glyph="ℹ"
+          icon="info"
           text={translate(uiLanguage, 'draftTranslationNotice')}
         />
       ) : null}
@@ -95,7 +95,7 @@ export function LanguagePicker({
       {!compact && showUncovered ? (
         // The gap stays visible rather than being quietly papered over.
         <StatusNote
-          glyph="!"
+          icon="alert"
           tone="attention"
           text={`No language here yet for: ${UNCOVERED_REGIONS.join(', ')}.`}
         />

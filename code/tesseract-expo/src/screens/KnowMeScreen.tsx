@@ -209,7 +209,7 @@ export function KnowMeScreen({ onBack }: { onBack: () => void }) {
           );
         })}
         <StatusNote
-          glyph="ℹ"
+          icon="info"
           text="An activity without enough of your content uses generic examples. It is never a mix presented as personal."
         />
       </Card>
@@ -283,9 +283,9 @@ export function KnowMeScreen({ onBack }: { onBack: () => void }) {
 
       <Divider />
       {content.dirty ? (
-        <StatusNote glyph="⇅" text="You have changes that are not uploaded." />
+        <StatusNote icon="sync" text="You have changes that are not uploaded." />
       ) : null}
-      {status ? <StatusNote glyph="ℹ" text={status} /> : null}
+      {status ? <StatusNote icon="info" text={status} /> : null}
       <PillButton
         label="Upload to the server"
         variant="outline"

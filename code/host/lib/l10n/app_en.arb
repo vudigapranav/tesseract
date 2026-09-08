@@ -268,7 +268,7 @@
   "@voiceNeedsConfirmation": {
     "description": "Reassurance that speech never acts on its own."
   },
-  "voicePermissionDenied": "Tesseract needs permission to use the microphone before it can listen.",
+  "voicePermissionDenied": "Apnapan needs permission to use the microphone before it can listen.",
   "@voicePermissionDenied": {
     "description": "Shown when microphone permission was refused."
   },

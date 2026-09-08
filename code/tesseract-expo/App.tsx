@@ -74,6 +74,7 @@ export default function App() {
   const [fontsLoaded] = useFonts({
     NotoSansBengali: require('./assets/fonts/NotoSansBengali-Regular.ttf'),
     NotoSansMeeteiMayek: require('./assets/fonts/NotoSansMeeteiMayek-Regular.ttf'),
+    NotoSansDevanagari: require('./assets/fonts/NotoSansDevanagari-Regular.ttf'),
   });
 
   // Held back one frame rather than flashing boxed glyphs at someone whose

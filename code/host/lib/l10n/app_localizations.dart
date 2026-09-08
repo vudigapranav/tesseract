@@ -8,6 +8,7 @@ import 'package:intl/intl.dart' as intl;
 import 'app_localizations_as.dart';
 import 'app_localizations_bn.dart';
 import 'app_localizations_en.dart';
+import 'app_localizations_hi.dart';
 import 'app_localizations_kha.dart';
 import 'app_localizations_lus.dart';
 import 'app_localizations_mni.dart';
@@ -101,6 +102,7 @@ abstract class AppLocalizations {
     Locale('as'),
     Locale('bn'),
     Locale('en'),
+    Locale('hi'),
     Locale('kha'),
     Locale('lus'),
     Locale('mni')
@@ -1027,7 +1029,7 @@ abstract class AppLocalizations {
   /// Shown when microphone permission was refused.
   ///
   /// In en, this message translates to:
-  /// **'Tesseract needs permission to use the microphone before it can listen.'**
+  /// **'Apnapan needs permission to use the microphone before it can listen.'**
   String get voicePermissionDenied;
 
   /// Shown when permission is permanently denied.
@@ -1147,6 +1149,7 @@ class _AppLocalizationsDelegate
         'as',
         'bn',
         'en',
+        'hi',
         'kha',
         'lus',
         'mni'
@@ -1165,6 +1168,8 @@ AppLocalizations lookupAppLocalizations(Locale locale) {
       return AppLocalizationsBn();
     case 'en':
       return AppLocalizationsEn();
+    case 'hi':
+      return AppLocalizationsHi();
     case 'kha':
       return AppLocalizationsKha();
     case 'lus':

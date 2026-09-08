@@ -59,6 +59,8 @@ export const fontFamilyForScript = (script: string): string | undefined => {
       return 'NotoSansBengali';
     case 'Meetei Mayek':
       return 'NotoSansMeeteiMayek';
+    case 'Devanagari':
+      return 'NotoSansDevanagari';
     default:
       return undefined;
   }

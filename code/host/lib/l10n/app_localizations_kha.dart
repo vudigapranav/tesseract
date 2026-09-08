@@ -517,7 +517,7 @@ class AppLocalizationsKha extends AppLocalizations {
 
   @override
   String get voicePermissionDenied =>
-      'Tesseract needs permission to use the microphone before it can listen.';
+      'Apnapan needs permission to use the microphone before it can listen.';
 
   @override
   String get voicePermissionBlocked =>

@@ -77,14 +77,14 @@ export function CaregiverGate({
       <Card>
         {canUseDeviceAuth === false ? (
           <StatusNote
-            glyph="!"
+            icon="alert"
             tone="attention"
             text="This device has no passcode or biometric lock set up, so this cannot be protected properly. Set one up in the phone's Settings."
           />
         ) : (
           <BodyLarge>{t('signInPatientNote')}</BodyLarge>
         )}
-        {error ? <StatusNote glyph="!" tone="attention" text={error} /> : null}
+        {error ? <StatusNote icon="alert" tone="attention" text={error} /> : null}
         <View style={{ height: 12 }} />
         {canUseDeviceAuth ? (
           <PillButton label={t('continueLabel')} busy={busy} onPress={unlock} />

@@ -1362,3 +1362,85 @@ iPhone**. Nothing has been verified on real hardware.
 
 Coverage after adding tagline/About strings: en/as/bn 100%, mni/kha/lus 8%,
 all non-English still draft. `appNameHindi` added as untranslatable.
+
+
+## 2026-09-08 Hindi, and a real game presentation layer
+
+### Hindi
+
+Added as a **seventh** language. It does not replace or excuse the NER gap, and
+a test asserts that: Meitei/Khasi/Mizo are still 8% and still draft, and the
+four uncovered states are still named.
+
+- `code/host/lib/l10n/app_hi.arb` — **all 168 translatable keys**, written by
+  me, covering sign-in, onboarding, patient/caregiver/doctor screens, settings,
+  About, errors, sync, game names, instructions, Help/Break, completion,
+  reminders and every speech/voice string including the
+  confirmation-before-acting wording.
+- Registered in the Flutter catalogue and, via `tools/sync-l10n.mjs`, in the
+  Expo app. Coverage measured, not asserted: **hi 100%**.
+- **Still `draft`.** Full coverage is a count, not an endorsement, and no
+  fluent speaker has read it. A test enforces that 100% cannot present as
+  reviewed.
+- `NotoSansDevanagari` bundled and wired through `fontFamilyForScript`, so
+  Devanagari does not depend on the platform default. The sign-in Hindi
+  wordmark was pointing at the Bengali face; fixed.
+- Also fixed a stale brand string: `voicePermissionDenied` still said
+  "Tesseract needs permission".
+
+**Hindi speech, assessed separately from text.** Apple ships a hi-IN voice and
+iOS lists Hindi for dictation, so reading aloud is *expected* to work — the
+probe checks the device rather than trusting that. **Recognition remains
+impossible in Expo Go for every language**, Hindi included, because it needs a
+native module the container cannot load. `resolveEngineTag` refuses
+cross-language matches, so a phone with no Hindi voice falls back to text
+rather than to English pronouncing Devanagari. Device result: **NOT TESTED**.
+
+### Game presentation
+
+Inspected all five in code first. The concrete defects: every game invented its
+own spacing, prompt size and "selected" look; feedback was a colour change and
+nothing else; boards were sized from raw window width so they clipped or floated;
+Word Search cells had 1px borders and unscaled text; Route Quest had invisible
+hit targets and a detached text legend; Marble Maze was flat rectangles; the two
+choice games used ordinary buttons, so answering looked like navigating. And
+**14 files used emoji and dingbats as icons** (`✋ ◎ ✎ ↺ ⚑ 🗣`).
+
+Fixed with two shared modules and one icon set:
+
+- `src/design/Icon.tsx` — 16 icons as SVG paths. Emoji rendered differently per
+  device, ignored the palette, sat off the baseline, and VoiceOver announced
+  them as "waving hand sign". All 14 files converted.
+- `src/games/presentation.tsx` — `GameLayout` (prompt → board → actions, board
+  sized against the smaller screen edge and capped so it neither clips nor
+  floats), one `TileState` vocabulary for selected/correct/incorrect/hinted/
+  done/disabled carried by **shape and position as well as colour**, `Settle`
+  (a small scale settle, skipped under reduce-motion), `GentleCorrection`,
+  `EmptyBoard`, `MIN_CELL` = 44.
+- `src/games/ChoiceCard.tsx` — the shared answer card.
+
+Per game: **Word Search** grid now fills the surface exactly so columns stay
+aligned, font scales with the cell so any script fits, `hitSlop` pads small
+cells to a forgiving target, found words become settled chips. **Route Quest**
+roads are a wide bed plus a dashed centre line, valid moves are dashed open
+rings, the destination carries a flag shape, labels sit beside their place.
+**Marble Maze** corridors are overlapping rounded cells reading as a channel,
+the goal has a radial glow, the marble has a contact shadow and highlight.
+**Routine Recall** shows the previous step as context. **Picture Sorting** puts
+the subject alone and large on the board.
+
+### Preserved, deliberately
+
+No rule, difficulty setting, event name, payload, sequence or finalization
+changed — **65 tests pass unchanged**, including the full play-throughs and the
+opaque-payload assertions. Marble Maze stays motion-first with the touch
+fallback and still reports only the mode actually used. No game gained a
+network, database or auth dependency. Attribution to Ruthika intact. No scores,
+lives, timers or clinical claims were introduced.
+
+### Verified / not verified
+
+TypeScript strict clean · **65 tests** · `expo-doctor` 21/21 · iOS bundle builds
+(HTTP 200). **No gameplay has been exercised on an iPhone.** Touch precision,
+motion feel, performance, Devanagari wrapping at large text and VoiceOver order
+are **NOT TESTED** on hardware. Before/after device comparison not performed.

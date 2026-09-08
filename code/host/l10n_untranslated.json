@@ -11,6 +11,12 @@
     "appNameHindi"
   ],
 
+  "hi": [
+    "appName",
+    "builtBy",
+    "appNameHindi"
+  ],
+
   "kha": [
     "appName",
     "signInTitle",

@@ -10,15 +10,10 @@
  * correct, attempt}, routine_completed. Step text never leaves the device.
  */
 import React, { useCallback, useMemo, useRef, useState } from 'react';
-import { StyleSheet, View } from 'react-native';
-import { spacing } from '../../design/tokens';
-import {
-  BigPatientAction,
-  BodyLarge,
-  StatusNote,
-  TitleLarge,
-} from '../../design/components';
+import { View } from 'react-native';
 import { GameScaffold } from '../GameScaffold';
+import { ChoiceCard } from '../ChoiceCard';
+import { EmptyBoard, GameLayout, GentleCorrection } from '../presentation';
 import {
   GameResultStatus,
   TesseractEventRecorder,
@@ -115,13 +110,7 @@ export function RoutineRecallGame({ config, onEvent, onFinish }: TesseractGamePr
           finish(GameResultStatus.stoppedByUser);
         }}
       >
-        <View style={styles.body}>
-          <StatusNote
-            glyph="✎"
-            tone="attention"
-            text={gameText(config.strings, 'routine_unavailable')}
-          />
-        </View>
+        <EmptyBoard text={gameText(config.strings, 'routine_unavailable')} />
       </GameScaffold>
     );
   }
@@ -180,36 +169,48 @@ export function RoutineRecallGame({ config, onEvent, onFinish }: TesseractGamePr
         finish(GameResultStatus.stoppedByUser);
       }}
     >
-      <View style={styles.body}>
-        <TitleLarge center>
-          {gameText(config.strings, 'routine_what_next')}
-        </TitleLarge>
-        <BodyLarge tone="soft" center style={{ marginTop: 6 }}>
-          {`${index + 1} / ${steps.length}`}
-        </BodyLarge>
-
-        <View style={{ height: 20 }} />
-
+      <GameLayout
+        prompt={gameText(config.strings, 'routine_what_next')}
+        subPrompt={`${index + 1} / ${steps.length}`}
+        boardAspect={0.42}
+        board={() => (
+          // The step just completed, shown as context so the question has a
+          // "next after what?" — previously the prompt stood alone.
+          <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', padding: 12 }}>
+            <ChoiceCard
+              label={
+                index === 0
+                  ? gameText(config.strings, 'routine_what_next')
+                  : (steps[index - 1].label ?? '')
+              }
+              state="disabled"
+              onPress={undefined}
+            />
+          </View>
+        )}
+      >
         {options.map((o) => (
-          <BigPatientAction
+          <ChoiceCard
             key={o.id}
             label={o.label ?? ''}
-            primary={hinted && o.id === current.id}
+            state={
+              wrongId === o.id
+                ? 'incorrect'
+                : hinted && o.id === current.id
+                  ? 'hinted'
+                  : 'idle'
+            }
             onPress={() => choose(o.id)}
           />
         ))}
 
         {wrongId ? (
-          <StatusNote
-            glyph="↺"
-            text={gameText(config.strings, 'routine_try_again')}
-          />
+          // Names what happened and leaves the question open. No penalty.
+          <GentleCorrection text={gameText(config.strings, 'routine_try_again')} />
         ) : null}
-      </View>
+      </GameLayout>
     </GameScaffold>
   );
 }
 
-const styles = StyleSheet.create({
-  body: { flex: 1, paddingHorizontal: spacing.gutter, paddingTop: 8 },
-});
+

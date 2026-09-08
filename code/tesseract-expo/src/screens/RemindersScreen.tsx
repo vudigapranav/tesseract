@@ -117,14 +117,14 @@ export function RemindersScreen({ onBack }: { onBack: () => void }) {
 
       {capability === 'denied' ? (
         <StatusNote
-          glyph="!"
+          icon="alert"
           tone="attention"
           text="Notifications are turned off, so nothing will pop up at the set time. The reminders below still show inside the app. You can turn notifications on in the phone's Settings."
         />
       ) : null}
       {capability === 'unavailable' ? (
         <StatusNote
-          glyph="!"
+          icon="alert"
           tone="attention"
           text="This device cannot schedule notifications. The reminders below still show inside the app."
         />

@@ -66,15 +66,15 @@ export function CaregiverHomeScreen({
       <HeadlineLarge fontFamily={font}>{t('caregiverGreeting')}</HeadlineLarge>
 
       {app.previewMode ? (
-        <StatusNote glyph="⚑" tone="attention" text={t('previewDataWarning')} />
+        <StatusNote icon="flag" tone="attention" text={t('previewDataWarning')} />
       ) : null}
       {app.patientsError ? (
-        <StatusNote glyph="!" tone="attention" text={app.patientsError} />
+        <StatusNote icon="alert" tone="attention" text={app.patientsError} />
       ) : null}
       {!app.apiConfigured ? (
         // Says plainly that nothing is syncing, rather than showing a
         // reassuring but false "synced".
-        <StatusNote glyph="⇅" text={t('savedOnDevice')} />
+        <StatusNote icon="sync" text={t('savedOnDevice')} />
       ) : null}
 
       <SectionHeading title={t('myPatients')} />
@@ -154,7 +154,7 @@ export function CaregiverHomeScreen({
             ))
         )}
         {/* No score, no trend line, no invented measure. */}
-        <StatusNote glyph="ℹ" text={t('doctorDisclaimer')} />
+        <StatusNote icon="info" text={t('doctorDisclaimer')} />
       </Card>
 
       <View style={{ height: 8 }} />
@@ -238,7 +238,7 @@ export function PatientBasicsScreen({ onDone }: { onDone: () => void }) {
         />
         {/* Honest about what the backend can and cannot store today. */}
         <StatusNote
-          glyph="ℹ"
+          icon="info"
           text="Age and notes are kept on this device only. The API has no endpoint to update patient basics yet."
         />
 
@@ -256,7 +256,7 @@ export function PatientBasicsScreen({ onDone }: { onDone: () => void }) {
           />
         ))}
 
-        {error ? <StatusNote glyph="!" tone="attention" text={error} /> : null}
+        {error ? <StatusNote icon="alert" tone="attention" text={error} /> : null}
         <PillButton
           label={t('save')}
           busy={busy}

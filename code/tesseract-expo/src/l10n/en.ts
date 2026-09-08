@@ -162,7 +162,7 @@ export const en = {
   "youSaid": "You said",
   "useThis": "Use this",
   "voiceNeedsConfirmation": "Nothing is saved until you choose Use this.",
-  "voicePermissionDenied": "Tesseract needs permission to use the microphone before it can listen.",
+  "voicePermissionDenied": "Apnapan needs permission to use the microphone before it can listen.",
   "voicePermissionBlocked": "Microphone access is blocked. You can turn it back on in the phone's Settings.",
   "voiceUnavailable": "This phone has no speech recognition, so speaking is not available. You can still type.",
   "voiceLanguageUnavailable": "Speaking is not available in {language} on this phone. You can still type.",

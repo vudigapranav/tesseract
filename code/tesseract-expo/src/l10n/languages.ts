@@ -26,7 +26,7 @@ export interface LanguageOption {
   region?: string;
 }
 
-export type LanguageCode = 'en' | 'as' | 'bn' | 'mni' | 'kha' | 'lus';
+export type LanguageCode = 'en' | 'hi' | 'as' | 'bn' | 'mni' | 'kha' | 'lus';
 
 export const LANGUAGES: readonly LanguageOption[] = [
   {
@@ -36,6 +36,15 @@ export const LANGUAGES: readonly LanguageOption[] = [
     coveragePercent: 100,
     reviewStatus: 'native',
     script: 'Latin',
+  },
+  {
+    code: 'hi',
+    endonym: 'हिन्दी',
+    englishName: 'Hindi',
+    coveragePercent: 100,
+    reviewStatus: 'draft',
+    script: 'Devanagari',
+    region: 'Widely spoken across India',
   },
   {
     code: 'as',

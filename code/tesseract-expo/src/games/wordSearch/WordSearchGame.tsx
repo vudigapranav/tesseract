@@ -8,10 +8,19 @@
  * all_words_found, content_unavailable {reason, wordIds}.
  */
 import React, { useCallback, useMemo, useRef, useState } from 'react';
-import { Pressable, StyleSheet, View, useWindowDimensions } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { colors, spacing } from '../../design/tokens';
-import { BodyLarge, StatusNote, TitleLarge } from '../../design/components';
+import { BodyLarge, BodyMedium } from '../../design/components';
+import { Icon } from '../../design/Icon';
 import { GameScaffold } from '../GameScaffold';
+import {
+  EmptyBoard,
+  GameLayout,
+  MIN_CELL,
+  Settle,
+  tileVisual,
+  type TileState,
+} from '../presentation';
 import {
   GameResultStatus,
   TesseractEventRecorder,
@@ -29,7 +38,6 @@ export function WordSearchGame({ config, onEvent, onFinish }: TesseractGameProps
     () => wordSearchDifficultyParams(config.level),
     [config.level],
   );
-  const { width } = useWindowDimensions();
 
   const grid = useMemo(() => {
     const entries = config.items
@@ -146,19 +154,11 @@ export function WordSearchGame({ config, onEvent, onFinish }: TesseractGameProps
           finish(GameResultStatus.stoppedByUser);
         }}
       >
-        <View style={styles.body}>
-          <StatusNote
-            glyph="✎"
-            tone="attention"
-            text={gameText(config.strings, 'words_unavailable')}
-          />
-        </View>
+        <EmptyBoard text={gameText(config.strings, 'words_unavailable')} />
       </GameScaffold>
     );
   }
 
-  const size = Math.min(width - spacing.gutter * 2, 380);
-  const cell = size / grid.size;
   const hinted = grid.words.find((w) => w.id === hintedId);
 
   return (
@@ -183,53 +183,109 @@ export function WordSearchGame({ config, onEvent, onFinish }: TesseractGameProps
         finish(GameResultStatus.stoppedByUser);
       }}
     >
-      <View style={styles.body}>
-        <TitleLarge center>{gameText(config.strings, 'words_find')}</TitleLarge>
-
-        <View style={[styles.grid, { width: size, height: size }]}>
-          {grid.letters.map((ch, i) => {
-            const isFound = foundCells.has(i);
-            const isAnchor = anchor === i;
-            const isHint = hinted?.cells.includes(i) ?? false;
+      <GameLayout
+        prompt={gameText(config.strings, 'words_find')}
+        subPrompt={`${found.size} / ${grid.words.length}`}
+        board={(size) => {
+          // The grid fills the board surface exactly, so rows and columns
+          // stay aligned at every screen size instead of drifting.
+          const inner = size - 20;
+          const cell = inner / grid.size;
+          return (
+            <View style={{ width: inner, height: inner, flexDirection: 'row', flexWrap: 'wrap' }}>
+              {grid.letters.map((ch, i) => {
+                const isFound = foundCells.has(i);
+                const isAnchor = anchor === i;
+                const isHint = hinted?.cells.includes(i) ?? false;
+                const state: TileState = isFound
+                  ? 'done'
+                  : isAnchor
+                    ? 'selected'
+                    : isHint
+                      ? 'hinted'
+                      : 'idle';
+                const v = tileVisual(state);
+                return (
+                  <Pressable
+                    key={i}
+                    accessibilityRole="button"
+                    accessibilityLabel={ch}
+                    accessibilityState={{ selected: isAnchor || isFound }}
+                    accessibilityHint={
+                      anchor === null
+                        ? gameText(config.strings, 'words_find')
+                        : undefined
+                    }
+                    // Hit area is padded out to a forgiving target even when
+                    // the drawn cell is smaller than a fingertip.
+                    hitSlop={Math.max(0, (MIN_CELL - cell) / 2)}
+                    onPress={() => onTapCell(i)}
+                    style={{
+                      width: cell,
+                      height: cell,
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      backgroundColor: v.bg,
+                      borderColor: v.border,
+                      borderWidth: v.width,
+                      borderRadius: Math.min(10, cell * 0.22),
+                    }}
+                  >
+                    <Text
+                      allowFontScaling={false}
+                      numberOfLines={1}
+                      style={{
+                        color: v.fg,
+                        fontWeight: isFound || isAnchor ? '700' : '600',
+                        // Scaled to the cell so long scripts never overflow
+                        // and letters stay optically consistent.
+                        fontSize: Math.max(13, cell * 0.46),
+                      }}
+                    >
+                      {ch}
+                    </Text>
+                  </Pressable>
+                );
+              })}
+            </View>
+          );
+        }}
+      >
+        {/* Found words move to a settled state rather than just changing
+            colour, so progress is legible at a glance. */}
+        <View style={styles.wordList}>
+          {grid.words.map((w) => {
+            const done = found.has(w.id);
             return (
-              <Pressable
-                key={i}
-                accessibilityRole="button"
-                accessibilityLabel={ch}
-                accessibilityState={{ selected: isAnchor || isFound }}
-                onPress={() => onTapCell(i)}
-                style={[
-                  styles.cell,
-                  { width: cell, height: cell },
-                  isFound && styles.cellFound,
-                  isAnchor && styles.cellAnchor,
-                  isHint && !isFound && styles.cellHint,
-                ]}
-              >
-                <BodyLarge tone={isFound || isAnchor ? 'onDark' : 'ink'} center>
-                  {ch}
-                </BodyLarge>
-              </Pressable>
+              <Settle key={w.id} trigger={done}>
+                <View
+                  style={[styles.wordChip, done && styles.wordChipDone]}
+                  accessible
+                  accessibilityLabel={`${w.word}${done ? ', found' : ''}`}
+                >
+                  <Icon
+                    name={done ? 'check' : 'target'}
+                    size={16}
+                    color={done ? '#6F8C63' : colors.inkSoft}
+                  />
+                  <BodyLarge
+                    tone={done ? 'soft' : 'ink'}
+                    style={done ? styles.wordDone : undefined}
+                  >
+                    {w.word}
+                  </BodyLarge>
+                </View>
+              </Settle>
             );
           })}
         </View>
 
-        <View style={styles.wordList}>
-          {grid.words.map((w) => (
-            <BodyLarge key={w.id} tone={found.has(w.id) ? 'soft' : 'ink'}>
-              {found.has(w.id) ? `✓ ${w.word}` : `• ${w.word}`}
-            </BodyLarge>
-          ))}
-        </View>
-
         {grid.skipped.length > 0 ? (
-          <StatusNote
-            glyph="!"
-            tone="attention"
-            text={gameText(config.strings, 'words_some_did_not_fit')}
-          />
+          <BodyMedium tone="soft">
+            {gameText(config.strings, 'words_some_did_not_fit')}
+          </BodyMedium>
         ) : null}
-      </View>
+      </GameLayout>
     </GameScaffold>
   );
 }
@@ -238,22 +294,19 @@ const sameCells = (a: number[], b: number[]) =>
   a.length === b.length && a.every((v, i) => v === b[i]);
 
 const styles = StyleSheet.create({
-  body: { flex: 1, paddingHorizontal: spacing.gutter, paddingTop: 8 },
-  grid: {
+  wordList: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
+  wordChip: {
     flexDirection: 'row',
-    flexWrap: 'wrap',
-    alignSelf: 'center',
-    marginTop: 12,
-  },
-  cell: {
     alignItems: 'center',
-    justifyContent: 'center',
+    gap: 8,
+    paddingVertical: 8,
+    paddingHorizontal: 14,
+    borderRadius: 999,
+    backgroundColor: colors.white,
     borderWidth: 1,
     borderColor: colors.hairline,
-    backgroundColor: colors.white,
+    minHeight: 44,
   },
-  cellFound: { backgroundColor: colors.ink },
-  cellAnchor: { backgroundColor: colors.coral },
-  cellHint: { borderColor: colors.coral, borderWidth: 3 },
-  wordList: { marginTop: 16, gap: 4 },
+  wordChipDone: { backgroundColor: '#E8F0E4', borderColor: '#6F8C63' },
+  wordDone: { textDecorationLine: 'line-through' },
 });

@@ -9,15 +9,11 @@
  * sorting_completed. Picture labels never enter an event.
  */
 import React, { useCallback, useMemo, useRef, useState } from 'react';
-import { StyleSheet, View } from 'react-native';
-import { spacing } from '../../design/tokens';
-import {
-  BigPatientAction,
-  BodyLarge,
-  StatusNote,
-  TitleLarge,
-} from '../../design/components';
+import { StyleSheet, Text, View } from 'react-native';
+import { colors } from '../../design/tokens';
 import { GameScaffold } from '../GameScaffold';
+import { ChoiceCard } from '../ChoiceCard';
+import { EmptyBoard, GameLayout, GentleCorrection } from '../presentation';
 import {
   GameResultStatus,
   TesseractEventRecorder,
@@ -112,13 +108,7 @@ export function PictureSortingGame({ config, onEvent, onFinish }: TesseractGameP
           finish(GameResultStatus.stoppedByUser);
         }}
       >
-        <View style={styles.body}>
-          <StatusNote
-            glyph="✎"
-            tone="attention"
-            text={gameText(config.strings, 'sorting_unavailable')}
-          />
-        </View>
+        <EmptyBoard text={gameText(config.strings, 'sorting_unavailable')} />
       </GameScaffold>
     );
   }
@@ -176,49 +166,54 @@ export function PictureSortingGame({ config, onEvent, onFinish }: TesseractGameP
         finish(GameResultStatus.stoppedByUser);
       }}
     >
-      <View style={styles.body}>
-        <TitleLarge center>
-          {gameText(config.strings, 'sorting_where_does_this_go')}
-        </TitleLarge>
-        <BodyLarge tone="soft" center style={{ marginTop: 6 }}>
-          {`${index + 1} / ${items.length}`}
-        </BodyLarge>
-
-        <View style={styles.subject}>
-          <BodyLarge center style={styles.subjectLabel}>
-            {current.label ?? ''}
-          </BodyLarge>
-        </View>
-
+      <GameLayout
+        prompt={gameText(config.strings, 'sorting_where_does_this_go')}
+        subPrompt={`${index + 1} / ${items.length}`}
+        boardAspect={0.55}
+        board={() => (
+          // The subject sits alone on the board, large and centred, so it is
+          // unmistakably the thing being sorted.
+          <View style={styles.subject}>
+            <Text numberOfLines={3} style={styles.subjectLabel}>
+              {current.label ?? ''}
+            </Text>
+          </View>
+        )}
+      >
         {categories.map((c) => (
-          <BigPatientAction
+          <ChoiceCard
             key={c}
-            label={
-              gameText(config.strings, `category_${c}`) || c
+            label={gameText(config.strings, `category_${c}`) || c}
+            state={
+              wrong && c !== current.extra?.categoryId
+                ? 'idle'
+                : hinted && c === current.extra?.categoryId
+                  ? 'hinted'
+                  : 'idle'
             }
-            primary={hinted && c === current.extra?.categoryId}
             onPress={() => sort(c)}
           />
         ))}
 
         {wrong ? (
-          <StatusNote
-            glyph="↺"
-            text={gameText(config.strings, 'sorting_try_again')}
-          />
+          <GentleCorrection text={gameText(config.strings, 'sorting_try_again')} />
         ) : null}
-      </View>
+      </GameLayout>
     </GameScaffold>
   );
 }
 
 const styles = StyleSheet.create({
-  body: { flex: 1, paddingHorizontal: spacing.gutter, paddingTop: 8 },
   subject: {
-    marginVertical: 20,
-    paddingVertical: 28,
-    borderRadius: spacing.cardRadius,
-    backgroundColor: '#FFFFFF',
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 20,
   },
-  subjectLabel: { fontSize: 26, fontWeight: '700' },
+  subjectLabel: {
+    fontSize: 30,
+    fontWeight: '700',
+    textAlign: 'center',
+    color: colors.ink,
+  },
 });

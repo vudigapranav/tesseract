@@ -25,6 +25,7 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { colors, spacing, type as typeScale } from './tokens';
+import { Icon, type IconName } from './Icon';
 
 /* ------------------------------------------------------------------ text - */
 
@@ -279,16 +280,19 @@ export function BigPatientAction({
 export function StatusNote({
   text,
   tone = 'neutral',
-  glyph,
+  icon,
 }: {
   text: string;
   tone?: 'neutral' | 'attention';
-  glyph?: string;
+  icon?: IconName;
 }) {
   const color = tone === 'attention' ? colors.attention : colors.inkSoft;
   return (
     <View style={styles.statusRow} accessible accessibilityRole="text">
-      <Text style={[styles.statusGlyph, { color }]}>{glyph ?? 'ℹ'}</Text>
+      {/* Decorative: the sentence beside it carries the meaning. */}
+      <View style={styles.statusIcon}>
+        <Icon name={icon ?? (tone === 'attention' ? 'alert' : 'info')} color={color} />
+      </View>
       <Text style={[typeScale.bodyMedium as TextStyle, { color, flex: 1 }]}>
         {text}
       </Text>
@@ -373,7 +377,7 @@ const styles = StyleSheet.create({
     gap: 10,
     paddingVertical: 6,
   },
-  statusGlyph: { fontSize: 16, lineHeight: 23 },
+  statusIcon: { paddingTop: 2 },
   badge: {
     backgroundColor: colors.peach,
     borderRadius: 999,

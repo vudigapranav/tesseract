@@ -17,7 +17,7 @@ import { fileURLToPath } from 'node:url';
 const here = dirname(fileURLToPath(import.meta.url));
 const ARB = join(here, '..', '..', 'host', 'lib', 'l10n');
 const OUT = join(here, '..', 'src', 'l10n');
-const LOCALES = ['as', 'bn', 'mni', 'kha', 'lus'];
+const LOCALES = ['hi', 'as', 'bn', 'mni', 'kha', 'lus'];
 const check = process.argv.includes('--check');
 
 if (!existsSync(ARB)) {

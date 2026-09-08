@@ -88,6 +88,15 @@ abstract final class LanguageCatalogue {
       script: 'Latin',
     ),
     LanguageOption(
+      locale: Locale('hi'),
+      endonym: 'हिन्दी',
+      englishName: 'Hindi',
+      coveragePercent: 100,
+      reviewStatus: ReviewStatus.draft,
+      script: 'Devanagari',
+      region: 'Widely spoken across India',
+    ),
+    LanguageOption(
       locale: Locale('as'),
       endonym: 'অসমীয়া',
       englishName: 'Assamese',
@@ -150,6 +159,9 @@ abstract final class LanguageCatalogue {
   static const List<String> fontFallback = <String>[
     'NotoSansBengali',
     'NotoSansMeeteiMayek',
+    // Devanagari for Hindi. Android ships it, but naming it keeps the
+    // fallback chain explicit rather than relying on the platform default.
+    'NotoSansDevanagari',
   ];
 
   /// States of the North Eastern Region with no language in this build.

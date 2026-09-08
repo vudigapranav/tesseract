@@ -10,6 +10,7 @@
  */
 import React, { createContext, useContext, useMemo } from 'react';
 import { en, type StringKey } from './en';
+import { hi } from './hi';
 import { as_ } from './as';
 import { bn } from './bn';
 import { mni } from './mni';
@@ -19,6 +20,7 @@ import type { LanguageCode } from './languages';
 
 const CATALOGUES: Record<LanguageCode, Partial<Record<StringKey, string>>> = {
   en,
+  hi,
   as: as_,
   bn,
   mni,

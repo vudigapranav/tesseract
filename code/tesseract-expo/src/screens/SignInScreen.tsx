@@ -77,7 +77,7 @@ export function SignInScreen() {
           <HeadlineLarge fontFamily={font}>{t('appName')}</HeadlineLarge>
           {/* The Devanagari wordmark as real text, so it scales and is
               announced — not only as pixels inside the logo. */}
-          <TitleLarge tone="soft" fontFamily="NotoSansBengali">
+          <TitleLarge tone="soft" fontFamily="NotoSansDevanagari">
             {t('appNameHindi')}
           </TitleLarge>
         </View>
@@ -164,10 +164,10 @@ export function SignInScreen() {
 
         {!app.identityConfigured ? (
           // Says exactly why sign-in cannot run, rather than failing opaquely.
-          <StatusNote glyph="!" tone="attention" text={t('signInNotConfigured')} />
+          <StatusNote icon="alert" tone="attention" text={t('signInNotConfigured')} />
         ) : null}
 
-        {error ? <StatusNote glyph="!" tone="attention" text={error} /> : null}
+        {error ? <StatusNote icon="alert" tone="attention" text={error} /> : null}
 
         <PillButton
           label={t('signIn')}
@@ -180,7 +180,7 @@ export function SignInScreen() {
       <SectionHeading title={t('openPreview')} />
       <Card>
         <StatusNote
-          glyph="⚑"
+          icon="flag"
           tone="attention"
           text={t('previewDataWarning')}
         />
