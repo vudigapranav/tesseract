@@ -43,6 +43,13 @@ dependencies:
   flutter_local_notifications: ^22.3.0
   timezone: ^0.11.1
   flutter_timezone: ^5.1.0
+  # Speech. Both are thin wrappers over the Android platform engines: no
+  # account, no key, no audio leaves the device. Which languages actually
+  # work is a property of the engine installed on the phone, so the app
+  # probes at runtime rather than trusting a compiled-in list.
+  flutter_tts: ^4.2.5
+  speech_to_text: ^7.4.0
+  permission_handler: ^12.0.1
 
 dev_dependencies:
   flutter_test:

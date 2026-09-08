@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'dart:convert';
 import 'dart:math';
 import 'package:flutter/material.dart' show ChangeNotifier, TimeOfDay;
@@ -7,6 +8,9 @@ import 'data/api_client.dart';
 import 'data/doctor_service.dart';
 import 'data/session_outbox.dart';
 import 'data/reminder_service.dart';
+import 'speech/platform_speech_engine.dart';
+import 'speech/speech_engine.dart';
+import 'speech/speech_output_service.dart';
 
 import '../games/game_registry.dart';
 
@@ -58,7 +62,33 @@ class ActivityRecord {
 /// Host state backed by caregiver-scoped durable settings and patient snapshots.
 /// Server access is verified separately; offline data never grants access.
 class HostFlowState extends ChangeNotifier {
-  HostFlowState({this.repository});
+  HostFlowState({this.repository, TtsEngine? ttsEngine, SttEngine? sttEngine})
+      : _ttsEngine = ttsEngine,
+        _sttEngine = sttEngine;
+
+  // Speech engines are injected by tests and built lazily otherwise, so
+  // constructing this state object never touches a platform channel. Nothing
+  // is created until something actually asks to speak or listen — which also
+  // means the microphone plugin is untouched until a user taps for it.
+  final TtsEngine? _ttsEngine;
+  final SttEngine? _sttEngine;
+  SpeechOutputService? _speech;
+  SttEngine? _resolvedStt;
+
+  /// Optional spoken output. Text and touch never depend on it.
+  SpeechOutputService get speech => _speech ??= SpeechOutputService(
+        engine: _ttsEngine ??
+            (kIsWeb ? const UnavailableTtsEngine() : PlatformTtsEngine()),
+        audioEnabled: () => audioEnabled,
+      );
+
+  /// Recogniser for tap-to-speak. Idle until a sheet asks it to listen.
+  SttEngine get stt => _resolvedStt ??= _sttEngine ??
+      (kIsWeb ? const UnavailableSttEngine() : PlatformSttEngine());
+
+  /// True once something has actually built the speech service, so lifecycle
+  /// and language changes can avoid constructing an engine just to stop it.
+  bool get speechStarted => _speech != null;
 
   /// Tell the app shell that a display preference changed.
   ///
@@ -454,12 +484,40 @@ class HostFlowState extends ChangeNotifier {
   Future<void> setInterfaceLanguage(String code) async {
     interfaceLanguageCode = code;
     displayPreferencesChanged();
+    await _speechLanguageChanged();
     await save();
     await rescheduleReminders();
   }
 
   Future<void> setPatientLanguage(String code) async {
     patientLanguageCode = code;
+    displayPreferencesChanged();
+    await _speechLanguageChanged();
+    await save();
+    await rescheduleReminders();
+  }
+
+  /// Stop anything mid-sentence and drop the bound voice.
+  ///
+  /// Without this a language change would finish the current utterance in the
+  /// previous language, which is exactly the silent substitution the speech
+  /// layer exists to prevent.
+  Future<void> _speechLanguageChanged() async {
+    if (!speechStarted) return;
+    await speech.handleLanguageChanged();
+  }
+
+  /// The app went to the background, or a patient session ended.
+  Future<void> stopSpeaking() async {
+    if (!speechStarted) return;
+    await speech.handleAppBackgrounded();
+  }
+
+  /// Turn spoken output on or off. Off stops immediately rather than at the
+  /// end of the current sentence.
+  Future<void> setAudioEnabled(bool enabled) async {
+    audioEnabled = enabled;
+    if (!enabled) await stopSpeaking();
     displayPreferencesChanged();
     await save();
     await rescheduleReminders();

@@ -34,8 +34,18 @@ class LanguageOption {
 
   final String englishName;
 
-  /// Percentage of the English string set that is translated. The remainder
-  /// falls back to English, which the UI discloses.
+  /// Percentage of the *translatable* English string set that is present in
+  /// this language's ARB file. The remainder falls back to English, which the
+  /// UI discloses.
+  ///
+  /// Two keys are excluded from the denominator because translating them
+  /// would be wrong, not missing: the product name and the fixed team
+  /// attribution. They are marked `x-untranslatable` in `app_en.arb` and the
+  /// coverage test reads that marker rather than hard-coding a list.
+  ///
+  /// This counts strings, not quality. 100% here means every string has been
+  /// written; it says nothing about whether a fluent speaker agrees with the
+  /// wording. That is [reviewStatus], and it is a separate axis on purpose.
   final int coveragePercent;
 
   final ReviewStatus reviewStatus;
@@ -49,7 +59,10 @@ class LanguageOption {
   final String? region;
 
   bool get isDraft => reviewStatus == ReviewStatus.draft;
-  bool get isComplete => coveragePercent >= 100;
+
+  /// Every string is written. **Not** a claim that they are any good — read
+  /// with [isDraft], never instead of it.
+  bool get isTextComplete => coveragePercent >= 100;
 
   String get code => locale.languageCode;
 }
@@ -78,7 +91,7 @@ abstract final class LanguageCatalogue {
       locale: Locale('as'),
       endonym: 'অসমীয়া',
       englishName: 'Assamese',
-      coveragePercent: 90,
+      coveragePercent: 100,
       reviewStatus: ReviewStatus.draft,
       script: 'Bengali-Assamese',
       region: 'Assam',
@@ -87,7 +100,7 @@ abstract final class LanguageCatalogue {
       locale: Locale('bn'),
       endonym: 'বাংলা',
       englishName: 'Bengali',
-      coveragePercent: 93,
+      coveragePercent: 100,
       reviewStatus: ReviewStatus.draft,
       script: 'Bengali-Assamese',
       region: 'Assam, Tripura',
@@ -96,7 +109,7 @@ abstract final class LanguageCatalogue {
       locale: Locale('mni'),
       endonym: 'ꯃꯤꯇꯩꯂꯣꯟ',
       englishName: 'Meitei (Manipuri)',
-      coveragePercent: 9,
+      coveragePercent: 8,
       reviewStatus: ReviewStatus.draft,
       script: 'Meetei Mayek',
       region: 'Manipur',
@@ -105,7 +118,7 @@ abstract final class LanguageCatalogue {
       locale: Locale('kha'),
       endonym: 'Ka Ktien Khasi',
       englishName: 'Khasi',
-      coveragePercent: 10,
+      coveragePercent: 8,
       reviewStatus: ReviewStatus.draft,
       script: 'Latin',
       region: 'Meghalaya',
@@ -114,7 +127,7 @@ abstract final class LanguageCatalogue {
       locale: Locale('lus'),
       endonym: 'Mizo ṭawng',
       englishName: 'Mizo',
-      coveragePercent: 10,
+      coveragePercent: 8,
       reviewStatus: ReviewStatus.draft,
       script: 'Latin',
       region: 'Mizoram',

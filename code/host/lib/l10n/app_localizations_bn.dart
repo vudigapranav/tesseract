@@ -48,14 +48,14 @@ class AppLocalizationsBn extends AppLocalizations {
 
   @override
   String get signInNotConfigured =>
-      'Sign-in is not configured in this build. It needs a Firebase project and a backend address, which are supplied at build time. Nothing is signed in until then — there is no offline substitute.';
+      'এই বিল্ডে সাইন-ইন কনফিগার করা নেই। এর জন্য একটি Firebase প্রকল্প ও একটি ব্যাকএন্ড ঠিকানা দরকার, যা বিল্ডের সময় দেওয়া হয়। ততক্ষণ কিছুই সাইন-ইন হবে না — অফলাইনে এর কোনো বিকল্প নেই।';
 
   @override
   String get signInPatientNote =>
       'যিনি কাজগুলি করবেন তাঁকে সাইন ইন করতে হয় না। একজন যত্নকারী সব ঠিক করে দিয়ে ফোনটি হাতে দেন।';
 
   @override
-  String get openPreview => 'Open synthetic development preview';
+  String get openPreview => 'কৃত্রিম ডেভেলপমেন্ট প্রিভিউ খুলুন';
 
   @override
   String get languageLabel => 'ভাষা';
@@ -269,11 +269,11 @@ class AppLocalizationsBn extends AppLocalizations {
 
   @override
   String get howToPlayMarbleMazeTilt =>
-      'Hold your phone comfortably while it settles, then gently tilt to guide the marble to the glowing goal. If tilt is unavailable, use your finger. Help shows the route.';
+      'ফোনটি আরাম করে ধরে রাখুন যতক্ষণ না এটি স্থির হয়, তারপর আলতো করে কাত করে মার্বেলটিকে উজ্জ্বল লক্ষ্যে নিয়ে যান। কাত করা সম্ভব না হলে আঙুল ব্যবহার করুন। সাহায্য পথটি দেখায়।';
 
   @override
   String get howToPlayMarbleMazeTouch =>
-      'Guide the marble along the wooden paths with your finger. Reach the glowing goal. Help shows the route.';
+      'আঙুল দিয়ে মার্বেলটিকে কাঠের পথ ধরে নিয়ে যান। উজ্জ্বল লক্ষ্যে পৌঁছান। সাহায্য পথটি দেখায়।';
 
   @override
   String get howToPlayWordSearch =>
@@ -292,10 +292,10 @@ class AppLocalizationsBn extends AppLocalizations {
       'সময় নিন। প্রয়োজন হলে সাহায্য পাবেন, আর যখন ইচ্ছে বিরতি নিতে পারেন।';
 
   @override
-  String get gameRouteQuest => 'Route Quest';
+  String get gameRouteQuest => 'পথের খোঁজ';
 
   @override
-  String get gameMarbleMaze => 'Marble Maze';
+  String get gameMarbleMaze => 'মার্বেল গোলকধাঁধা';
 
   @override
   String get gameWordSearch => 'শব্দ খোঁজা';
@@ -393,7 +393,7 @@ class AppLocalizationsBn extends AppLocalizations {
 
   @override
   String get noPatientsAssigned =>
-      'No patients are assigned to you yet. Assignment is done on the server, not from this app.';
+      'এখনও আপনার নামে কোনো রোগী নির্ধারিত হয়নি। নির্ধারণ সার্ভারে হয়, এই অ্যাপ থেকে নয়।';
 
   @override
   String get observedMeasures => 'পর্যবেক্ষণ করা পরিমাপ';
@@ -418,7 +418,7 @@ class AppLocalizationsBn extends AppLocalizations {
 
   @override
   String get doctorDisclaimer =>
-      'Observed activity in the app. Not a cognitive score, diagnosis, or measure of disease progression.';
+      'অ্যাপে দেখা কার্যকলাপ। এটি কোনো জ্ঞানীয় স্কোর, রোগনির্ণয়, বা রোগের অগ্রগতির পরিমাপ নয়।';
 
   @override
   String notMeasured(String metrics) {
@@ -458,4 +458,112 @@ class AppLocalizationsBn extends AppLocalizations {
   @override
   String get reminderChannelDescription =>
       'যত্নকারীর তৈরি দৈনন্দিন মনে করিয়ে দেওয়া';
+
+  @override
+  String get speakThis => 'পড়ে শোনান';
+
+  @override
+  String get stopSpeaking => 'থামান';
+
+  @override
+  String get readAloudAgain => 'আবার পড়ুন';
+
+  @override
+  String speechUnavailableForLanguage(String language) {
+    return 'এই ফোনে $language ভাষায় পড়ে শোনানো যায় না। উপরের লেখা স্ক্রিনেই থাকবে।';
+  }
+
+  @override
+  String get speechNoEngine =>
+      'এই ফোনে কোনো টেক্সট-টু-স্পিচ কণ্ঠ ইনস্টল করা নেই, তাই কিছু পড়ে শোনানো যাবে না।';
+
+  @override
+  String get speechAudioOff =>
+      'সেটিংসে শব্দ বন্ধ করা আছে, তাই কিছু পড়ে শোনানো হচ্ছে না।';
+
+  @override
+  String get speechFailed => 'এখন লেখাটি পড়ে শোনানো গেল না।';
+
+  @override
+  String get tapToSpeak => 'বলতে ট্যাপ করুন';
+
+  @override
+  String get listening => 'শোনা হচ্ছে…';
+
+  @override
+  String get listeningHint => 'আপনি যা চান বলুন, তারপর একটু অপেক্ষা করুন।';
+
+  @override
+  String get stopListening => 'থামান';
+
+  @override
+  String get cancelListening => 'বাতিল করুন';
+
+  @override
+  String get youSaid => 'আপনি বলেছেন';
+
+  @override
+  String get useThis => 'এটি ব্যবহার করুন';
+
+  @override
+  String get voiceNeedsConfirmation =>
+      '‘এটি ব্যবহার করুন’ না বাছাই করা পর্যন্ত কিছুই সংরক্ষণ হবে না।';
+
+  @override
+  String get voicePermissionDenied =>
+      'শোনার আগে Tesseract-এর মাইক্রোফোন ব্যবহারের অনুমতি দরকার।';
+
+  @override
+  String get voicePermissionBlocked =>
+      'মাইক্রোফোনের অনুমতি বন্ধ আছে। ফোনের সেটিংস থেকে আবার চালু করতে পারেন।';
+
+  @override
+  String get voiceUnavailable =>
+      'এই ফোনে কথা শনাক্ত করার সুবিধা নেই, তাই বলা যাবে না। আপনি লিখতে পারেন।';
+
+  @override
+  String voiceLanguageUnavailable(String language) {
+    return 'এই ফোনে $language ভাষায় বলা যায় না। আপনি লিখতে পারেন।';
+  }
+
+  @override
+  String get voiceNothingHeard =>
+      'কিছু শোনা যায়নি। আবার চেষ্টা করতে পারেন, বা লিখতে পারেন।';
+
+  @override
+  String get voiceNetworkNeeded =>
+      'কথা শনাক্ত করতে এখন সংযোগ দরকার, কিন্তু সংযোগ পাওয়া যায়নি।';
+
+  @override
+  String get voiceError =>
+      'এখন কথা শনাক্ত করা গেল না। আবার চেষ্টা করতে পারেন, বা লিখতে পারেন।';
+
+  @override
+  String get speechSettingsTitle => 'বলা ও শোনা';
+
+  @override
+  String get speechSettingsSubtitle =>
+      'ঐচ্ছিক। এখানকার সবকিছু স্ক্রিনে পড়াও যায় এবং ছুঁয়েও করা যায়।';
+
+  @override
+  String get speechCheckThisPhone => 'এই ফোনে কী কী চলে দেখুন';
+
+  @override
+  String get speechReadAloudAvailable => 'পড়ে শোনানো: আছে';
+
+  @override
+  String get speechReadAloudUnavailable => 'পড়ে শোনানো: নেই';
+
+  @override
+  String get speechListeningAvailable => 'অ্যাপকে বলা: আছে';
+
+  @override
+  String get speechListeningUnavailable => 'অ্যাপকে বলা: নেই';
+
+  @override
+  String get speechNotCheckedYet => 'এই ফোনে এখনও পরীক্ষা করা হয়নি';
+
+  @override
+  String get speechDraftWarning =>
+      'এই ভাষায় সাবলীল কোনো ব্যক্তি এখনও কথা বলার সুবিধাটি পরীক্ষা করেননি।';
 }

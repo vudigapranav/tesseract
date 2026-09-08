@@ -5,6 +5,7 @@ import 'default_content.dart';
 import 'host_flow_state.dart';
 import 'host_strings.dart';
 import 'play_screen.dart';
+import 'speech/speak_button.dart';
 
 /// P3 How to Play: one short instruction, then Begin.
 ///
@@ -44,14 +45,29 @@ class HowToPlayScreen extends StatelessWidget {
             children: <Widget>[
               Icon(registration.icon, size: 56),
               const SizedBox(height: 16),
-              Text(
-                localizedInstructions(
+              Builder(builder: (BuildContext context) {
+                final String instructions = localizedInstructions(
                     flowState.effectivePatientLanguageCode, registration.gameId,
-                    preferTouch: flowState.preferTouch),
-                style: Theme.of(context).textTheme.titleLarge,
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 32),
+                    preferTouch: flowState.preferTouch);
+                return Column(
+                  children: <Widget>[
+                    Text(
+                      instructions,
+                      style: Theme.of(context).textTheme.titleLarge,
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 8),
+                    // Optional. The instruction stays on screen above it and
+                    // Begin works whether or not anything is ever spoken.
+                    SpeakButton(
+                      service: flowState.speech,
+                      text: instructions,
+                      languageCode: flowState.effectivePatientLanguageCode,
+                    ),
+                  ],
+                );
+              }),
+              const SizedBox(height: 24),
               SizedBox(
                 width: double.infinity,
                 height: 56,

@@ -2,7 +2,8 @@
   "@@locale": "en",
   "appName": "Tesseract",
   "@appName": {
-    "description": "Product name. Not translated."
+    "description": "Product name. Must not be translated or transliterated in any locale.",
+    "x-untranslatable": true
   },
   "languageName": "English",
   "@languageName": {
@@ -201,5 +202,143 @@
   "outcomeInterrupted": "Interrupted",
   "reminderNotificationTitle": "A gentle reminder",
   "reminderChannelName": "Routine reminders",
-  "reminderChannelDescription": "Caregiver-created everyday reminders"
+  "reminderChannelDescription": "Caregiver-created everyday reminders",
+  "speakThis": "Read aloud",
+  "@speakThis": {
+    "description": "Button that speaks the text on screen in the patient's language."
+  },
+  "stopSpeaking": "Stop",
+  "@stopSpeaking": {
+    "description": "Button that stops speech immediately."
+  },
+  "readAloudAgain": "Read again",
+  "@readAloudAgain": {
+    "description": "Button that repeats the spoken text."
+  },
+  "speechUnavailableForLanguage": "Reading aloud is not available in {language} on this phone. The words above stay on the screen.",
+  "@speechUnavailableForLanguage": {
+    "description": "Shown when the device has no voice for the selected language. Placeholder is the language name.",
+    "placeholders": {
+      "language": {
+        "type": "String"
+      }
+    }
+  },
+  "speechNoEngine": "This phone has no text-to-speech voice installed, so nothing can be read aloud.",
+  "@speechNoEngine": {
+    "description": "Shown when no TTS engine exists at all."
+  },
+  "speechAudioOff": "Sound is turned off in Settings, so nothing is read aloud.",
+  "@speechAudioOff": {
+    "description": "Shown when the caregiver disabled audio."
+  },
+  "speechFailed": "The words could not be read aloud just now.",
+  "@speechFailed": {
+    "description": "Shown when an utterance fails."
+  },
+  "tapToSpeak": "Tap to speak",
+  "@tapToSpeak": {
+    "description": "Button that starts one listening turn."
+  },
+  "listening": "Listening…",
+  "@listening": {
+    "description": "Shown while the microphone is open."
+  },
+  "listeningHint": "Say what you would like, then wait a moment.",
+  "@listeningHint": {
+    "description": "Help text under the listening indicator."
+  },
+  "stopListening": "Stop",
+  "@stopListening": {
+    "description": "Button that ends listening."
+  },
+  "cancelListening": "Cancel",
+  "@cancelListening": {
+    "description": "Button that abandons listening and discards what was heard."
+  },
+  "youSaid": "You said",
+  "@youSaid": {
+    "description": "Label above the recognised text, shown before anything is saved."
+  },
+  "useThis": "Use this",
+  "@useThis": {
+    "description": "Button confirming the recognised text should be used."
+  },
+  "voiceNeedsConfirmation": "Nothing is saved until you choose Use this.",
+  "@voiceNeedsConfirmation": {
+    "description": "Reassurance that speech never acts on its own."
+  },
+  "voicePermissionDenied": "Tesseract needs permission to use the microphone before it can listen.",
+  "@voicePermissionDenied": {
+    "description": "Shown when microphone permission was refused."
+  },
+  "voicePermissionBlocked": "Microphone access is blocked. You can turn it back on in the phone's Settings.",
+  "@voicePermissionBlocked": {
+    "description": "Shown when permission is permanently denied."
+  },
+  "voiceUnavailable": "This phone has no speech recognition, so speaking is not available. You can still type.",
+  "@voiceUnavailable": {
+    "description": "Shown when no recogniser exists."
+  },
+  "voiceLanguageUnavailable": "Speaking is not available in {language} on this phone. You can still type.",
+  "@voiceLanguageUnavailable": {
+    "description": "Shown when the recogniser has no such language. Placeholder is the language name.",
+    "placeholders": {
+      "language": {
+        "type": "String"
+      }
+    }
+  },
+  "voiceNothingHeard": "Nothing was heard. You can try again or type instead.",
+  "@voiceNothingHeard": {
+    "description": "Shown on timeout or no match."
+  },
+  "voiceNetworkNeeded": "Speech recognition needs a connection right now and could not reach it.",
+  "@voiceNetworkNeeded": {
+    "description": "Shown when the recogniser needs the network."
+  },
+  "voiceError": "Speech did not work just now. You can try again or type instead.",
+  "@voiceError": {
+    "description": "Generic recogniser error."
+  },
+  "speechSettingsTitle": "Speaking and listening",
+  "@speechSettingsTitle": {
+    "description": "Settings section heading for speech."
+  },
+  "speechSettingsSubtitle": "Optional. Everything here can also be read on screen and done by touch.",
+  "@speechSettingsSubtitle": {
+    "description": "Settings section explanation."
+  },
+  "speechCheckThisPhone": "Check what this phone supports",
+  "@speechCheckThisPhone": {
+    "description": "Button that probes the installed engines."
+  },
+  "speechReadAloudAvailable": "Reading aloud: available",
+  "@speechReadAloudAvailable": {
+    "description": "Matrix row, TTS works for this language."
+  },
+  "speechReadAloudUnavailable": "Reading aloud: not available",
+  "@speechReadAloudUnavailable": {
+    "description": "Matrix row, TTS missing for this language."
+  },
+  "speechListeningAvailable": "Speaking to the app: available",
+  "@speechListeningAvailable": {
+    "description": "Matrix row, STT works for this language."
+  },
+  "speechListeningUnavailable": "Speaking to the app: not available",
+  "@speechListeningUnavailable": {
+    "description": "Matrix row, STT missing for this language."
+  },
+  "speechNotCheckedYet": "Not checked on this phone yet",
+  "@speechNotCheckedYet": {
+    "description": "Matrix row before probing."
+  },
+  "speechDraftWarning": "Speech has not been checked by a fluent speaker of this language.",
+  "@speechDraftWarning": {
+    "description": "Honesty note shown alongside any non-English speech."
+  },
+  "@builtBy": {
+    "description": "Fixed attribution. Must appear in this exact English wording in every locale, so it is deliberately absent from every translation file and is excluded from coverage.",
+    "x-untranslatable": true
+  }
 }

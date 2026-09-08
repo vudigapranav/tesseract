@@ -3,6 +3,7 @@ import '../../l10n/app_localizations.dart';
 import '../design_system.dart';
 import '../host_flow_state.dart';
 import '../l10n/language_catalogue.dart';
+import '../speech/speech_settings_section.dart';
 import '../l10n/language_selector.dart';
 import 'about_screen.dart';
 import 'sign_in_screen.dart';
@@ -113,13 +114,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
               onTap: () => _pickLanguage(forPatient: true)),
           const Divider(height: 32),
           SwitchListTile(
-              title: const Text('Reminder sound'),
+              title: const Text('Sound'),
               subtitle: const Text(
-                  'Controls sounds for newly scheduled reminders. Games currently have no audio playback.'),
+                  'Controls sounds for newly scheduled reminders and whether text can be read aloud. Turning this off stops speech immediately. Games have no audio playback of their own.'),
               value: flow.audioEnabled,
               onChanged: (v) async {
-                setState(() => flow.audioEnabled = v);
-                await save();
+                // Goes through the flow state rather than setting the field,
+                // so switching off also stops anything mid-sentence.
+                await flow.setAudioEnabled(v);
+                if (mounted) setState(() {});
               }),
           SwitchListTile(
               title: const Text('Reduce motion'),
@@ -129,6 +132,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 flow.displayPreferencesChanged();
                 await save();
               }),
+          SpeechSettingsSection(flowState: flow),
           const ListTile(
               title: Text('Text size'),
               subtitle: Text(

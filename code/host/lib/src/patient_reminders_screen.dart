@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'design_system.dart';
 import 'host_flow_state.dart';
+import 'speech/speak_button.dart';
 
 /// The patient's view of today's reminders.
 ///
@@ -144,6 +145,15 @@ class _PatientRemindersScreenState extends State<PatientRemindersScreen> {
                 ),
               ),
             ],
+          ),
+          // The reminder is read in the patient's language, but the words
+          // spoken are the caregiver's own — this reads the title back, it
+          // does not translate or rephrase what they wrote.
+          SpeakButton(
+            service: flow.speech,
+            text: '${reminder.title}. $time',
+            languageCode: flow.effectivePatientLanguageCode,
+            compact: true,
           ),
           const SizedBox(height: 16),
           if (seen)

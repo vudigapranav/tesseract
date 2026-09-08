@@ -6,6 +6,10 @@
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
+    <!-- Tap-to-speak only. Requested at the moment the user taps a microphone
+         control, never at startup, and the app has no path that records
+         without an explicit press. -->
+    <uses-permission android:name="android.permission.RECORD_AUDIO"/>
     <application
         android:allowBackup="false" android:label="tesseract_host"
         android:name="${applicationName}"
@@ -54,6 +58,16 @@
         <intent>
             <action android:name="android.intent.action.PROCESS_TEXT"/>
             <data android:mimeType="text/plain"/>
+        </intent>
+        <!-- Android 11+ package visibility. Without these the app cannot see
+             the installed speech engines at all, so every language would probe
+             as unavailable and the app would silently lose speech on exactly
+             the devices it works on. -->
+        <intent>
+            <action android:name="android.intent.action.TTS_SERVICE"/>
+        </intent>
+        <intent>
+            <action android:name="android.speech.RecognitionService"/>
         </intent>
     </queries>
 </manifest>

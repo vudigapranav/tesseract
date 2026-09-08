@@ -52,7 +52,7 @@ class HostApp extends StatefulWidget {
   State<HostApp> createState() => _HostAppState();
 }
 
-class _HostAppState extends State<HostApp> {
+class _HostAppState extends State<HostApp> with WidgetsBindingObserver {
   late final flow = widget.flowState ?? HostFlowState();
 
   /// Lets a notification tap navigate without a BuildContext of its own.
@@ -61,6 +61,10 @@ class _HostAppState extends State<HostApp> {
   @override
   void initState() {
     super.initState();
+    // Speech must not carry on out of a backgrounded app: it would talk over
+    // whatever the person opened next, and a reminder read aloud after
+    // handover could be overheard by someone the caregiver did not intend.
+    WidgetsBinding.instance.addObserver(this);
     // Text size and reduced motion are applied by the MediaQuery below, so
     // the shell has to rebuild when the caregiver changes them.
     flow.addListener(_onDisplayPreferencesChanged);
@@ -78,7 +82,16 @@ class _HostAppState extends State<HostApp> {
   }
 
   @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state != AppLifecycleState.resumed) {
+      flow.stopSpeaking();
+    }
+  }
+
+  @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    flow.stopSpeaking();
     flow.removeListener(_onDisplayPreferencesChanged);
     flow.reminderService.onReminderTapped = null;
     super.dispose();

@@ -598,3 +598,136 @@ patient-basics update endpoint. Ruthika review and five missing required games
 remain outstanding. Next action: supply public config and a phone, then run real
 sign-in, patient creation/selection/upload/conflict and offline reminder checks.
 No push; original Desktop/SIH and unrelated parent repository untouched.
+
+
+## 2026-09-08 user-confirmed remaining scope and NER speech requirements
+
+Documentation-only update requested by the user: include all five existing unfinished areas plus spoken output/input, per-language verification and explicit fallback in a reusable continuation prompt. No application code changed, no speech implementation or new verification claimed, and the paused automation remains paused.
+
+Existing gaps remain: Assamese 90%, Bengali 93%, Meitei 9%, Khasi 10%, Mizo 10% recorded text coverage; no non-English native review; real Firebase/backend sign-in configuration/verification; physical Android checks NOT TESTED; missing backend event calculators and patient-basics update endpoint; five missing required games (four of nine required plus Picture Sorting extra currently registered). Recompute and inspect before treating these figures as current in a later task.
+
+New required functionality: optional spoken instructions, Help and reminders in patient language; optional tap-to-speak commands/dictation with explicit confirmation before saving/acting; independent TTS/STT and pronunciation/recognition verification for Assamese, Bengali, Meitei, Khasi and Mizo; clear text/touch fallback with NO silent language substitution. Speech input/output are NOT IMPLEMENTED as of this record. Translated text and notification sounds are not speech support.
+
+Acceptance requires current provider/device capability checks per language, fluent-speaker review, permission/denial/offline/cancel/error/lifecycle handling, audio preference, no overlapping speech, and preservation of caregiver access controls. Do not promise all-language offline speech or mark unavailable engines as supported. Paid/cloud service choices and external audio processing need explicit approval; credentials stay server-side. Personal speech/text must not leak into event payloads or logs. Preserve language selection before sign-in/in Settings and About Tesseract attribution.
+
+Full reusable implementation prompt and detailed verification requirements: `docs/handoffs/REMAINING_WORK_AND_NER_VOICE_PROMPT.md`. Pranav retains backend/API/analytics ownership; teammates retain game ownership. Missing repository/service/provider decisions remain explicit dependencies.
+
+Checks in this documentation pass: inspected clean Git status and latest continuity tail; wrote the prompt and appended this requirement record to Brain.md and PS003_MOBILE_CODE_STATUS.md. No application tests/builds were run because no application code was changed.
+
+
+## 2026-09-08 — speech implemented, live Firebase auth, as/bn translation complete
+
+### Implemented this pass
+
+Optional spoken output and optional tap-to-speak input, entirely in the host
+layer (`code/host/lib/src/speech/`). No game gained a network, database, auth or
+speech dependency. Spoken: game instructions, host Help text, reminder content,
+in the patient's selected language. Not spoken: the in-game pause overlay, which
+is drawn inside the game packages — speaking it would breach the contract
+boundary, so it is deliberately excluded rather than quietly worked around.
+
+Voice input is explicitly activated, shows a listening indicator, requests the
+microphone at point of use, offers stop/cancel, handles denial, timeout,
+missing recogniser, unsupported language and network loss, shows what it heard,
+and **requires confirmation before anything is saved**. No always-on listening,
+no automatic submission, no bypass of caregiver authentication. Recognised text
+is never written to event payloads or logs.
+
+Settings → "Speaking and listening" probes the engines actually installed on the
+phone, per language, in both directions separately.
+
+### Files changed
+
+`code/host/lib/src/speech/` (new: `speech_capability.dart`,
+`speech_engine.dart`, `platform_speech_engine.dart`,
+`speech_output_service.dart`, `voice_input_service.dart`, `speak_button.dart`,
+`voice_input_sheet.dart`, `speech_settings_section.dart`);
+`main.dart` (lifecycle stop); `host_flow_state.dart` (injectable engines,
+`setAudioEnabled`, language-change rebinding); `how_to_play_screen.dart`,
+`patient_reminders_screen.dart`, `caregiver/reminders_screen.dart`,
+`caregiver/settings_screen.dart`; `l10n/app_en.arb` (+31 keys, 2 marked
+`x-untranslatable`), `app_as.arb` (+43), `app_bn.arb` (+39);
+`src/l10n/language_catalogue.dart`; `android/.../AndroidManifest.xml`
+(`RECORD_AUDIO`, TTS/recogniser package queries); `pubspec.yaml`
+(`flutter_tts`, `speech_to_text`, `permission_handler`).
+
+New docs: `docs/handoffs/NER_SPEECH_MATRIX.md`,
+`docs/handoffs/PRANAV_BACKEND_GAPS.md`.
+
+### Tests actually run
+
+`flutter analyze` clean across host, contract, five games and harness.
+`dart format` clean. `flutter test`: **255 passing** — host 156, contract 22,
+Route Quest 16, Marble Maze 17, Word Search 24, Routine Recall 11, Picture
+Sorting 9. Of those, 28 new speech behaviour tests, 4 speech UI/golden tests,
+4 new localization tests.
+
+`flutter build apk --debug` succeeds → `code/host/build/app/outputs/flutter-apk/
+app-debug.apk` (183 MB debug). `aapt2 dump badging` confirms `RECORD_AUDIO`.
+
+Goldens regenerated and visually inspected: `how_to_play_speech.png`,
+`how_to_play_speech_unavailable.png`, `how_to_play_speech_bengali_2x.png`,
+plus the three existing localization goldens.
+
+### Translation coverage
+
+| Language | Coverage | Review |
+|---|---|---|
+| English | 100% | source |
+| Assamese | **100%** (was 90%) | **draft — not reviewed** |
+| Bengali | **100%** (was 93%) | **draft — not reviewed** |
+| Meitei | 8% (was 9%) | draft — not reviewed |
+| Khasi | 8% (was 10%) | draft — not reviewed |
+| Mizo | 8% (was 10%) | draft — not reviewed |
+
+Measured over 167 translatable keys (169 English keys minus `appName` and
+`builtBy`, which must stay exact English). The three low figures fell because
+the English set grew, not because anything was removed; no low-confidence
+wording was invented to raise them. 100% means every string is written and says
+nothing about quality — a test enforces that full coverage still presents as a
+draft.
+
+### Speech coverage
+
+Implementation status is "routed" for all six languages: the app asks the
+engine, uses it only if the engine really offers that language, and otherwise
+says speech is unavailable **in that language** while keeping text and touch
+fully working. It never substitutes another language.
+
+Actual availability is **NOT TESTED** for every language — no Android device was
+connected (`adb devices` empty). On current Google documentation, only Bengali
+is documented for either direction; Assamese, Meitei, Khasi and Mizo are not.
+Full matrix, sources and the on-device procedure: `docs/handoffs/NER_SPEECH_MATRIX.md`.
+
+No language is speech-verified. No fluent speaker has reviewed any language.
+
+### Live API evidence
+
+Firebase project `tesseract-3ac5a`: Email/Password enabled and a Web app
+registered on 2026-09-08 with the user's explicit approval — **neither existed
+before**, contrary to the earlier record. Sign-in, wrong-password rejection,
+token refresh and invalid-refresh rejection were all verified live against the
+exact endpoints `IdentityService` calls. Credentials are held outside the
+repository; no service-account key was requested or stored.
+
+Client → Firebase is proven. Client → Firebase → API is **not**: the backend
+needs a service-account file the user must place, and the client requires an
+`https://` API URL, so a local HTTP backend is refused by design.
+
+### Device status
+
+**NOT TESTED**, all of it: notification delivery/permission/reboot/time-zone/
+duplicates, biometric gate, Marble Maze gyroscope feel, script rendering and
+glyph coverage, large text on real hardware, TalkBack, smaller screens, and
+every speech behaviour. No device model, Android version or build can be
+recorded because no device was connected.
+
+### Remaining blockers
+
+1. No Android device.
+2. No fluent-speaker review of any language.
+3. Expected provider gap for four of five NER languages (report, not a bug).
+4. Backend: no `PATCH /patients/{id}`; no calculator for the eight event types;
+   service-account file and HTTPS URL needed for end-to-end auth.
+5. Five of the nine required games absent (Reveal Match, Trace, Coloring, Spot
+   Difference, Picture Recall) — no repositories available.

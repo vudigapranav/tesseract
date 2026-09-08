@@ -30,14 +30,32 @@ void main() {
         File('lib/l10n/app_$code.arb').readAsStringSync(),
       ) as Map<String, dynamic>;
 
-  int translatableKeys(Map<String, dynamic> arb) =>
-      arb.keys.where((String k) => !k.startsWith('@')).length;
+  /// Keys that must never be translated, read from the template's own
+  /// `x-untranslatable` markers rather than hard-coded here, so the ARB file
+  /// stays the single source of truth.
+  Set<String> untranslatableKeys(Map<String, dynamic> template) =>
+      template.entries
+          .where((MapEntry<String, dynamic> e) =>
+              e.key.startsWith('@') &&
+              e.value is Map &&
+              (e.value as Map)['x-untranslatable'] == true)
+          .map((MapEntry<String, dynamic> e) => e.key.substring(1))
+          .toSet();
+
+  List<String> messageKeys(Map<String, dynamic> arb) =>
+      arb.keys.where((String k) => !k.startsWith('@')).toList();
 
   group('coverage is measured, not asserted', () {
-    late int templateKeys;
+    late Map<String, dynamic> template;
+    late Set<String> untranslatable;
+    late List<String> denominator;
 
     setUp(() {
-      templateKeys = translatableKeys(readArb('en'));
+      template = readArb('en');
+      untranslatable = untranslatableKeys(template);
+      denominator = messageKeys(template)
+          .where((String k) => !untranslatable.contains(k))
+          .toList();
     });
 
     test('every catalogue language has an ARB file', () {
@@ -49,14 +67,76 @@ void main() {
 
     test('published coverage matches the real files, within rounding', () {
       for (final LanguageOption option in LanguageCatalogue.all) {
-        final int translated = translatableKeys(readArb(option.code));
-        final int actual = ((translated / templateKeys) * 100).round();
+        final List<String> present = messageKeys(readArb(option.code));
+        // Only keys the template actually asks for count. A stale key left
+        // behind after an English string is deleted must not prop a
+        // percentage up.
+        final int translated =
+            denominator.where((String k) => present.contains(k)).length;
+        final int actual = ((translated / denominator.length) * 100).round();
         expect(
           option.coveragePercent == actual,
           isTrue,
           reason: '${option.englishName} claims ${option.coveragePercent}% '
               'but the ARB files measure $actual%',
         );
+      }
+    });
+
+    test('no translation file carries a key English marks untranslatable', () {
+      // The product name and the fixed attribution must render in their exact
+      // English wording everywhere, which they do by falling through. A
+      // locale that redefined one would silently change the attribution.
+      for (final LanguageOption option in LanguageCatalogue.all) {
+        if (option.code == 'en') continue;
+        final List<String> present = messageKeys(readArb(option.code));
+        for (final String key in untranslatable) {
+          expect(present.contains(key), isFalse,
+              reason: '${option.englishName} overrides "$key", which must '
+                  'stay exactly as written in English');
+        }
+      }
+    });
+
+    test('no translation is a verbatim copy of the English string', () {
+      // Copying English in and counting it as translated is the easiest way
+      // to fake coverage, so it is checked rather than trusted. Genuine
+      // loanwords are listed explicitly and reviewed as such.
+      const Set<String> allowedLoanwords = <String>{
+        'roleDoctor',
+        'password',
+      };
+      for (final LanguageOption option in LanguageCatalogue.all) {
+        if (option.code == 'en') continue;
+        final Map<String, dynamic> arb = readArb(option.code);
+        for (final String key in messageKeys(arb)) {
+          if (allowedLoanwords.contains(key)) continue;
+          if (!template.containsKey(key)) continue;
+          expect(arb[key], isNot(template[key]),
+              reason: '${option.englishName} "$key" is the English string '
+                  'verbatim; either translate it or leave it out so it falls '
+                  'back honestly');
+        }
+      }
+    });
+
+    test('every translated string keeps the placeholders English declares', () {
+      // A dropped {language} placeholder would render a sentence with a hole
+      // in it, and gen-l10n would not catch it across locales.
+      final RegExp placeholder = RegExp(r'\{(\w+)\}');
+      Set<String> holes(String v) =>
+          placeholder.allMatches(v).map((Match m) => m.group(1)!).toSet();
+      for (final LanguageOption option in LanguageCatalogue.all) {
+        if (option.code == 'en') continue;
+        final Map<String, dynamic> arb = readArb(option.code);
+        for (final String key in messageKeys(arb)) {
+          final Object? en = template[key];
+          if (en is! String) continue;
+          final Object? tr = arb[key];
+          if (tr is! String) continue;
+          expect(holes(tr), holes(en),
+              reason: '${option.englishName} "$key" changed its placeholders');
+        }
       }
     });
 
@@ -76,7 +156,22 @@ void main() {
     test('no language below full coverage is presented as complete', () {
       for (final LanguageOption option in LanguageCatalogue.all) {
         if (option.coveragePercent < 100) {
+          expect(option.isTextComplete, isFalse);
           expect(option.isDraft, isTrue);
+        }
+      }
+    });
+
+    test('full text coverage still does not imply fluent-speaker review', () {
+      // Assamese and Bengali reached 100% of the strings in this pass. That
+      // is a count, not an endorsement, and the UI must keep saying draft
+      // until a named fluent speaker has actually read them.
+      for (final LanguageOption option in LanguageCatalogue.all) {
+        if (option.code == 'en') continue;
+        if (option.isTextComplete) {
+          expect(option.isDraft, isTrue,
+              reason: '${option.englishName} is fully written but has not '
+                  'been reviewed; it must still present as a draft');
         }
       }
     });

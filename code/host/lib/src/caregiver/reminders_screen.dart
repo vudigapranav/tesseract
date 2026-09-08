@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../host_flow_state.dart';
+import '../speech/voice_input_sheet.dart';
 
 class RemindersScreen extends StatefulWidget {
   const RemindersScreen(
@@ -44,6 +45,41 @@ class _RemindersScreenState extends State<RemindersScreen> {
                           decoration: const InputDecoration(
                               labelText: 'Reminder',
                               hintText: 'For example, water the plants')),
+                      const SizedBox(height: 8),
+                      // Dictation is an alternative to typing, never a
+                      // replacement: the field above stays editable, and what
+                      // the microphone hears only lands in it after the
+                      // caregiver presses "Use this" in the sheet. Saving is
+                      // still a separate, deliberate press of Save.
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: OutlinedButton.icon(
+                          icon: const Icon(Icons.mic_none_rounded),
+                          label: const Text('Speak instead of typing'),
+                          style: OutlinedButton.styleFrom(
+                              minimumSize: const Size(64, 48)),
+                          onPressed: () async {
+                            final String? spoken = await showVoiceInputSheet(
+                              context: context,
+                              engine: widget.flowState.stt,
+                              // The caregiver dictates in the language they
+                              // are working in, which is also the language
+                              // the reminder will be read back in.
+                              languageCode:
+                                  widget.flowState.effectivePatientLanguageCode,
+                            );
+                            if (spoken == null || spoken.isEmpty) return;
+                            // Appended to whatever is already typed rather
+                            // than overwriting it, so a dictation attempt can
+                            // never silently destroy text the caregiver
+                            // entered by hand.
+                            final String existing = controller.text.trim();
+                            update(() => controller.text = existing.isEmpty
+                                ? spoken
+                                : '$existing $spoken');
+                          },
+                        ),
+                      ),
                       const SizedBox(height: 16),
                       TextButton(
                           onPressed: () async {

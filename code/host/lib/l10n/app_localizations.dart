@@ -106,7 +106,7 @@ abstract class AppLocalizations {
     Locale('mni')
   ];
 
-  /// Product name. Not translated.
+  /// Product name. Must not be translated or transliterated in any locale.
   ///
   /// In en, this message translates to:
   /// **'Tesseract'**
@@ -778,7 +778,7 @@ abstract class AppLocalizations {
   /// **'Tesseract offers gentle cognitive activities and everyday reminders for people living with dementia, set up and reviewed by the people who care for them.'**
   String get aboutDescription;
 
-  /// No description provided for @builtBy.
+  /// Fixed attribution. Must appear in this exact English wording in every locale, so it is deliberately absent from every translation file and is excluded from coverage.
   ///
   /// In en, this message translates to:
   /// **'Built and developed by the Tesseract Team.'**
@@ -933,6 +933,192 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Caregiver-created everyday reminders'**
   String get reminderChannelDescription;
+
+  /// Button that speaks the text on screen in the patient's language.
+  ///
+  /// In en, this message translates to:
+  /// **'Read aloud'**
+  String get speakThis;
+
+  /// Button that stops speech immediately.
+  ///
+  /// In en, this message translates to:
+  /// **'Stop'**
+  String get stopSpeaking;
+
+  /// Button that repeats the spoken text.
+  ///
+  /// In en, this message translates to:
+  /// **'Read again'**
+  String get readAloudAgain;
+
+  /// Shown when the device has no voice for the selected language. Placeholder is the language name.
+  ///
+  /// In en, this message translates to:
+  /// **'Reading aloud is not available in {language} on this phone. The words above stay on the screen.'**
+  String speechUnavailableForLanguage(String language);
+
+  /// Shown when no TTS engine exists at all.
+  ///
+  /// In en, this message translates to:
+  /// **'This phone has no text-to-speech voice installed, so nothing can be read aloud.'**
+  String get speechNoEngine;
+
+  /// Shown when the caregiver disabled audio.
+  ///
+  /// In en, this message translates to:
+  /// **'Sound is turned off in Settings, so nothing is read aloud.'**
+  String get speechAudioOff;
+
+  /// Shown when an utterance fails.
+  ///
+  /// In en, this message translates to:
+  /// **'The words could not be read aloud just now.'**
+  String get speechFailed;
+
+  /// Button that starts one listening turn.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap to speak'**
+  String get tapToSpeak;
+
+  /// Shown while the microphone is open.
+  ///
+  /// In en, this message translates to:
+  /// **'Listening…'**
+  String get listening;
+
+  /// Help text under the listening indicator.
+  ///
+  /// In en, this message translates to:
+  /// **'Say what you would like, then wait a moment.'**
+  String get listeningHint;
+
+  /// Button that ends listening.
+  ///
+  /// In en, this message translates to:
+  /// **'Stop'**
+  String get stopListening;
+
+  /// Button that abandons listening and discards what was heard.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get cancelListening;
+
+  /// Label above the recognised text, shown before anything is saved.
+  ///
+  /// In en, this message translates to:
+  /// **'You said'**
+  String get youSaid;
+
+  /// Button confirming the recognised text should be used.
+  ///
+  /// In en, this message translates to:
+  /// **'Use this'**
+  String get useThis;
+
+  /// Reassurance that speech never acts on its own.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing is saved until you choose Use this.'**
+  String get voiceNeedsConfirmation;
+
+  /// Shown when microphone permission was refused.
+  ///
+  /// In en, this message translates to:
+  /// **'Tesseract needs permission to use the microphone before it can listen.'**
+  String get voicePermissionDenied;
+
+  /// Shown when permission is permanently denied.
+  ///
+  /// In en, this message translates to:
+  /// **'Microphone access is blocked. You can turn it back on in the phone\'s Settings.'**
+  String get voicePermissionBlocked;
+
+  /// Shown when no recogniser exists.
+  ///
+  /// In en, this message translates to:
+  /// **'This phone has no speech recognition, so speaking is not available. You can still type.'**
+  String get voiceUnavailable;
+
+  /// Shown when the recogniser has no such language. Placeholder is the language name.
+  ///
+  /// In en, this message translates to:
+  /// **'Speaking is not available in {language} on this phone. You can still type.'**
+  String voiceLanguageUnavailable(String language);
+
+  /// Shown on timeout or no match.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing was heard. You can try again or type instead.'**
+  String get voiceNothingHeard;
+
+  /// Shown when the recogniser needs the network.
+  ///
+  /// In en, this message translates to:
+  /// **'Speech recognition needs a connection right now and could not reach it.'**
+  String get voiceNetworkNeeded;
+
+  /// Generic recogniser error.
+  ///
+  /// In en, this message translates to:
+  /// **'Speech did not work just now. You can try again or type instead.'**
+  String get voiceError;
+
+  /// Settings section heading for speech.
+  ///
+  /// In en, this message translates to:
+  /// **'Speaking and listening'**
+  String get speechSettingsTitle;
+
+  /// Settings section explanation.
+  ///
+  /// In en, this message translates to:
+  /// **'Optional. Everything here can also be read on screen and done by touch.'**
+  String get speechSettingsSubtitle;
+
+  /// Button that probes the installed engines.
+  ///
+  /// In en, this message translates to:
+  /// **'Check what this phone supports'**
+  String get speechCheckThisPhone;
+
+  /// Matrix row, TTS works for this language.
+  ///
+  /// In en, this message translates to:
+  /// **'Reading aloud: available'**
+  String get speechReadAloudAvailable;
+
+  /// Matrix row, TTS missing for this language.
+  ///
+  /// In en, this message translates to:
+  /// **'Reading aloud: not available'**
+  String get speechReadAloudUnavailable;
+
+  /// Matrix row, STT works for this language.
+  ///
+  /// In en, this message translates to:
+  /// **'Speaking to the app: available'**
+  String get speechListeningAvailable;
+
+  /// Matrix row, STT missing for this language.
+  ///
+  /// In en, this message translates to:
+  /// **'Speaking to the app: not available'**
+  String get speechListeningUnavailable;
+
+  /// Matrix row before probing.
+  ///
+  /// In en, this message translates to:
+  /// **'Not checked on this phone yet'**
+  String get speechNotCheckedYet;
+
+  /// Honesty note shown alongside any non-English speech.
+  ///
+  /// In en, this message translates to:
+  /// **'Speech has not been checked by a fluent speaker of this language.'**
+  String get speechDraftWarning;
 }
 
 class _AppLocalizationsDelegate

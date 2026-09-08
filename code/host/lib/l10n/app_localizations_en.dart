@@ -464,4 +464,112 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get reminderChannelDescription =>
       'Caregiver-created everyday reminders';
+
+  @override
+  String get speakThis => 'Read aloud';
+
+  @override
+  String get stopSpeaking => 'Stop';
+
+  @override
+  String get readAloudAgain => 'Read again';
+
+  @override
+  String speechUnavailableForLanguage(String language) {
+    return 'Reading aloud is not available in $language on this phone. The words above stay on the screen.';
+  }
+
+  @override
+  String get speechNoEngine =>
+      'This phone has no text-to-speech voice installed, so nothing can be read aloud.';
+
+  @override
+  String get speechAudioOff =>
+      'Sound is turned off in Settings, so nothing is read aloud.';
+
+  @override
+  String get speechFailed => 'The words could not be read aloud just now.';
+
+  @override
+  String get tapToSpeak => 'Tap to speak';
+
+  @override
+  String get listening => 'Listening…';
+
+  @override
+  String get listeningHint => 'Say what you would like, then wait a moment.';
+
+  @override
+  String get stopListening => 'Stop';
+
+  @override
+  String get cancelListening => 'Cancel';
+
+  @override
+  String get youSaid => 'You said';
+
+  @override
+  String get useThis => 'Use this';
+
+  @override
+  String get voiceNeedsConfirmation =>
+      'Nothing is saved until you choose Use this.';
+
+  @override
+  String get voicePermissionDenied =>
+      'Tesseract needs permission to use the microphone before it can listen.';
+
+  @override
+  String get voicePermissionBlocked =>
+      'Microphone access is blocked. You can turn it back on in the phone\'s Settings.';
+
+  @override
+  String get voiceUnavailable =>
+      'This phone has no speech recognition, so speaking is not available. You can still type.';
+
+  @override
+  String voiceLanguageUnavailable(String language) {
+    return 'Speaking is not available in $language on this phone. You can still type.';
+  }
+
+  @override
+  String get voiceNothingHeard =>
+      'Nothing was heard. You can try again or type instead.';
+
+  @override
+  String get voiceNetworkNeeded =>
+      'Speech recognition needs a connection right now and could not reach it.';
+
+  @override
+  String get voiceError =>
+      'Speech did not work just now. You can try again or type instead.';
+
+  @override
+  String get speechSettingsTitle => 'Speaking and listening';
+
+  @override
+  String get speechSettingsSubtitle =>
+      'Optional. Everything here can also be read on screen and done by touch.';
+
+  @override
+  String get speechCheckThisPhone => 'Check what this phone supports';
+
+  @override
+  String get speechReadAloudAvailable => 'Reading aloud: available';
+
+  @override
+  String get speechReadAloudUnavailable => 'Reading aloud: not available';
+
+  @override
+  String get speechListeningAvailable => 'Speaking to the app: available';
+
+  @override
+  String get speechListeningUnavailable => 'Speaking to the app: not available';
+
+  @override
+  String get speechNotCheckedYet => 'Not checked on this phone yet';
+
+  @override
+  String get speechDraftWarning =>
+      'Speech has not been checked by a fluent speaker of this language.';
 }

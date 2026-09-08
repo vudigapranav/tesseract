@@ -48,14 +48,14 @@ class AppLocalizationsAs extends AppLocalizations {
 
   @override
   String get signInNotConfigured =>
-      'Sign-in is not configured in this build. It needs a Firebase project and a backend address, which are supplied at build time. Nothing is signed in until then — there is no offline substitute.';
+      'এই বিল্ডত ছাইন-ইন কনফিগাৰ কৰা হোৱা নাই। ইয়াৰ বাবে এটা Firebase প্ৰকল্প আৰু এটা বেকএণ্ড ঠিকনা লাগে, যিবোৰ বিল্ডৰ সময়ত দিয়া হয়। তেতিয়ালৈকে একোৱেই ছাইন-ইন নহয় — অফলাইনত ইয়াৰ কোনো বিকল্প নাই।';
 
   @override
   String get signInPatientNote =>
       'যিয়ে কামবোৰ কৰিব তেওঁ ছাইন ইন নকৰে। এজন যত্নকাৰীয়ে সাজু কৰি ফোনটো হাতত দিয়ে।';
 
   @override
-  String get openPreview => 'Open synthetic development preview';
+  String get openPreview => 'কৃত্ৰিম ডেভেলপমেণ্ট প্ৰিভিউ খোলক';
 
   @override
   String get languageLabel => 'ভাষা';
@@ -131,11 +131,11 @@ class AppLocalizationsAs extends AppLocalizations {
 
   @override
   String get decisionApproved =>
-      'Approved. The new activity is ready for the next session.';
+      'অনুমোদিত। নতুন কাৰ্যকলাপটো পৰৱৰ্তী ছেছনৰ বাবে সাজু।';
 
   @override
   String get decisionModified =>
-      'Saved your choice. That is what will be offered next.';
+      'আপোনাৰ পছন্দ ৰক্ষা কৰা হ\'ল। পৰৱৰ্তী সময়ত সেইটোৱেই আগবঢ়োৱা হ\'ব।';
 
   @override
   String get decisionRejected =>
@@ -271,11 +271,11 @@ class AppLocalizationsAs extends AppLocalizations {
 
   @override
   String get howToPlayMarbleMazeTilt =>
-      'Hold your phone comfortably while it settles, then gently tilt to guide the marble to the glowing goal. If tilt is unavailable, use your finger. Help shows the route.';
+      'ফোনটো আৰামেৰে ধৰি ৰাখক যেতিয়ালৈকে ই স্থিৰ নহয়, তাৰ পিছত লাহেকৈ কাত কৰি মাৰ্বেলটো উজ্জ্বল লক্ষ্যলৈ লৈ যাওক। কাত কৰিব নোৱাৰিলে আঙুলি ব্যৱহাৰ কৰক। সহায়ে বাটটো দেখুৱায়।';
 
   @override
   String get howToPlayMarbleMazeTouch =>
-      'Guide the marble along the wooden paths with your finger. Reach the glowing goal. Help shows the route.';
+      'আঙুলিৰে মাৰ্বেলটো কাঠৰ বাটেৰে লৈ যাওক। উজ্জ্বল লক্ষ্যত উপনীত হওক। সহায়ে বাটটো দেখুৱায়।';
 
   @override
   String get howToPlayWordSearch =>
@@ -294,10 +294,10 @@ class AppLocalizationsAs extends AppLocalizations {
       'সময় লওক। প্ৰয়োজন হ’লে সহায় পাব, আৰু যেতিয়া ইচ্ছা বিৰতি ল’ব পাৰে।';
 
   @override
-  String get gameRouteQuest => 'Route Quest';
+  String get gameRouteQuest => 'বাটৰ সন্ধান';
 
   @override
-  String get gameMarbleMaze => 'Marble Maze';
+  String get gameMarbleMaze => 'মাৰ্বেল গোলকধাঁধা';
 
   @override
   String get gameWordSearch => 'শব্দ বিচৰা';
@@ -349,7 +349,7 @@ class AppLocalizationsAs extends AppLocalizations {
 
   @override
   String get textSizeHelp =>
-      'Applies straight away, on top of the Android text-size setting.';
+      'লগে লগে প্ৰয়োগ হয়, এণ্ড্ৰইডৰ লিখাৰ আকাৰৰ ছেটিঙৰ ওপৰত।';
 
   @override
   String get synchronization => 'ছিংক কৰা';
@@ -395,10 +395,10 @@ class AppLocalizationsAs extends AppLocalizations {
 
   @override
   String get noPatientsAssigned =>
-      'No patients are assigned to you yet. Assignment is done on the server, not from this app.';
+      'এতিয়ালৈকে আপোনাৰ নামত কোনো ৰোগী নিৰ্ধাৰিত হোৱা নাই। নিৰ্ধাৰণ চাৰ্ভাৰত হয়, এই এপৰ পৰা নহয়।';
 
   @override
-  String get observedMeasures => 'Observed measures';
+  String get observedMeasures => 'লক্ষ্য কৰা পৰিমাপ';
 
   @override
   String get sessionHistory => 'খেলৰ ছেছনৰ ইতিহাস';
@@ -420,7 +420,7 @@ class AppLocalizationsAs extends AppLocalizations {
 
   @override
   String get doctorDisclaimer =>
-      'Observed activity in the app. Not a cognitive score, diagnosis, or measure of disease progression.';
+      'এপত লক্ষ্য কৰা কাৰ্যকলাপ। ই কোনো জ্ঞানীয় স্ক\'ৰ, ৰোগনিৰ্ণয়, বা ৰোগৰ অগ্ৰগতিৰ পৰিমাপ নহয়।';
 
   @override
   String notMeasured(String metrics) {
@@ -460,4 +460,112 @@ class AppLocalizationsAs extends AppLocalizations {
   @override
   String get reminderChannelDescription =>
       'যত্নকাৰীয়ে তৈয়াৰ কৰা দৈনন্দিন মনত পেলোৱা';
+
+  @override
+  String get speakThis => 'পঢ়ি শুনাওক';
+
+  @override
+  String get stopSpeaking => 'বন্ধ কৰক';
+
+  @override
+  String get readAloudAgain => 'পুনৰ পঢ়ক';
+
+  @override
+  String speechUnavailableForLanguage(String language) {
+    return 'এই ফোনত $language ভাষাত পঢ়ি শুনোৱা নাযায়। ওপৰৰ কথাখিনি স্ক্ৰীণতে থাকিব।';
+  }
+
+  @override
+  String get speechNoEngine =>
+      'এই ফোনত কোনো টেক্সট-টু-স্পীচ কণ্ঠ ইনষ্টল কৰা নাই, সেয়েহে একো পঢ়ি শুনাব নোৱাৰি।';
+
+  @override
+  String get speechAudioOff =>
+      'ছেটিঙত শব্দ বন্ধ কৰা আছে, সেয়েহে একো পঢ়ি শুনোৱা হোৱা নাই।';
+
+  @override
+  String get speechFailed => 'এতিয়া কথাখিনি পঢ়ি শুনাব পৰা নগ\'ল।';
+
+  @override
+  String get tapToSpeak => 'ক\'বলৈ টিপক';
+
+  @override
+  String get listening => 'শুনি আছে…';
+
+  @override
+  String get listeningHint => 'আপুনি যি বিচাৰে কওক, তাৰ পিছত অলপ ৰৈ থাকক।';
+
+  @override
+  String get stopListening => 'বন্ধ কৰক';
+
+  @override
+  String get cancelListening => 'বাতিল কৰক';
+
+  @override
+  String get youSaid => 'আপুনি ক\'লে';
+
+  @override
+  String get useThis => 'এইটো ব্যৱহাৰ কৰক';
+
+  @override
+  String get voiceNeedsConfirmation =>
+      '‘এইটো ব্যৱহাৰ কৰক’ নোবোলালৈকে একোৱেই ৰক্ষা কৰা নহ\'ব।';
+
+  @override
+  String get voicePermissionDenied =>
+      'শুনাৰ আগতে Tesseract-ৰ মাইক্ৰ\'ফোন ব্যৱহাৰৰ অনুমতি লাগে।';
+
+  @override
+  String get voicePermissionBlocked =>
+      'মাইক্ৰ\'ফোনৰ অনুমতি বন্ধ কৰা আছে। ফোনৰ ছেটিঙৰ পৰা পুনৰ খুলিব পাৰে।';
+
+  @override
+  String get voiceUnavailable =>
+      'এই ফোনত কথা চিনাক্ত কৰাৰ সুবিধা নাই, সেয়েহে ক\'ব নোৱাৰি। আপুনি লিখিব পাৰে।';
+
+  @override
+  String voiceLanguageUnavailable(String language) {
+    return 'এই ফোনত $language ভাষাত ক\'ব নোৱাৰি। আপুনি লিখিব পাৰে।';
+  }
+
+  @override
+  String get voiceNothingHeard =>
+      'একো শুনা নগ\'ল। পুনৰ চেষ্টা কৰিব পাৰে, বা লিখিব পাৰে।';
+
+  @override
+  String get voiceNetworkNeeded =>
+      'কথা চিনাক্ত কৰিবলৈ এতিয়া সংযোগ লাগে, কিন্তু সংযোগ পোৱা নগ\'ল।';
+
+  @override
+  String get voiceError =>
+      'এতিয়া কথা চিনাক্ত কৰিব পৰা নগ\'ল। পুনৰ চেষ্টা কৰিব পাৰে, বা লিখিব পাৰে।';
+
+  @override
+  String get speechSettingsTitle => 'কোৱা আৰু শুনা';
+
+  @override
+  String get speechSettingsSubtitle =>
+      'ঐচ্ছিক। ইয়াৰ সকলোবোৰ স্ক্ৰীণত পঢ়িবও পাৰি আৰু স্পৰ্শ কৰিও কৰিব পাৰি।';
+
+  @override
+  String get speechCheckThisPhone => 'এই ফোনত কি কি চলে চাওক';
+
+  @override
+  String get speechReadAloudAvailable => 'পঢ়ি শুনোৱা: আছে';
+
+  @override
+  String get speechReadAloudUnavailable => 'পঢ়ি শুনোৱা: নাই';
+
+  @override
+  String get speechListeningAvailable => 'এপক কোৱা: আছে';
+
+  @override
+  String get speechListeningUnavailable => 'এপক কোৱা: নাই';
+
+  @override
+  String get speechNotCheckedYet => 'এই ফোনত এতিয়াও পৰীক্ষা কৰা হোৱা নাই';
+
+  @override
+  String get speechDraftWarning =>
+      'এই ভাষাত সুন্দৰকৈ ক\'ব পৰা কোনো ব্যক্তিয়ে এতিয়াও কথা কোৱাৰ সুবিধাটো পৰীক্ষা কৰা নাই।';
 }
