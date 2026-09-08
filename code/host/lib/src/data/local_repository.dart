@@ -68,7 +68,8 @@ class LocalRepository {
   static Future<void> _upgradeToV2(Database db) async {
     final List<Map<String, Object?>> columns =
         await db.rawQuery('PRAGMA table_info(sessions)');
-    final bool hasScope = columns.any((Map<String, Object?> c) => c['name'] == 'scope');
+    final bool hasScope =
+        columns.any((Map<String, Object?> c) => c['name'] == 'scope');
     if (!hasScope) {
       await db.execute(
           "ALTER TABLE sessions ADD COLUMN scope TEXT NOT NULL DEFAULT '$anonymousScope'");
@@ -98,8 +99,8 @@ class LocalRepository {
 
   /// The identity that was active when the app last ran, if any.
   Future<String?> readActiveScope() async {
-    final List<Map<String, Object?>> rows = await db
-        .query('settings', where: 'id = ?', whereArgs: <Object?>[_activeScopeRow]);
+    final List<Map<String, Object?>> rows = await db.query('settings',
+        where: 'id = ?', whereArgs: <Object?>[_activeScopeRow]);
     if (rows.isEmpty) {
       return null;
     }
@@ -120,8 +121,8 @@ class LocalRepository {
   // ---------------------------------------------------------------------
 
   Future<Map<String, dynamic>?> readSettings() async {
-    final List<Map<String, Object?>> rows =
-        await db.query('settings', where: 'id = ?', whereArgs: <Object?>[_scope]);
+    final List<Map<String, Object?>> rows = await db
+        .query('settings', where: 'id = ?', whereArgs: <Object?>[_scope]);
     return rows.isEmpty
         ? null
         : jsonDecode(rows.single['body'] as String) as Map<String, dynamic>;
@@ -193,7 +194,8 @@ class LocalRepository {
         }
         return;
       }
-      await txn.update('sessions', <String, Object?>{'completion': jsonEncode(completion)},
+      await txn.update(
+          'sessions', <String, Object?>{'completion': jsonEncode(completion)},
           where: 'id = ?', whereArgs: <Object?>[id]);
     });
   }
@@ -244,12 +246,10 @@ class LocalRepository {
       final Map<String, dynamic> last = saved.last;
       final bool terminal = last['type'] == 'session_finished';
       await complete(id, <String, Object?>{
-        'status': terminal
-            ? (last['payload'] as Map)['status']
-            : 'interrupted',
+        'status': terminal ? (last['payload'] as Map)['status'] : 'interrupted',
         'final_seq': last['seq'],
-        'assisted':
-            saved.any((Map<String, dynamic> e) => e['type'] == 'hint_requested'),
+        'assisted': saved
+            .any((Map<String, dynamic> e) => e['type'] == 'hint_requested'),
         'ended_at': last['occurred_at'],
       });
     }

@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'dart:math';
-import 'package:flutter/material.dart' show TimeOfDay;
+import 'package:flutter/material.dart' show ChangeNotifier, TimeOfDay;
 import 'data/local_repository.dart';
 import 'data/identity_service.dart';
 import 'data/api_client.dart';
@@ -59,8 +59,16 @@ class ActivityRecord {
 /// session outbox. Nothing here persists past an app restart, and none of
 /// it is real caregiver-entered data yet — each screen that reads or writes
 /// a field says what it's standing in for.
-class HostFlowState {
+class HostFlowState extends ChangeNotifier {
   HostFlowState({this.repository});
+
+  /// Tell the app shell that a display preference changed.
+  ///
+  /// Text size and reduced motion are applied by the root `MediaQuery`, so
+  /// they only take effect if something rebuilds it. Without this the
+  /// caregiver has to close and reopen the app to see a change they just
+  /// made, which reads as the setting being broken.
+  void displayPreferencesChanged() => notifyListeners();
   final LocalRepository? repository;
   final identity = IdentityService();
   final reminderService = ReminderService();
@@ -71,6 +79,7 @@ class HostFlowState {
   int configVersion = 0;
   List<Map<String, dynamic>> recommendations = [];
   String syncStatus = 'Saved on device; not connected';
+
   /// Patients this caregiver can actually access, for explicit selection when
   /// there is more than one and none is already chosen.
   List<Map<String, dynamic>> availablePatients = <Map<String, dynamic>>[];
@@ -89,8 +98,7 @@ class HostFlowState {
     // caregiver's patient content into another's session.
     await adoptIdentityScope();
 
-    final patients =
-        (response['items'] as List).cast<Map<String, dynamic>>();
+    final patients = (response['items'] as List).cast<Map<String, dynamic>>();
     availablePatients = patients;
 
     final matching = patients.where((p) => p['patient_id'] == patientId);

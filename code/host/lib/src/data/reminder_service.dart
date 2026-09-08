@@ -9,6 +9,23 @@ class ReminderService {
   final plugin = FlutterLocalNotificationsPlugin();
   bool ready = false;
   String status = 'Notifications not checked';
+
+  /// Called when the person taps a reminder notification, with the reminder's
+  /// id. Set by the app shell so the tap can open the reminder view; without
+  /// it a tap would only bring the app to whatever screen it was last on.
+  void Function(int reminderId)? onReminderTapped;
+
+  void _handleResponse(NotificationResponse response) {
+    final String? payload = response.payload;
+    if (payload == null || !payload.startsWith('reminder:')) {
+      return;
+    }
+    final int? id = int.tryParse(payload.substring('reminder:'.length));
+    if (id != null) {
+      onReminderTapped?.call(id);
+    }
+  }
+
   Future<void> initialize() async {
     if (kIsWeb) {
       status = 'Browser preview: Android notifications unavailable';
@@ -19,7 +36,8 @@ class ReminderService {
         tz.getLocation((await FlutterTimezone.getLocalTimezone()).identifier));
     await plugin.initialize(
         settings: const InitializationSettings(
-            android: AndroidInitializationSettings('@mipmap/ic_launcher')));
+            android: AndroidInitializationSettings('@mipmap/ic_launcher')),
+        onDidReceiveNotificationResponse: _handleResponse);
     ready = true;
   }
 

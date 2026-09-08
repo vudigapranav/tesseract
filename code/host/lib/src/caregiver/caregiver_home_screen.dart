@@ -68,8 +68,8 @@ class _CaregiverHomeScreenState extends State<CaregiverHomeScreen> {
       // A stale proposal or a lost connection must be visible, not retried
       // quietly behind the caregiver's back.
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text(
-              'That could not be saved. Nothing was changed. ($error)')));
+          content:
+              Text('That could not be saved. Nothing was changed. ($error)')));
     } finally {
       if (mounted) {
         setState(() => _busy = false);
@@ -77,7 +77,8 @@ class _CaregiverHomeScreenState extends State<CaregiverHomeScreen> {
     }
   }
 
-  Future<void> _chooseDifferentLevel(Map<String, dynamic> recommendation) async {
+  Future<void> _chooseDifferentLevel(
+      Map<String, dynamic> recommendation) async {
     final Map<String, dynamic> proposed =
         (recommendation['proposed_config'] as Map).cast<String, dynamic>();
     final Map<String, dynamic> current =
@@ -236,7 +237,9 @@ class _CaregiverHomeScreenState extends State<CaregiverHomeScreen> {
             ),
             const SizedBox(height: 2),
             Text(
-              flow.patientName.isEmpty ? 'No patient set up yet' : flow.patientName,
+              flow.patientName.isEmpty
+                  ? 'No patient set up yet'
+                  : flow.patientName,
               style: theme.textTheme.headlineMedium,
             ),
           ],
@@ -305,8 +308,7 @@ class _CaregiverHomeScreenState extends State<CaregiverHomeScreen> {
             children: <Widget>[
               Expanded(
                 child: OutlinedButton(
-                  onPressed:
-                      _busy ? null : () => _chooseDifferentLevel(item),
+                  onPressed: _busy ? null : () => _chooseDifferentLevel(item),
                   child: const Text('Choose level'),
                 ),
               ),

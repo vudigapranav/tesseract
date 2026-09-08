@@ -1,72 +1,74 @@
 import 'package:flutter/material.dart';
 
 import '../games/game_registry.dart';
+import 'design_system.dart';
 import 'host_flow_state.dart';
 import 'host_strings.dart';
 import 'how_to_play_screen.dart';
 
-/// P2 Choose Activity: cards built from the registry, at most three shown.
+/// P2 Choose Activity.
+///
+/// One large, plainly labelled choice per activity. No timer, no scores, no
+/// "recommended" badge — the patient is choosing what they feel like doing,
+/// and nothing here should read as a test.
 class ChooseGameScreen extends StatelessWidget {
   const ChooseGameScreen({super.key, required this.flowState});
 
   final HostFlowState flowState;
 
+  /// A calm, concrete sentence about what the activity involves. Keyed by
+  /// game id so a new game supplies its own without changing this screen.
+  static const Map<String, String> _whatItIs = <String, String>{
+    'route_quest': 'Find your way to a place and back again.',
+    'marble_maze': 'Guide the marble gently to the end.',
+  };
+
   @override
   Widget build(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
     final List<GameRegistration> shown = gameRegistry.take(3).toList();
+
     return Scaffold(
-      appBar: AppBar(title: const Text('Choose an activity')),
-      body: SafeArea(
-        child: ListView(
-          padding: const EdgeInsets.all(16),
-          children: shown
-              .map((GameRegistration registration) =>
-                  _GameCard(registration: registration, flowState: flowState))
-              .toList(),
-        ),
-      ),
-    );
-  }
-}
-
-class _GameCard extends StatelessWidget {
-  const _GameCard({required this.registration, required this.flowState});
-
-  final GameRegistration registration;
-  final HostFlowState flowState;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 16),
-      child: SizedBox(
-        height: 96,
-        child: Card(
-          child: InkWell(
-            borderRadius: BorderRadius.circular(12),
-            onTap: () {
-              Navigator.of(context).push(
-                MaterialPageRoute<void>(
-                  builder: (BuildContext context) => HowToPlayScreen(
-                      flowState: flowState, registration: registration),
-                ),
-              );
-            },
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Row(
+      backgroundColor: Colors.transparent,
+      body: TesseractBackground(
+        child: SafeArea(
+          child: ListView(
+            padding: const EdgeInsets.fromLTRB(
+                TesseractDesign.gutter, 16, TesseractDesign.gutter, 32),
+            children: <Widget>[
+              Row(
                 children: <Widget>[
-                  Icon(registration.icon, size: 40),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: Text(
-                      HostStrings.displayName(registration.displayNameKey),
-                      style: Theme.of(context).textTheme.titleMedium,
-                    ),
+                  IconButton(
+                    icon: const Icon(Icons.arrow_back, size: 28),
+                    tooltip: 'Go back',
+                    onPressed: () => Navigator.of(context).maybePop(),
                   ),
                 ],
               ),
-            ),
+              const SizedBox(height: 8),
+              Text('What would you like to do?',
+                  style: theme.textTheme.headlineMedium),
+              const SizedBox(height: 8),
+              Text(
+                'Take your time. You can stop whenever you like.',
+                style: theme.textTheme.bodyLarge
+                    ?.copyWith(color: TesseractDesign.inkSoft),
+              ),
+              const SizedBox(height: 28),
+              for (final GameRegistration registration in shown)
+                BigPatientAction(
+                  label: HostStrings.displayName(registration.displayNameKey),
+                  subtitle: _whatItIs[registration.gameId],
+                  icon: registration.icon,
+                  primary: false,
+                  onPressed: () => Navigator.of(context).push(
+                    MaterialPageRoute<void>(
+                      builder: (BuildContext context) => HowToPlayScreen(
+                          flowState: flowState, registration: registration),
+                    ),
+                  ),
+                ),
+            ],
           ),
         ),
       ),

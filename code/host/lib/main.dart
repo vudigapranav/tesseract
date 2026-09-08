@@ -5,6 +5,7 @@ import 'src/host_flow_state.dart';
 import 'src/home_screen.dart';
 import 'src/design_system.dart';
 import 'src/data/local_repository.dart';
+import 'src/patient_reminders_screen.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -49,9 +50,46 @@ class HostApp extends StatefulWidget {
 
 class _HostAppState extends State<HostApp> {
   late final flow = widget.flowState ?? HostFlowState();
+
+  /// Lets a notification tap navigate without a BuildContext of its own.
+  final GlobalKey<NavigatorState> _navigatorKey = GlobalKey<NavigatorState>();
+
+  @override
+  void initState() {
+    super.initState();
+    // Text size and reduced motion are applied by the MediaQuery below, so
+    // the shell has to rebuild when the caregiver changes them.
+    flow.addListener(_onDisplayPreferencesChanged);
+    // Tapping a reminder should open the reminder view, not just whatever
+    // screen the app happened to be showing.
+    flow.reminderService.onReminderTapped = _openReminders;
+  }
+
+  void _openReminders(int reminderId) {
+    _navigatorKey.currentState?.push(
+      MaterialPageRoute<void>(
+        builder: (_) => PatientRemindersScreen(flowState: flow),
+      ),
+    );
+  }
+
+  @override
+  void dispose() {
+    flow.removeListener(_onDisplayPreferencesChanged);
+    flow.reminderService.onReminderTapped = null;
+    super.dispose();
+  }
+
+  void _onDisplayPreferencesChanged() {
+    if (mounted) {
+      setState(() {});
+    }
+  }
+
   @override
   Widget build(BuildContext context) => MaterialApp(
       title: 'Tesseract',
+      navigatorKey: _navigatorKey,
       debugShowCheckedModeBanner: false,
       theme: TesseractDesign.theme,
       home: flow.patientMode

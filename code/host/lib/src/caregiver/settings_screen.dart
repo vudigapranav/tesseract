@@ -63,19 +63,23 @@ class _SettingsScreenState extends State<SettingsScreen> {
               value: flow.reducedMotion,
               onChanged: (v) async {
                 setState(() => flow.reducedMotion = v);
+                flow.displayPreferencesChanged();
                 await save();
               }),
           const ListTile(
               title: Text('Text size'),
               subtitle: Text(
-                  'Android text-size settings are also respected. Preference applies when the app reopens.')),
+                  'Applies straight away, on top of the Android text-size setting.')),
           Slider(
               value: flow.textScalePreference,
               min: 1,
               max: 2,
               divisions: 4,
               label: '${flow.textScalePreference}×',
-              onChanged: (v) => setState(() => flow.textScalePreference = v),
+              onChanged: (v) {
+                setState(() => flow.textScalePreference = v);
+                flow.displayPreferencesChanged();
+              },
               onChangeEnd: (_) => save()),
           const ListTile(
               title: Text('Language'),

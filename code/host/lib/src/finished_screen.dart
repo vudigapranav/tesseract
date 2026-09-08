@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../games/game_registry.dart';
+import 'design_system.dart';
 import 'host_flow_state.dart';
 import 'host_strings.dart';
 import 'how_to_play_screen.dart';
@@ -21,34 +22,35 @@ class FinishedScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     return Scaffold(
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              _CompletionMark(gameId: registration.gameId),
-              const SizedBox(height: 20),
-              Text('All done for now!',
-                  style: theme.textTheme.headlineMedium,
-                  textAlign: TextAlign.center),
-              const SizedBox(height: 12),
-              Text(
-                'Thank you for playing ${HostStrings.displayName(registration.displayNameKey)}.',
-                style: theme.textTheme.bodyLarge,
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 12),
-              Text(
-                'Activities today: ${flowState.completedActivitiesCount}',
-                style: theme.textTheme.titleMedium,
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 32),
-              SizedBox(
-                width: double.infinity,
-                height: 56,
-                child: FilledButton(
+      backgroundColor: Colors.transparent,
+      body: TesseractBackground(
+        child: SafeArea(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(TesseractDesign.gutter),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                _CompletionMark(gameId: registration.gameId),
+                const SizedBox(height: 20),
+                Text('All done for now!',
+                    style: theme.textTheme.headlineMedium,
+                    textAlign: TextAlign.center),
+                const SizedBox(height: 12),
+                Text(
+                  'Thank you for playing ${HostStrings.displayName(registration.displayNameKey)}.',
+                  style: theme.textTheme.bodyLarge,
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  'Activities today: ${flowState.completedActivitiesCount}',
+                  style: theme.textTheme.titleMedium,
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 32),
+                BigPatientAction(
+                  label: 'Rest',
+                  icon: Icons.self_improvement_rounded,
                   onPressed: () {
                     Navigator.of(context).pushAndRemoveUntil(
                       MaterialPageRoute<void>(
@@ -57,14 +59,11 @@ class FinishedScreen extends StatelessWidget {
                       (Route<void> route) => false,
                     );
                   },
-                  child: const Text('Rest'),
                 ),
-              ),
-              const SizedBox(height: 12),
-              SizedBox(
-                width: double.infinity,
-                height: 56,
-                child: OutlinedButton(
+                BigPatientAction(
+                  label: 'Play again',
+                  icon: Icons.replay_rounded,
+                  primary: false,
                   onPressed: () {
                     Navigator.of(context).pushAndRemoveUntil(
                       MaterialPageRoute<void>(
@@ -74,10 +73,9 @@ class FinishedScreen extends StatelessWidget {
                       (Route<void> route) => false,
                     );
                   },
-                  child: const Text('Play again'),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

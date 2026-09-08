@@ -216,7 +216,8 @@ class PillButton extends StatelessWidget {
       style: FilledButton.styleFrom(
         backgroundColor: TesseractDesign.ink,
         foregroundColor: Colors.white,
-        disabledBackgroundColor: TesseractDesign.inkSoft.withValues(alpha: 0.35),
+        disabledBackgroundColor:
+            TesseractDesign.inkSoft.withValues(alpha: 0.35),
         shape: const StadiumBorder(),
         minimumSize: const Size(64, 56),
       ),

@@ -2,12 +2,15 @@ import 'package:flutter/material.dart';
 
 import 'caregiver_return_gate.dart';
 import 'choose_game_screen.dart';
+import 'design_system.dart';
 import 'home_screen.dart';
 import 'host_flow_state.dart';
 
-/// P8 Rest State: calm idle state, no active session — distinct from a
-/// paused game (P5), where a session is waiting to resume. Home and Ready
-/// to play are both offered, per the patient-mode spec for this screen.
+/// P8 Rest State: a calm idle screen with no active session.
+///
+/// Distinct from a paused game (P5), where a session is still waiting to
+/// resume. Nothing here nudges the patient back into an activity: resting is
+/// a legitimate place to stay.
 class RestScreen extends StatelessWidget {
   const RestScreen({super.key, required this.flowState});
 
@@ -17,33 +20,37 @@ class RestScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     return Scaffold(
-      body: SafeArea(
-        child: Column(
-          children: <Widget>[
-            Align(
-              alignment: Alignment.topRight,
-              child: CaregiverReturnGate(flowState: flowState),
-            ),
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.all(24),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: <Widget>[
-                    Text('Resting',
-                        style: theme.textTheme.headlineMedium,
-                        textAlign: TextAlign.center),
-                    const SizedBox(height: 12),
-                    Text(
-                      'Come back whenever you feel ready.',
-                      style: theme.textTheme.bodyLarge,
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: 32),
-                    SizedBox(
-                      width: double.infinity,
-                      height: 56,
-                      child: FilledButton(
+      backgroundColor: Colors.transparent,
+      body: TesseractBackground(
+        child: SafeArea(
+          child: Column(
+            children: <Widget>[
+              Align(
+                alignment: Alignment.topRight,
+                child: CaregiverReturnGate(flowState: flowState),
+              ),
+              Expanded(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: TesseractDesign.gutter, vertical: 12),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: <Widget>[
+                      const SizedBox(height: 12),
+                      Text('Resting',
+                          style: theme.textTheme.headlineMedium,
+                          textAlign: TextAlign.center),
+                      const SizedBox(height: 12),
+                      Text(
+                        'Come back whenever you feel ready.',
+                        style: theme.textTheme.bodyLarge
+                            ?.copyWith(color: TesseractDesign.inkSoft),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 36),
+                      BigPatientAction(
+                        label: 'Ready to play',
+                        icon: Icons.play_arrow_rounded,
                         onPressed: () {
                           Navigator.of(context).pushAndRemoveUntil(
                             MaterialPageRoute<void>(
@@ -53,14 +60,11 @@ class RestScreen extends StatelessWidget {
                             (Route<void> route) => false,
                           );
                         },
-                        child: const Text('Ready to play'),
                       ),
-                    ),
-                    const SizedBox(height: 12),
-                    SizedBox(
-                      width: double.infinity,
-                      height: 56,
-                      child: OutlinedButton(
+                      BigPatientAction(
+                        label: 'Home',
+                        icon: Icons.home_rounded,
+                        primary: false,
                         onPressed: () {
                           Navigator.of(context).pushAndRemoveUntil(
                             MaterialPageRoute<void>(
@@ -70,14 +74,13 @@ class RestScreen extends StatelessWidget {
                             (Route<void> route) => false,
                           );
                         },
-                        child: const Text('Home'),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
