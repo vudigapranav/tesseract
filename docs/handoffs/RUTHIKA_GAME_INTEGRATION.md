@@ -38,9 +38,9 @@ well. All three are now registered and playable.
 
 | Game | Package | Status |
 |---|---|---|
-| Daily Routine Recall (G8) | `code/games/routine_recall` | Ported from `game2` |
-| Picture Sorting (extra) | `code/games/picture_sorting` | Ported from `game1` |
-| Personalized Word Search (G7) | `code/games/word_search` | Written new |
+| Daily Routine Recall (G8) | `Apnapan/games/routine_recall` | Ported from `game2` |
+| Picture Sorting (extra) | `Apnapan/games/picture_sorting` | Ported from `game1` |
+| Personalized Word Search (G7) | `Apnapan/games/word_search` | Written new |
 
 Picture Sorting is registered as an **extra activity beyond the nine-game
 catalogue**, at Pranav's explicit request. It has not been silently swapped in
@@ -144,7 +144,7 @@ Verified: 44 automated tests across the three new packages
 (word_search 24, routine_recall 11, picture_sorting 9), covering event
 sequencing, exactly-once finalisation, Help/Break, retry attempts, empty
 content, and that no personal text reaches a payload. All three render inside
-the real host — screenshots are in `code/host/test/goldens/`.
+the real host — screenshots are in `Apnapan/host/test/goldens/`.
 
 **Not verified:** none of this has run on a physical Android device. Emoji
 render as placeholder boxes in the golden environment because no emoji font is

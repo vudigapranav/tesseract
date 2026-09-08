@@ -1,33 +1,33 @@
 # PS003 mobile code status
 
-Updated 2026-09-07 by Claude. This is the entry point for anything under `code/`.
+Updated 2026-09-07 by Claude. This is the entry point for anything under `Apnapan/`.
 Backend agents: this file tells you what the Flutter side actually is right now, so
-you do not have to read the Dart. Nothing under `code/` reaches into `services/`.
+you do not have to read the Dart. Nothing under `Apnapan/` reaches into `services/`.
 The wire contract between the two is `docs/contracts/PS003_API_CONTRACT_V1.md`;
 the backend that implements it is `services/api` (see its README for status).
 
 ## What exists
 
-`code/` holds the Flutter mobile side. Five packages. No third-party dependencies
+`Apnapan/` holds the Flutter mobile side. Five packages. No third-party dependencies
 anywhere in the games or the contract — only `flutter`, `flutter_test`,
 `flutter_lints`, and path dependencies between our own packages. (The host's
 Android build itself needs no extra pub dependency either — Marble Maze's tilt
 reads a native Kotlin sensor bridge in the host's own `android/`, not a plugin.)
 
-- `code/packages/tesseract_game_contract` — the shared contract. **Every one of the
+- `Apnapan/packages/tesseract_game_contract` — the shared contract. **Every one of the
   nine games implements this.** Aryan's five and Ruthika's two must use it unchanged.
-- `code/games/route_quest` — G2, Pranav. Node-graph world, BFS shortest path, route
+- `Apnapan/games/route_quest` — G2, Pranav. Node-graph world, BFS shortest path, route
   efficiency, illustrated visual redesign, fixed-timestep animation. Built.
-- `code/games/marble_maze` — G3, Pranav. Grid collision, touch input, Android
+- `Apnapan/games/marble_maze` — G3, Pranav. Grid collision, touch input, Android
   fused-gyroscope tilt with touch fallback. Built; native build verified, physical
   device feel not yet.
-- `code/harness` — a developer app for running the two games with fake content.
+- `Apnapan/harness` — a developer app for running the two games with fake content.
   Has Android + web platform folders and runs.
-- `code/host` — the real app shell. Has Android + web platform folders and runs.
+- `Apnapan/host` — the real app shell. Has Android + web platform folders and runs.
   Now covers the **full decided frontend skeleton**: patient P1-P9 and caregiver
   C1-C7, connected end to end (sign-in through hand-over through play through the
   protected caregiver-return gate). Structural skeleton, not final visual design —
-  see `code/host/README.md`. Doctor portal (D1-D8) is deliberately not built here;
+  see `Apnapan/host/README.md`. Doctor portal (D1-D8) is deliberately not built here;
   the docs mark its platform as an open decision.
 
 ## The contract, for backend readers
@@ -74,7 +74,7 @@ Path efficiency = shortest grid path / actual path travelled.
 
 ## Known gaps — do not treat these as done
 
-1. **Interactive target not yet verified.** `code/host` now has Android and web
+1. **Interactive target not yet verified.** `Apnapan/host` now has Android and web
    platform folders and can be used for the integrated preview. The older harness
    still lacks platform folders. The redesigned games have not yet been inspected
    running on a physical phone or in a browser.
@@ -132,7 +132,7 @@ Path efficiency = shortest grid path / actual path travelled.
 ## What the other seven games must do
 
 Aryan (G1, G4, G5, G6, G9) and Ruthika (G7, G8) depend on
-`code/packages/tesseract_game_contract` by path and implement `TesseractGame`.
+`Apnapan/packages/tesseract_game_contract` by path and implement `TesseractGame`.
 They add no dependencies, hardcode no display text (everything via `GameStrings`),
 never set their own level, and use `TesseractGameStateMixin` so backgrounding
 pauses the session clock the same way in every game.
@@ -156,7 +156,7 @@ visible shortest-path Help guide.
 
 Verified on Flutter 3.47.2 / Dart 3.13.2:
 
-- analysis of both game packages and `code/host`: no issues
+- analysis of both game packages and `Apnapan/host`: no issues
 - Route Quest: 16 tests passed
 - Marble Maze: 16 tests passed
 - Host and golden screenshots: 19 tests passed
@@ -201,7 +201,7 @@ numbers, then completed the one step Codex had explicitly deferred.
   automated tests passing project-wide. Visually inspected every new/changed
   golden; no defects.
 - `flutter build apk --debug` **succeeded** (792s) —
-  `code/host/build/app/outputs/flutter-apk/app-debug.apk`. This is the first
+  `Apnapan/host/build/app/outputs/flutter-apk/app-debug.apk`. This is the first
   real compile of the native Kotlin gyroscope bridge. Confirmed via
   `aapt dump badging` that the merged manifest still declares
   `android.hardware.sensor.gyroscope` as not required, so the app installs on
@@ -217,13 +217,13 @@ adjust (`_tiltDeadZone`, calibration sample count, the low-pass lerp factor,
 `_tiltGridUnitsPerSecond`) if it drifts or feels off.
 
 Also worth knowing: the harness's tilt option for Marble Maze will silently
-behave as touch, since only `code/host` has the native
+behave as touch, since only `Apnapan/host` has the native
 `org.tesseract/marble_tilt` channel. Acceptable for a dev tool, not a defect —
 just don't spend time debugging it there.
 
 ## 2026-09-07 Claude host frontend skeleton milestone
 
-Built the full decided frontend skeleton into `code/host`: patient P1-P9 and
+Built the full decided frontend skeleton into `Apnapan/host`: patient P1-P9 and
 caregiver C1-C7, as structure only — visual design is deliberately
 unfinished; the frontend team redesigns it next. Doctor portal (D1-D8)
 confirmed out of scope pending its own platform decision. Full detail,
@@ -242,7 +242,7 @@ file list and the exact live-QA walkthrough are in Brain.md; summary here:
   Hand Over, else P2 — the actual "Start to P2 or approved P7" rule, not
   just P2 every time.
 - `flutter analyze` clean on all five packages; host tests still 21/21 (no
-  new goldens — see the reasoning in `code/host/README.md` and Brain.md).
+  new goldens — see the reasoning in `Apnapan/host/README.md` and Brain.md).
   Correctness of the 9 new screens was verified by one continuous live
   click-through in the web preview: sign in, fill in patient basics and Know
   Me, hand over an activity, play into it from Home through P7, stop the
@@ -266,7 +266,7 @@ This task initially opened in an unrelated UserProfileApp worktree at `/Users/pr
 ### Code written (not accepted as verified behavior)
 
 - Shared lifecycle mixin now forwards recorder-returned `paused` and `resumed` events to `widget.onEvent`; its test gained sink type/sequence assertions. The discovered original defect advanced seq but dropped both events.
-- Added `code/host/lib/src/data/local_repository.dart`: SQLite tables for settings, sessions/events, immutable local completion checking and interrupted-session recovery.
+- Added `Apnapan/host/lib/src/data/local_repository.dart`: SQLite tables for settings, sessions/events, immutable local completion checking and interrupted-session recovery.
 - Added `data/api_client.dart` and `data/session_outbox.dart`: bearer-token HTTP adapter; session create → batches of at most 500 → complete; stable event IDs; accepted/duplicate checks; retain permanent errors instead of deleting data. These are not verified against the live backend.
 - `session_controller.dart`: elapsedMs → elapsed_ms mapping, sequence/finalization guards, queued durable writes and flush, frozen config, explicit touch preference, omission of unknown actual tilt mode, removal of printed session JSON.
 - `host_flow_state.dart`: settings serialization/restore, saved-history loading, identity/API references and initial sync/config/recommendation fetch plumbing.
@@ -315,7 +315,7 @@ An automatic continuation fired during the stop handoff. The explicit user stop 
 
 Resumed the paused Codex work in the nested clone (branch
 `codex/patient-caregiver-integration`). Full detail in Brain.md; what matters
-for anyone reading `code/`:
+for anyone reading `Apnapan/`:
 
 ### The shared lifecycle defect is fixed and tested
 
@@ -380,17 +380,17 @@ Session `config_version`/`content_version` are still hardcoded '1'.
 
 ## 2026-09-08 Claude — five games registered, doctor screens, design applied
 
-### `code/` now holds eight packages
+### `Apnapan/` now holds eight packages
 
 ```
-code/packages/tesseract_game_contract/   shared contract (+ optional scaffold)
-code/games/route_quest/                  G2, Pranav
-code/games/marble_maze/                  G3, Pranav
-code/games/word_search/                  G7, newly written
-code/games/routine_recall/               G8, ported from Ruthika's JS
-code/games/picture_sorting/              extra activity, ported from Ruthika's JS
-code/harness/                            dev tool
-code/host/                               the app
+Apnapan/packages/tesseract_game_contract/   shared contract (+ optional scaffold)
+Apnapan/games/route_quest/                  G2, Pranav
+Apnapan/games/marble_maze/                  G3, Pranav
+Apnapan/games/word_search/                  G7, newly written
+Apnapan/games/routine_recall/               G8, ported from Ruthika's JS
+Apnapan/games/picture_sorting/              extra activity, ported from Ruthika's JS
+Apnapan/harness/                            dev tool
+Apnapan/host/                               the app
 ```
 
 **Ruthika's repository contains HTML/CSS/JS, not Flutter, and contains no Word
@@ -421,7 +421,7 @@ accuracy figure of its own.
 
 ### Content boundary
 
-`code/host/lib/src/content/know_me_content.dart` maps caregiver content to
+`Apnapan/host/lib/src/content/know_me_content.dart` maps caregiver content to
 each game: places for Route Quest, the caregiver's **familiar words** for Word
 Search, the caregiver's **reminders in time order** for Daily Routine, and a
 neutral built-in set for Picture Sorting. Ids are positional and opaque
@@ -445,7 +445,7 @@ remains the only path.
   routine_recall 11, picture_sorting 9, host 76 — **175 passing**.
 - `flutter build apk --debug` succeeds.
 - Goldens regenerated; new screenshots for all three new games and the role
-  sign-in are in `code/host/test/goldens/`.
+  sign-in are in `Apnapan/host/test/goldens/`.
 
 ### Still NOT TESTED
 
@@ -462,7 +462,7 @@ Khasi, Mizo. **Covers 4 of 8 NE states**; Nagaland, Tripura, Arunachal Pradesh
 and Sikkim have no language and this is stated in the app and asserted by a
 test.
 
-`flutter_localizations` + `gen_l10n`; ARB files in `code/host/lib/l10n/`.
+`flutter_localizations` + `gen_l10n`; ARB files in `Apnapan/host/lib/l10n/`.
 `NotoSansBengali` and `NotoSansMeeteiMayek` bundled under SIL OFL and wired as
 theme `fontFamilyFallback`.
 
@@ -574,7 +574,7 @@ payload changes. Translation milestone committed as `8d72e4c`.
   to Know Me, and frozen session versions/parameters. Added notification-locale
   fallback coverage; measured language coverage now requires exact rounding.
 - `flutter build apk --debug`: success; APK at
-  `code/host/build/app/outputs/flutter-apk/app-debug.apk`. Build emits a plugin
+  `Apnapan/host/build/app/outputs/flutter-apk/app-debug.apk`. Build emits a plugin
   Kotlin migration warning but completes. `git diff --check` clean.
 - Three updated localization goldens inspected; patient creation widget tested
   with 2x text. These are automated checks, not live API/device evidence.
@@ -620,7 +620,7 @@ Checks in this documentation pass: inspected clean Git status and latest continu
 ### Implemented this pass
 
 Optional spoken output and optional tap-to-speak input, entirely in the host
-layer (`code/host/lib/src/speech/`). No game gained a network, database, auth or
+layer (`Apnapan/host/lib/src/speech/`). No game gained a network, database, auth or
 speech dependency. Spoken: game instructions, host Help text, reminder content,
 in the patient's selected language. Not spoken: the in-game pause overlay, which
 is drawn inside the game packages — speaking it would breach the contract
@@ -638,7 +638,7 @@ phone, per language, in both directions separately.
 
 ### Files changed
 
-`code/host/lib/src/speech/` (new: `speech_capability.dart`,
+`Apnapan/host/lib/src/speech/` (new: `speech_capability.dart`,
 `speech_engine.dart`, `platform_speech_engine.dart`,
 `speech_output_service.dart`, `voice_input_service.dart`, `speak_button.dart`,
 `voice_input_sheet.dart`, `speech_settings_section.dart`);
@@ -662,7 +662,7 @@ Route Quest 16, Marble Maze 17, Word Search 24, Routine Recall 11, Picture
 Sorting 9. Of those, 28 new speech behaviour tests, 4 speech UI/golden tests,
 4 new localization tests.
 
-`flutter build apk --debug` succeeds → `code/host/build/app/outputs/flutter-apk/
+`flutter build apk --debug` succeeds → `Apnapan/host/build/app/outputs/flutter-apk/
 app-debug.apk` (183 MB debug). `aapt2 dump badging` confirms `RECORD_AUDIO`.
 
 Goldens regenerated and visually inspected: `how_to_play_speech.png`,
@@ -735,8 +735,8 @@ recorded because no device was connected.
 
 ## 2026-09-08 — Expo Go React Native frontend added (Flutter preserved)
 
-New app at `code/tesseract-expo`. Flutter `code/host` untouched and still the
-reference build. Reason: the user has an iPhone, `code/host` has no iOS target,
+New app at `Apnapan/tesseract-expo`. Flutter `Apnapan/host` untouched and still the
+reference build. Reason: the user has an iPhone, `Apnapan/host` has no iOS target,
 and no Android device was available all session.
 
 **Expo SDK 57** (App Store Expo Go 57.0.9). `expo-doctor` 21/21. Every package
@@ -850,3 +850,12 @@ expo-doctor 21/21.
 testing, no real Firebase sign-in from Expo. Voice input has no working
 recognition. Non-English languages remain unreviewed drafts and hardcoded
 English remains in several screens.
+
+
+## 2026-09-08 repository folder renamed to Apnapan
+
+User requested renaming the code folder and reflecting it on GitHub. Renamed root `code/` to `Apnapan/`, preserving Flutter, Expo, games, package boundaries and local files. Updated tracked source comments, generated localization headers, documentation/handoff paths and the golden-failure ignore rule. Relative package imports remain unchanged. The active Expo directory is now `Apnapan/tesseract-expo`; Flutter host is `Apnapan/host`. Historical path references in editable documentation were updated for usability; existing PDF/PPT artifacts were not modified.
+
+Verification and GitHub push results are recorded below after checks. This is a folder/path change, not new application behavior.
+
+Rename checks: `git diff --check`, Expo `npm run typecheck` and `npm run l10n:check` passed from the new folder. Tracked editable path search found no remaining old application paths outside the intentional rename record. No behavioral tests or builds rerun for this path-only change. User authorized pushing this scoped rename to GitHub remote `github`, branch `codex/patient-caregiver-integration`; push pending at commit time.

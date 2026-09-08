@@ -81,22 +81,22 @@ Direction:
 
 Files changed:
 
-- `code/games/route_quest/lib/src/route_map_painter.dart`
-- `code/games/route_quest/lib/src/route_map_view.dart`
-- `code/games/route_quest/lib/src/route_quest_game.dart`
-- `code/games/marble_maze/lib/src/maze_level.dart`
-- `code/games/marble_maze/lib/src/maze_painter.dart`
-- `code/games/marble_maze/lib/src/maze_view.dart`
-- `code/games/marble_maze/lib/src/marble_maze_game.dart`
-- `code/games/marble_maze/test/marble_maze_game_test.dart`
-- `code/host/test/golden_test.dart`
-- Game golden screenshots under `code/host/test/goldens/`
+- `Apnapan/games/route_quest/lib/src/route_map_painter.dart`
+- `Apnapan/games/route_quest/lib/src/route_map_view.dart`
+- `Apnapan/games/route_quest/lib/src/route_quest_game.dart`
+- `Apnapan/games/marble_maze/lib/src/maze_level.dart`
+- `Apnapan/games/marble_maze/lib/src/maze_painter.dart`
+- `Apnapan/games/marble_maze/lib/src/maze_view.dart`
+- `Apnapan/games/marble_maze/lib/src/marble_maze_game.dart`
+- `Apnapan/games/marble_maze/test/marble_maze_game_test.dart`
+- `Apnapan/host/test/golden_test.dart`
+- Game golden screenshots under `Apnapan/host/test/goldens/`
 - `AGENTS.md`, `Brain.md`, and `PS003_MOBILE_CODE_STATUS.md`
 
 ## Verified evidence
 
 - Flutter 3.47.2 / Dart 3.13.2.
-- `flutter analyze code/games/route_quest code/games/marble_maze code/host`: no issues.
+- `flutter analyze Apnapan/games/route_quest Apnapan/games/marble_maze Apnapan/host`: no issues.
 - Route Quest package: 16 tests passed.
 - Marble Maze package: 16 tests passed, including visible Help-state coverage.
 - Host/golden suite: 19 tests passed.
@@ -120,7 +120,7 @@ Files changed:
 
 ## Next action
 
-Install `code/host/build/app/outputs/flutter-apk/app-debug.apk` on the chosen
+Install `Apnapan/host/build/app/outputs/flutter-apk/app-debug.apk` on the chosen
 physical Android phone and check Marble Maze's tilt direction, neutral
 calibration and sensitivity by feel — no automated check can substitute for
 this. If the marble drifts at rest, tighten `_tiltDeadZone` (currently 0.035)
@@ -136,20 +136,20 @@ Marble Maze must use the phone gyroscope rather than swipe as its primary contro
 
 Changed files so far:
 
-- `code/games/marble_maze/lib/src/marble_tilt_input.dart`
-- `code/games/marble_maze/lib/src/marble_maze_game.dart`
-- `code/games/marble_maze/lib/src/maze_view.dart`
-- `code/games/marble_maze/test/marble_maze_game_test.dart`
-- `code/games/marble_maze/README.md`
-- `code/games/marble_maze/pubspec.yaml`
-- `code/games/route_quest/lib/src/route_quest_game.dart`
-- `code/games/route_quest/lib/src/route_map_view.dart`
-- `code/games/route_quest/lib/src/route_map_painter.dart`
-- `code/host/android/app/src/main/kotlin/com/example/tesseract_host/MainActivity.kt`
-- `code/host/lib/src/session_controller.dart`
-- `code/host/lib/src/play_screen.dart`
-- `code/host/lib/src/finished_screen.dart`
-- `code/host/test/golden_test.dart`
+- `Apnapan/games/marble_maze/lib/src/marble_tilt_input.dart`
+- `Apnapan/games/marble_maze/lib/src/marble_maze_game.dart`
+- `Apnapan/games/marble_maze/lib/src/maze_view.dart`
+- `Apnapan/games/marble_maze/test/marble_maze_game_test.dart`
+- `Apnapan/games/marble_maze/README.md`
+- `Apnapan/games/marble_maze/pubspec.yaml`
+- `Apnapan/games/route_quest/lib/src/route_quest_game.dart`
+- `Apnapan/games/route_quest/lib/src/route_map_view.dart`
+- `Apnapan/games/route_quest/lib/src/route_map_painter.dart`
+- `Apnapan/host/android/app/src/main/kotlin/com/example/tesseract_host/MainActivity.kt`
+- `Apnapan/host/lib/src/session_controller.dart`
+- `Apnapan/host/lib/src/play_screen.dart`
+- `Apnapan/host/lib/src/finished_screen.dart`
+- `Apnapan/host/test/golden_test.dart`
 - `PS003_MOBILE_CODE_STATUS.md`
 - `Brain.md`
 
@@ -171,7 +171,7 @@ Decisions and behavior:
 
 Checks actually run:
 
-- `flutter analyze code/games/route_quest code/games/marble_maze code/host`: no issues.
+- `flutter analyze Apnapan/games/route_quest Apnapan/games/marble_maze Apnapan/host`: no issues.
 - Route Quest package: 16 tests passed.
 - Marble Maze package: 17 tests passed, including synthetic fused-tilt movement
   after neutral calibration and the no-sensor touch fallback.
@@ -231,8 +231,8 @@ Checks run and exact results:
 - Visually inspected every new/changed golden PNG (both completion marks,
   the textScale-clamped Route Quest labels, Marble Maze's board and Help
   path). No defects found.
-- `flutter build apk --debug` from `code/host`: **succeeded**, 792s,
-  producing `code/host/build/app/outputs/flutter-apk/app-debug.apk` (150MB —
+- `flutter build apk --debug` from `Apnapan/host`: **succeeded**, 792s,
+  producing `Apnapan/host/build/app/outputs/flutter-apk/app-debug.apk` (150MB —
   normal for an unstripped multi-ABI debug build). This is the first real
   compile of the native Kotlin sensor bridge; it was not verified before now.
 - Inspected the built APK's merged manifest with `aapt dump badging`:
@@ -250,7 +250,7 @@ Not verified, and no claim is made otherwise:
   and no emulator is installed. This absolutely requires Pranav's phone; see
   Next action.
 - The harness's own tilt option for Marble Maze will silently behave as
-  touch, because only `code/host`'s `MainActivity.kt` implements the native
+  touch, because only `Apnapan/host`'s `MainActivity.kt` implements the native
   `org.tesseract/marble_tilt` channel — the harness has no native code of its
   own. This is an acceptable gap for a dev tool, not a defect, but worth
   knowing before someone spends time debugging "tilt does nothing" on the
@@ -259,7 +259,7 @@ Not verified, and no claim is made otherwise:
 ## 2026-09-07 Claude host frontend skeleton pass
 
 User decision: build the full decided frontend skeleton (P1-P9 patient +
-C1-C7 caregiver) into `code/host` now, as structure only — the frontend team
+C1-C7 caregiver) into `Apnapan/host` now, as structure only — the frontend team
 redesigns the actual visuals later. Doctor portal (D1-D8) confirmed out of
 scope for this pass; the docs mark its platform (mobile vs. separate web) as
 an open decision, and building it into this mobile skeleton would presume
@@ -314,7 +314,7 @@ Decisions and honesty boundaries kept:
 Checks run and exact results:
 
 - `flutter analyze` on all five packages: no issues.
-- `flutter test` in `code/host`: 21/21 (unchanged real-test count — no new
+- `flutter test` in `Apnapan/host`: 21/21 (unchanged real-test count — no new
   goldens were added; see below for why).
 - 4 existing goldens needed regenerating (`home*`, `rest*` — both gained a
   visible new element) after visually confirming the diff was exactly the
@@ -367,7 +367,7 @@ found a real problem: **the git repository was rooted at the user's home
 directory** (`/Users/pranav07vudiga`), with `origin` pointing at
 `https://github.com/vudigapranav/UserProfileApp.git` — an unrelated repo. Only
 22 files had ever been committed, in one commit on `codex/marble-gyro-polish`.
-Everything else — all planning docs, `docs/`, `services/`, most of `code/`,
+Everything else — all planning docs, `docs/`, `services/`, most of `Apnapan/`,
 both game packages — had never been tracked at all. A `git add -A` there would
 have swept in `.ssh/`, shell history and unrelated projects.
 
@@ -469,7 +469,7 @@ Recommendation rules were written to use only the metrics that do exist
 Shanks reviews `docs/contracts/PS003_API_CONTRACT_V1.md` and answers its four
 open questions (§14) — especially P1 (`elapsed_ms` naming) and P4 (can the host
 report `actual_input_mode` after the gyroscope check). Then the SQLite outbox in
-`code/host` can be written against a contract that will not move under it.
+`Apnapan/host` can be written against a contract that will not move under it.
 
 ## Update template
 
@@ -495,7 +495,7 @@ This task initially opened in an unrelated UserProfileApp worktree at `/Users/pr
 ### Code written (not accepted as verified behavior)
 
 - Shared lifecycle mixin now forwards recorder-returned `paused` and `resumed` events to `widget.onEvent`; its test gained sink type/sequence assertions. The discovered original defect advanced seq but dropped both events.
-- Added `code/host/lib/src/data/local_repository.dart`: SQLite tables for settings, sessions/events, immutable local completion checking and interrupted-session recovery.
+- Added `Apnapan/host/lib/src/data/local_repository.dart`: SQLite tables for settings, sessions/events, immutable local completion checking and interrupted-session recovery.
 - Added `data/api_client.dart` and `data/session_outbox.dart`: bearer-token HTTP adapter; session create → batches of at most 500 → complete; stable event IDs; accepted/duplicate checks; retain permanent errors instead of deleting data. These are not verified against the live backend.
 - `session_controller.dart`: elapsedMs → elapsed_ms mapping, sequence/finalization guards, queued durable writes and flush, frozen config, explicit touch preference, omission of unknown actual tilt mode, removal of printed session JSON.
 - `host_flow_state.dart`: settings serialization/restore, saved-history loading, identity/API references and initial sync/config/recommendation fetch plumbing.
@@ -555,7 +555,7 @@ APK, no formatting. That is now resolved:
 
 - `dart format` applied to host lib, contract lib and contract tests (27 files
   changed). The new data layer was dense single-line code and unreviewable.
-- `flutter analyze`: **clean, no issues**, on `code/host` and on
+- `flutter analyze`: **clean, no issues**, on `Apnapan/host` and on
   `tesseract_game_contract`. This is the first clean analysis that *includes*
   the reminder/platform code Codex wrote after its last analysis run.
 - **The lifecycle fix is real and now tested.** `TesseractGameStateMixin` had
@@ -566,7 +566,7 @@ APK, no formatting. That is now resolved:
   sequence, because the practical consequence of the old behaviour was a
   permanent `sequence_gap` rejection at `POST /complete`.
 - **`flutter build apk --debug` now SUCCEEDS** (193s) —
-  `code/host/build/app/outputs/flutter-apk/app-debug.apk`, 167 MB debug. This
+  `Apnapan/host/build/app/outputs/flutter-apk/app-debug.apk`, 167 MB debug. This
   is the first compile of the FlutterFragmentActivity switch, core-library
   desugaring, notification receivers and local_auth. `aapt2 dump badging`
   confirms `android.hardware.sensor.gyroscope` is still **not-required** (the
@@ -620,7 +620,7 @@ attached to a stranger's patient.
 
 ### Tests written this pass — 35 new, all passing
 
-`code/host/test/data/`:
+`Apnapan/host/test/data/`:
 
 - `local_repository_test.dart` (16): reopen durability for settings and for a
   completed session's events; four identity-isolation cases; sign-out keeps
@@ -756,10 +756,10 @@ authorship and every deliberate change are in
 
 #### Three new game packages, all registered and playable
 
-- `code/games/routine_recall` (G8) — ported from `game2`.
-- `code/games/picture_sorting` — ported from `game1`, registered as an **extra**
+- `Apnapan/games/routine_recall` (G8) — ported from `game2`.
+- `Apnapan/games/picture_sorting` — ported from `game1`, registered as an **extra**
   activity beyond the nine, at the user's explicit request.
-- `code/games/word_search` (G7) — newly written; there was no source.
+- `Apnapan/games/word_search` (G7) — newly written; there was no source.
 
 Changes to her mechanics, each deliberate: no score/high-score/stars; answers
 compare **opaque ids** instead of names (her original compared step names,
@@ -822,7 +822,7 @@ two-way ternary; text size and reduced motion apply immediately.
 - Screenshots inspected directly. Word Search's generated grid was verified by
   reading it: GARDEN down column 2, TEMPLE across row 5, CHAI across row 4.
 - `flutter build apk --debug`: **succeeds**,
-  `code/host/build/app/outputs/flutter-apk/app-debug.apk` (190 MB debug).
+  `Apnapan/host/build/app/outputs/flutter-apk/app-debug.apk` (190 MB debug).
 
 #### NOT TESTED
 
@@ -857,14 +857,14 @@ by a test so it cannot quietly disappear.
 
 #### What was built
 
-- `flutter_localizations` + `gen_l10n`. ARB files in `code/host/lib/l10n/` for
+- `flutter_localizations` + `gen_l10n`. ARB files in `Apnapan/host/lib/l10n/` for
   en, as, bn, mni, kha, lus. 135 translatable keys.
 - `src/l10n/language_catalogue.dart` — endonym, English name, script, region,
   measured coverage and review status per language.
 - `src/l10n/language_selector.dart` — selector plus `DraftLanguageBanner`.
 - `src/caregiver/about_screen.dart` — About Tesseract.
 - Bundled `NotoSansBengali` and `NotoSansMeeteiMayek` (SIL OFL, licence in
-  `code/host/fonts/LICENSE-NOTO.txt`) and wired `fontFamilyFallback`, because
+  `Apnapan/host/fonts/LICENSE-NOTO.txt`) and wired `fontFamilyFallback`, because
   an entry-level Android device may not ship those scripts.
 
 #### Measured coverage — not claimed, computed
@@ -920,7 +920,7 @@ to English.
   Loading the bundled Noto faces in the golden harness fixed it, which is real
   evidence the theme's font fallback works rather than an assumption.
 - `flutter build apk --debug` **succeeds** with fonts and localizations
-  included: `code/host/build/app/outputs/flutter-apk/app-debug.apk`, 191 MB.
+  included: `Apnapan/host/build/app/outputs/flutter-apk/app-debug.apk`, 191 MB.
 
 #### NOT TESTED
 
@@ -1015,7 +1015,7 @@ payload changes. Translation milestone committed as `8d72e4c`.
   to Know Me, and frozen session versions/parameters. Added notification-locale
   fallback coverage; measured language coverage now requires exact rounding.
 - `flutter build apk --debug`: success; APK at
-  `code/host/build/app/outputs/flutter-apk/app-debug.apk`. Build emits a plugin
+  `Apnapan/host/build/app/outputs/flutter-apk/app-debug.apk`. Build emits a plugin
   Kotlin migration warning but completes. `git diff --check` clean.
 - Three updated localization goldens inspected; patient creation widget tested
   with 2x text. These are automated checks, not live API/device evidence.
@@ -1122,7 +1122,7 @@ matched the test's metric. Then:
 
 ### Speech — implemented, in the host layer only
 
-New `code/host/lib/src/speech/`. No game gained a network, database, auth or
+New `Apnapan/host/lib/src/speech/`. No game gained a network, database, auth or
 speech dependency; the contract boundary is intact.
 
 * `speech_capability.dart` — the per-language matrix, with vendor
@@ -1192,7 +1192,7 @@ exist here; the user confirmed no repositories are available yet.
   `how_to_play_speech_unavailable.png` (names Mizo, text stays, Begin works),
   Bengali 2× large text, language selector, Assamese/Bengali sign-in.
 * `flutter build apk --debug`: success, 183 MB, at
-  `code/host/build/app/outputs/flutter-apk/app-debug.apk`. `aapt2` confirms
+  `Apnapan/host/build/app/outputs/flutter-apk/app-debug.apk`. `aapt2` confirms
   `RECORD_AUDIO` is in the built manifest.
 
 Two real bugs were found and fixed by this work, not papered over: the
@@ -1217,10 +1217,10 @@ widget-test teardown.
 
 User asked for an Expo Go-compatible React Native build so the app can be run
 on an **iPhone** by scanning a QR. Flutter is untouched and remains the
-reference implementation; the new app is `code/tesseract-expo`.
+reference implementation; the new app is `Apnapan/tesseract-expo`.
 
 Context for why: `adb devices` was empty all session and the user has no Android
-phone. The Flutter host has **no iOS target at all** (`code/host` has `android/`
+phone. The Flutter host has **no iOS target at all** (`Apnapan/host` has `android/`
 and `web/` only), and its remaining checklist is Android-specific, so an iPhone
 could not validate it.
 
@@ -1288,7 +1288,7 @@ developed by the Tesseract Team." Flutter untouched.
 ### Branding
 
 Approved logo copied verbatim to
-`code/tesseract-expo/assets/branding/apnapan-logo.png` (1254×1254, unmodified).
+`Apnapan/tesseract-expo/assets/branding/apnapan-logo.png` (1254×1254, unmodified).
 Derivatives generated by cropping the **symbol band only** (y 206–802, measured,
 so the wordmarks provably cannot appear) and compositing it onto a background
 canvas at an explicit occupancy:
@@ -1372,7 +1372,7 @@ Added as a **seventh** language. It does not replace or excuse the NER gap, and
 a test asserts that: Meitei/Khasi/Mizo are still 8% and still draft, and the
 four uncovered states are still named.
 
-- `code/host/lib/l10n/app_hi.arb` — **all 168 translatable keys**, written by
+- `Apnapan/host/lib/l10n/app_hi.arb` — **all 168 translatable keys**, written by
   me, covering sign-in, onboarding, patient/caregiver/doctor screens, settings,
   About, errors, sync, game names, instructions, Help/Break, completion,
   reminders and every speech/voice string including the
@@ -1567,3 +1567,12 @@ TypeScript strict clean · **110 tests passing** (was 50) · l10n in sync ·
 - Coverage: hi/as/bn 100%, mni/kha/lus 8%, **all non-English unreviewed**.
   Dictionary completeness is not screen completeness; hardcoded English
   remains in several screens.
+
+
+## 2026-09-08 repository folder renamed to Apnapan
+
+User requested renaming the code folder and reflecting it on GitHub. Renamed root `code/` to `Apnapan/`, preserving Flutter, Expo, games, package boundaries and local files. Updated tracked source comments, generated localization headers, documentation/handoff paths and the golden-failure ignore rule. Relative package imports remain unchanged. The active Expo directory is now `Apnapan/tesseract-expo`; Flutter host is `Apnapan/host`. Historical path references in editable documentation were updated for usability; existing PDF/PPT artifacts were not modified.
+
+Verification and GitHub push results are recorded below after checks. This is a folder/path change, not new application behavior.
+
+Rename checks: `git diff --check`, Expo `npm run typecheck` and `npm run l10n:check` passed from the new folder. Tracked editable path search found no remaining old application paths outside the intentional rename record. No behavioral tests or builds rerun for this path-only change. User authorized pushing this scoped rename to GitHub remote `github`, branch `codex/patient-caregiver-integration`; push pending at commit time.

@@ -19,4 +19,4 @@ this requirement alone does not authorize new implementation or external actions
 
 ## Repository layout
 
-`code/` holds the Flutter mobile side of the app; `services/` holds the backend. Within `code/`, every game (`code/games/*`) depends only on `code/packages/tesseract_game_contract` — no game may add a network, database or auth dependency of its own.
+`Apnapan/` holds the Flutter mobile side of the app; `services/` holds the backend. Within `Apnapan/`, every game (`Apnapan/games/*`) depends only on `Apnapan/packages/tesseract_game_contract` — no game may add a network, database or auth dependency of its own.

@@ -3,7 +3,7 @@
 // table plus every golden PNG inline in a phone-shaped frame with its name
 // underneath.
 //
-// Run from code/host/:
+// Run from Apnapan/host/:
 //   dart run tool/generate_test_report.dart
 import 'dart:async';
 import 'dart:convert';

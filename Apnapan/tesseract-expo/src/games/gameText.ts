@@ -10,7 +10,7 @@
  * not been written or reviewed, the same boundary is kept here and stated
  * plainly, so the measured coverage figures stay truthful.
  *
- * To translate these properly: add them to `code/host/lib/l10n/app_en.arb`,
+ * To translate these properly: add them to `Apnapan/host/lib/l10n/app_en.arb`,
  * translate them per language, re-run `node tools/sync-l10n.mjs`, and read them
  * through `translate()` like everything else. Coverage will drop until the
  * translations actually exist, which is the correct signal.

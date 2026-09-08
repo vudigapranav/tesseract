@@ -14,13 +14,13 @@ Supplies fake `GameItem`s and a fully populated fake `GameStrings` — no real
 caregiver content, no personalisation.
 
 This is a developer tool for exercising one game in isolation; it is not the
-product shell. See `code/host/` for the real app (Home through Rest) that
+product shell. See `Apnapan/host/` for the real app (Home through Rest) that
 P1-P9 grows into.
 
 ## Run
 
 ```
-cd code/harness
+cd Apnapan/harness
 flutter pub get
 flutter run
 ```

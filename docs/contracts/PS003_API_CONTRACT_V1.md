@@ -17,7 +17,7 @@ to review — say so now, not after you have written against it).
 ### 1.1 Confirmed - game event names
 
 The nine games emit event types defined in
-`code/packages/tesseract_game_contract`. **The API does not rename any of
+`Apnapan/packages/tesseract_game_contract`. **The API does not rename any of
 them.** Verbatim, from `lib/src/event_recorder.dart` and the two built games:
 
 | Source | Event types |

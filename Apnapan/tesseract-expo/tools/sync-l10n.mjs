@@ -2,7 +2,7 @@
 /**
  * Regenerates src/l10n/*.ts from the Flutter ARB files.
  *
- * The ARBs in code/host/lib/l10n stay the single source of truth for wording.
+ * The ARBs in Apnapan/host/lib/l10n stay the single source of truth for wording.
  * Two apps maintaining two copies of six languages by hand is how a project
  * ends up claiming coverage it does not have, so this is generated and the
  * generated files are never hand-edited.
@@ -43,7 +43,7 @@ const denominator = messageKeys.filter((k) => !untranslatable.includes(k));
 const files = {};
 
 files['en.ts'] =
-  `// GENERATED from code/host/lib/l10n/app_en.arb by tools/sync-l10n.mjs.\n` +
+  `// GENERATED from Apnapan/host/lib/l10n/app_en.arb by tools/sync-l10n.mjs.\n` +
   `// Do not hand-edit: the Flutter ARBs remain the single source of truth so\n` +
   `// the two apps cannot drift apart in wording or coverage.\n\n` +
   `export const untranslatableKeys = [\n` +
@@ -61,7 +61,7 @@ for (const code of LOCALES) {
   );
   coverage[code] = Math.round((entries.length / denominator.length) * 100);
   files[`${code}.ts`] =
-    `// GENERATED from code/host/lib/l10n/app_${code}.arb. Do not hand-edit.\n` +
+    `// GENERATED from Apnapan/host/lib/l10n/app_${code}.arb. Do not hand-edit.\n` +
     `// Missing keys fall back to English, which the UI discloses.\n\n` +
     `import type { StringKey } from './en';\n\n` +
     `export const ${varName}: Partial<Record<StringKey, string>> = {\n` +

@@ -86,7 +86,7 @@ the full type definitions.
 ## Running the harness
 
 ```
-cd code/harness
+cd Apnapan/harness
 flutter pub get
 flutter run
 ```

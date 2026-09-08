@@ -1,4 +1,4 @@
-// GENERATED from code/host/lib/l10n/app_as.arb. Do not hand-edit.
+// GENERATED from Apnapan/host/lib/l10n/app_as.arb. Do not hand-edit.
 // Missing keys fall back to English, which the UI discloses.
 
 import type { StringKey } from './en';

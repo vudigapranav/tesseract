@@ -52,7 +52,7 @@ no match.
 
 ## Verification status
 
-**Automated (done, this session).** 28 tests in `code/host/test/speech_test.dart`
+**Automated (done, this session).** 28 tests in `Apnapan/host/test/speech_test.dart`
 cover tag resolution, cross-language refusal, unavailable-language routing,
 audio-preference gating, no-overlap, background stop, language rebinding,
 permission request-at-point-of-use, permission denial, missing recogniser,

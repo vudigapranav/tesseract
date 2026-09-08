@@ -71,7 +71,7 @@ Nothing in `services/` was touched; that remains Astra's pass.
 
 ## Update — 2026-09-06 (later)
 
-Reviewed the Flutter code produced in `code/` (contract package + G2 Route Quest +
+Reviewed the Flutter code produced in `Apnapan/` (contract package + G2 Route Quest +
 G3 Marble Maze + developer harness, ~3,270 lines, zero third-party dependencies).
 Wrote `../PS003_MOBILE_CODE_STATUS.md` at the project root as the entry point for
 that folder, aimed at backend agents who should not have to read Dart.

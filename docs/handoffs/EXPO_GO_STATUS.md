@@ -1,14 +1,14 @@
 # Expo Go build — status and setup
 
-Created 2026-09-08. The Flutter application in `code/host` is **unchanged** and
+Created 2026-09-08. The Flutter application in `Apnapan/host` is **unchanged** and
 remains the reference implementation and the working fallback. This is an
-additional frontend in `code/tesseract-expo`, built so the app can be opened on
+additional frontend in `Apnapan/tesseract-expo`, built so the app can be opened on
 an iPhone through Expo Go without a custom native build.
 
 ## Run it
 
 ```bash
-cd code/tesseract-expo
+cd Apnapan/tesseract-expo
 cp .env.example .env      # fill in the public Firebase key
 npx expo start
 ```

@@ -1,7 +1,7 @@
 /**
  * Apnapan — Expo Go build.
  *
- * A React Native port of the Flutter application in `code/host`, which remains
+ * A React Native port of the Flutter application in `Apnapan/host`, which remains
  * the reference implementation and the fallback. This build exists so the app
  * can be opened on an iPhone through Expo Go without a custom native build.
  *

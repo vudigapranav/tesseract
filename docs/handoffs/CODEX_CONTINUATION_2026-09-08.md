@@ -30,8 +30,8 @@ Commits this session, on top of backend `00f5cc9`:
 - Tests **208 passing**: contract 22, route_quest 16, marble_maze 17,
   word_search 24, routine_recall 11, picture_sorting 9, host 109.
 - `flutter build apk --debug` succeeds →
-  `code/host/build/app/outputs/flutter-apk/app-debug.apk` (191 MB debug).
-- Goldens regenerated and visually inspected, in `code/host/test/goldens/`.
+  `Apnapan/host/build/app/outputs/flutter-apk/app-debug.apk` (191 MB debug).
+- Goldens regenerated and visually inspected, in `Apnapan/host/test/goldens/`.
 
 ## What works
 
@@ -69,7 +69,7 @@ Patient path on the design system. Six languages with measured coverage.
 1. **Translation coverage.** as/bn are 73%, mni/kha/lus are **10%** — only
    strings with genuine confidence were drafted. Raise coverage, then get a
    fluent speaker per language and flip `ReviewStatus.draft` → `native` in
-   `code/host/lib/src/l10n/language_catalogue.dart`. A test recomputes
+   `Apnapan/host/lib/src/l10n/language_catalogue.dart`. A test recomputes
    coverage from the ARB files, so update the ARBs and the number together.
 2. **Localize reminder notification text.** `ReminderService.schedule` still
    builds `'A gentle reminder'` and the body from untranslated literals. It

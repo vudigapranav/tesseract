@@ -2,7 +2,7 @@
 
 The real app shell — the full frontend skeleton from the decided P1-P9 /
 C1-C7 screen model, that every game plugs into. Not the developer harness
-(`code/harness/`), which stays a separate, simpler demo tool.
+(`Apnapan/harness/`), which stays a separate, simpler demo tool.
 
 **This is a structural skeleton, not final visual design.** Every screen is
 real and navigable, but layout/styling is deliberately plain — the frontend

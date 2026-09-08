@@ -1,4 +1,4 @@
-// GENERATED from code/host/lib/l10n/app_en.arb by tools/sync-l10n.mjs.
+// GENERATED from Apnapan/host/lib/l10n/app_en.arb by tools/sync-l10n.mjs.
 // Do not hand-edit: the Flutter ARBs remain the single source of truth so
 // the two apps cannot drift apart in wording or coverage.
 

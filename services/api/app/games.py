@@ -1,6 +1,6 @@
 """Server-side game catalogue.
 
-Mirrors `code/host/lib/games/game_registry.dart`. It exists so the server can
+Mirrors `Apnapan/host/lib/games/game_registry.dart`. It exists so the server can
 clamp a recommendation to a level the game actually has, and hand out a safe
 default activity — not to duplicate game logic.
 
