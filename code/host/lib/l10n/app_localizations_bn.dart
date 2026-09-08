@@ -9,7 +9,7 @@ class AppLocalizationsBn extends AppLocalizations {
   AppLocalizationsBn([String locale = 'bn']) : super(locale);
 
   @override
-  String get appName => 'Tesseract';
+  String get appName => 'Apnapan';
 
   @override
   String get languageName => 'বাংলা';
@@ -368,11 +368,11 @@ class AppLocalizationsBn extends AppLocalizations {
   String get savedOnDevice => 'এই ফোনে রাখা আছে। এখন সংযোগ নেই।';
 
   @override
-  String get aboutTesseract => 'টেসারেক্ট সম্পর্কে';
+  String get aboutTesseract => 'অপনাপন সম্পর্কে';
 
   @override
   String get aboutDescription =>
-      'টেসারেক্ট ডিমেনশিয়ায় আক্রান্ত মানুষের জন্য সহজ মানসিক কাজ এবং প্রতিদিনের মনে করিয়ে দেওয়ার ব্যবস্থা করে, যা তাঁদের যত্নকারীরা সাজিয়ে দেন ও দেখে নেন।';
+      'অপনাপন ডিমেনশিয়ায় আক্রান্ত মানুষের জন্য মৃদু জ্ঞানমূলক কার্যকলাপ ও প্রতিদিনের অনুস্মারক দেয়, যা তাঁদের যত্নকারীরা সাজিয়ে দেন ও দেখে নেন।';
 
   @override
   String get builtBy => 'Built and developed by the Tesseract Team.';
@@ -566,4 +566,11 @@ class AppLocalizationsBn extends AppLocalizations {
   @override
   String get speechDraftWarning =>
       'এই ভাষায় সাবলীল কোনো ব্যক্তি এখনও কথা বলার সুবিধাটি পরীক্ষা করেননি।';
+
+  @override
+  String get appNameHindi => 'अपनापन';
+
+  @override
+  String get appTagline =>
+      'AI-ভিত্তিক জ্ঞানমূলক কার্যকলাপ ও প্রতিদিনের সহায়তা।';
 }

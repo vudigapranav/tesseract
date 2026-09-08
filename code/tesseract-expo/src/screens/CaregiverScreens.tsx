@@ -36,12 +36,14 @@ export function CaregiverHomeScreen({
   onSettings,
   onKnowMe,
   onReminders,
+  onRecommendations,
 }: {
   onHandOver: () => void;
   onBasics: () => void;
   onSettings: () => void;
   onKnowMe: () => void;
   onReminders: () => void;
+  onRecommendations: () => void;
 }) {
   const app = useApp();
   const t = (k: Parameters<typeof translate>[1]) =>
@@ -112,6 +114,11 @@ export function CaregiverHomeScreen({
         <PillButton label={t('patientBasics')} variant="outline" onPress={onBasics} />
         <PillButton label={t('knowMe')} variant="outline" onPress={onKnowMe} />
         <PillButton label={t('reminders')} variant="outline" onPress={onReminders} />
+        <PillButton
+          label={t('needsYourDecision')}
+          variant="outline"
+          onPress={onRecommendations}
+        />
         <PillButton label={t('settingsAndSync')} variant="outline" onPress={onSettings} />
       </Card>
 

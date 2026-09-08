@@ -9,7 +9,7 @@ class AppLocalizationsMni extends AppLocalizations {
   AppLocalizationsMni([String locale = 'mni']) : super(locale);
 
   @override
-  String get appName => 'Tesseract';
+  String get appName => 'Apnapan';
 
   @override
   String get languageName => 'ꯃꯤꯇꯩꯂꯣꯟ';
@@ -374,11 +374,11 @@ class AppLocalizationsMni extends AppLocalizations {
   String get savedOnDevice => 'Saved on this device. Not connected right now.';
 
   @override
-  String get aboutTesseract => 'About Tesseract';
+  String get aboutTesseract => 'About Apnapan';
 
   @override
   String get aboutDescription =>
-      'Tesseract offers gentle cognitive activities and everyday reminders for people living with dementia, set up and reviewed by the people who care for them.';
+      'Apnapan offers gentle cognitive activities and everyday reminders for people living with dementia, set up and reviewed by the people who care for them.';
 
   @override
   String get builtBy => 'Built and developed by the Tesseract Team.';
@@ -572,4 +572,11 @@ class AppLocalizationsMni extends AppLocalizations {
   @override
   String get speechDraftWarning =>
       'Speech has not been checked by a fluent speaker of this language.';
+
+  @override
+  String get appNameHindi => 'अपनापन';
+
+  @override
+  String get appTagline =>
+      'AI-based cognitive activities and everyday support.';
 }

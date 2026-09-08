@@ -8,7 +8,7 @@
  * because that is the truth.
  */
 import React, { useState } from 'react';
-import { Switch, View } from 'react-native';
+import { Image, StyleSheet, Switch, View } from 'react-native';
 import { fontFamilyForScript } from '../design/tokens';
 import {
   BodyLarge,
@@ -188,6 +188,17 @@ export function SettingsScreen({ onBack }: { onBack: () => void }) {
 
       <SectionHeading title={t('aboutTesseract')} />
       <Card>
+        {/* The full logo, wordmarks included, is the About presentation. */}
+        <Image
+          source={require('../../assets/branding/apnapan-logo.png')}
+          style={aboutStyles.logo}
+          resizeMode="contain"
+          accessibilityLabel={`${t('appName')} — ${t('appNameHindi')}`}
+        />
+        <BodyLarge center style={{ marginBottom: 4 }}>
+          {t('appTagline')}
+        </BodyLarge>
+        <Divider />
         <BodyLarge>{t('aboutDescription')}</BodyLarge>
         <Divider />
         {/* The app's own version, not the container it happens to run in. */}
@@ -215,6 +226,10 @@ export function SettingsScreen({ onBack }: { onBack: () => void }) {
     </Screen>
   );
 }
+
+const aboutStyles = StyleSheet.create({
+  logo: { width: '100%', height: 190, alignSelf: 'center', marginBottom: 8 },
+});
 
 function Row({
   label,

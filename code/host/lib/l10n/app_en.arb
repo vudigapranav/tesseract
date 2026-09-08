@@ -1,6 +1,6 @@
 {
   "@@locale": "en",
-  "appName": "Tesseract",
+  "appName": "Apnapan",
   "@appName": {
     "description": "Product name. Must not be translated or transliterated in any locale.",
     "x-untranslatable": true
@@ -158,8 +158,8 @@
   "signOut": "Sign out",
   "notConnected": "Not connected. Your changes remain on this device.",
   "savedOnDevice": "Saved on this device. Not connected right now.",
-  "aboutTesseract": "About Tesseract",
-  "aboutDescription": "Tesseract offers gentle cognitive activities and everyday reminders for people living with dementia, set up and reviewed by the people who care for them.",
+  "aboutTesseract": "About Apnapan",
+  "aboutDescription": "Apnapan offers gentle cognitive activities and everyday reminders for people living with dementia, set up and reviewed by the people who care for them.",
   "builtBy": "Built and developed by the Tesseract Team.",
   "versionLabel": "Version {version} (build {build})",
   "@versionLabel": {
@@ -340,5 +340,14 @@
   "@builtBy": {
     "description": "Fixed attribution. Must appear in this exact English wording in every locale, so it is deliberately absent from every translation file and is excluded from coverage.",
     "x-untranslatable": true
+  },
+  "appNameHindi": "अपनापन",
+  "@appNameHindi": {
+    "description": "The product name in Devanagari, shown beside the logo. A proper noun: never translated or transliterated.",
+    "x-untranslatable": true
+  },
+  "appTagline": "AI-based cognitive activities and everyday support.",
+  "@appTagline": {
+    "description": "Product positioning shown on the opening screen. It describes what the product is, and is not a clinical claim: nothing here asserts diagnosis, validation, or an AI capability the build does not have."
   }
 }

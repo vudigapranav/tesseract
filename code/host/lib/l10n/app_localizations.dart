@@ -109,7 +109,7 @@ abstract class AppLocalizations {
   /// Product name. Must not be translated or transliterated in any locale.
   ///
   /// In en, this message translates to:
-  /// **'Tesseract'**
+  /// **'Apnapan'**
   String get appName;
 
   /// This language's own name, in its own script, for the language selector.
@@ -769,13 +769,13 @@ abstract class AppLocalizations {
   /// No description provided for @aboutTesseract.
   ///
   /// In en, this message translates to:
-  /// **'About Tesseract'**
+  /// **'About Apnapan'**
   String get aboutTesseract;
 
   /// No description provided for @aboutDescription.
   ///
   /// In en, this message translates to:
-  /// **'Tesseract offers gentle cognitive activities and everyday reminders for people living with dementia, set up and reviewed by the people who care for them.'**
+  /// **'Apnapan offers gentle cognitive activities and everyday reminders for people living with dementia, set up and reviewed by the people who care for them.'**
   String get aboutDescription;
 
   /// Fixed attribution. Must appear in this exact English wording in every locale, so it is deliberately absent from every translation file and is excluded from coverage.
@@ -1119,6 +1119,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Speech has not been checked by a fluent speaker of this language.'**
   String get speechDraftWarning;
+
+  /// The product name in Devanagari, shown beside the logo. A proper noun: never translated or transliterated.
+  ///
+  /// In en, this message translates to:
+  /// **'अपनापन'**
+  String get appNameHindi;
+
+  /// Product positioning shown on the opening screen. It describes what the product is, and is not a clinical claim: nothing here asserts diagnosis, validation, or an AI capability the build does not have.
+  ///
+  /// In en, this message translates to:
+  /// **'AI-based cognitive activities and everyday support.'**
+  String get appTagline;
 }
 
 class _AppLocalizationsDelegate

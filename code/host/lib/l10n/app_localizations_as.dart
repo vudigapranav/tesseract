@@ -9,7 +9,7 @@ class AppLocalizationsAs extends AppLocalizations {
   AppLocalizationsAs([String locale = 'as']) : super(locale);
 
   @override
-  String get appName => 'Tesseract';
+  String get appName => 'Apnapan';
 
   @override
   String get languageName => 'অসমীয়া';
@@ -370,11 +370,11 @@ class AppLocalizationsAs extends AppLocalizations {
   String get savedOnDevice => 'এই ফোনত ৰখা আছে। এতিয়া সংযোগ নাই।';
 
   @override
-  String get aboutTesseract => 'টেছাৰেক্টৰ বিষয়ে';
+  String get aboutTesseract => 'অপনাপনৰ বিষয়ে';
 
   @override
   String get aboutDescription =>
-      'টেছাৰেক্টে ডিমেনচিয়াত ভোগা লোকৰ বাবে সহজ মানসিক কাম আৰু দৈনন্দিন মনত পেলোৱাৰ ব্যৱস্থা কৰে, যিবোৰ তেওঁলোকৰ যত্নকাৰীয়ে সাজু কৰি চাই থাকে।';
+      'অপনাপনে ডিমেনচিয়াত ভোগা মানুহৰ বাবে মৃদু জ্ঞানমূলক কাৰ্যকলাপ আৰু দৈনন্দিন মনত পেলোৱা দিয়ে, যিবোৰ তেওঁলোকৰ যত্ন লওঁতাসকলে সাজি দিয়ে আৰু চায়।';
 
   @override
   String get builtBy => 'Built and developed by the Tesseract Team.';
@@ -568,4 +568,11 @@ class AppLocalizationsAs extends AppLocalizations {
   @override
   String get speechDraftWarning =>
       'এই ভাষাত সুন্দৰকৈ ক\'ব পৰা কোনো ব্যক্তিয়ে এতিয়াও কথা কোৱাৰ সুবিধাটো পৰীক্ষা কৰা নাই।';
+
+  @override
+  String get appNameHindi => 'अपनापन';
+
+  @override
+  String get appTagline =>
+      'AI-ভিত্তিক জ্ঞানমূলক কাৰ্যকলাপ আৰু দৈনন্দিনৰ সহায়।';
 }

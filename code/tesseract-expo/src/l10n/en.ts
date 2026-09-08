@@ -5,10 +5,11 @@
 export const untranslatableKeys = [
   "appName",
   "builtBy",
+  "appNameHindi",
 ] as const;
 
 export const en = {
-  "appName": "Tesseract",
+  "appName": "Apnapan",
   "languageName": "English",
   "signInTitle": "A familiar moment.\nA little joy.",
   "signInSubtitle": "Set up meaningful activities and everyday reminders, together.",
@@ -118,8 +119,8 @@ export const en = {
   "signOut": "Sign out",
   "notConnected": "Not connected. Your changes remain on this device.",
   "savedOnDevice": "Saved on this device. Not connected right now.",
-  "aboutTesseract": "About Tesseract",
-  "aboutDescription": "Tesseract offers gentle cognitive activities and everyday reminders for people living with dementia, set up and reviewed by the people who care for them.",
+  "aboutTesseract": "About Apnapan",
+  "aboutDescription": "Apnapan offers gentle cognitive activities and everyday reminders for people living with dementia, set up and reviewed by the people who care for them.",
   "builtBy": "Built and developed by the Tesseract Team.",
   "versionLabel": "Version {version} (build {build})",
   "languagesLabel": "Languages",
@@ -177,6 +178,8 @@ export const en = {
   "speechListeningUnavailable": "Speaking to the app: not available",
   "speechNotCheckedYet": "Not checked on this phone yet",
   "speechDraftWarning": "Speech has not been checked by a fluent speaker of this language.",
+  "appNameHindi": "अपनापन",
+  "appTagline": "AI-based cognitive activities and everyday support.",
 } as const;
 
 export type StringKey = keyof typeof en;

@@ -1,12 +1,14 @@
 {
   "as": [
     "appName",
-    "builtBy"
+    "builtBy",
+    "appNameHindi"
   ],
 
   "bn": [
     "appName",
-    "builtBy"
+    "builtBy",
+    "appNameHindi"
   ],
 
   "kha": [
@@ -164,7 +166,9 @@
     "speechListeningAvailable",
     "speechListeningUnavailable",
     "speechNotCheckedYet",
-    "speechDraftWarning"
+    "speechDraftWarning",
+    "appNameHindi",
+    "appTagline"
   ],
 
   "lus": [
@@ -322,7 +326,9 @@
     "speechListeningAvailable",
     "speechListeningUnavailable",
     "speechNotCheckedYet",
-    "speechDraftWarning"
+    "speechDraftWarning",
+    "appNameHindi",
+    "appTagline"
   ],
 
   "mni": [
@@ -481,6 +487,8 @@
     "speechListeningAvailable",
     "speechListeningUnavailable",
     "speechNotCheckedYet",
-    "speechDraftWarning"
+    "speechDraftWarning",
+    "appNameHindi",
+    "appTagline"
   ]
 }

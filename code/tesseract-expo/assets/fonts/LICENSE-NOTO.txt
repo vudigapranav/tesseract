@@ -1,0 +1,14 @@
+The Noto fonts bundled in this directory are licensed under the
+SIL Open Font License, Version 1.1.
+
+  NotoSansBengali-Regular.ttf   — Noto Sans Bengali
+                                  https://github.com/notofonts/bengali
+  NotoSansMeeteiMayek-Regular.ttf — Noto Sans Meetei Mayek
+                                  https://github.com/notofonts/meeteimayek
+
+Copyright The Noto Project Authors.
+
+They are bundled because Assamese/Bengali (Bengali-Assamese script) and
+Meitei (Meetei Mayek script) must render on entry-level Android devices that
+may not ship those system fonts. Khasi, Mizo and English use Latin script and
+are covered by Roboto.

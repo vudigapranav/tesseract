@@ -7,7 +7,7 @@
  * medical record. Everything here is drawn in the **patient's** language,
  * which is configured separately from the caregiver's.
  */
-import React, { useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { View } from 'react-native';
 import { fontFamilyForScript, spacing } from '../design/tokens';
 import {
@@ -35,6 +35,7 @@ import {
 } from '../games/contract';
 import { createOutboxSession } from '../data/outbox';
 import { GAME_TEXT_EN, PLACEHOLDER_CONTENT } from '../games/gameText';
+import { emptyKnowMe, itemsForGame, loadKnowMe, type KnowMeContent } from '../data/knowMe';
 
 /**
  * Game strings, localised by the host.
@@ -205,6 +206,14 @@ export function PlayScreen({
   const code = app.patientLanguage;
   const Game = registration.component;
 
+  // The caregiver's own places, steps and words, when they have entered
+  // enough. Below the threshold the game runs on the generic set instead of a
+  // half-personal mixture, which would look personal without being it.
+  const [knowMe, setKnowMe] = useState<KnowMeContent | null>(null);
+  useEffect(() => {
+    void loadKnowMe(app.selectedPatient?.id ?? 'local').then(setKnowMe);
+  }, [app.selectedPatient?.id]);
+
   /** Created once per session; ids stay stable across retries. */
   const session = useRef(
     createOutboxSession({
@@ -219,6 +228,7 @@ export function PlayScreen({
       metricVersion: '1',
     }),
   ).current;
+  void emptyKnowMe;
   const enqueued = useRef(false);
   if (!enqueued.current) {
     enqueued.current = true;
@@ -231,11 +241,14 @@ export function PlayScreen({
       gameVersion: '1',
       schemaVersion: '1',
       configVersion: 'local-v1',
-      contentVersion: 'local-v1',
+      // The real content revision this session used, not a hardcoded '1'.
+      contentVersion: knowMe?.localVersion ?? 'local-v1',
       metricVersion: '1',
       level,
       difficultyParams: registration.difficultyParamsForLevel(level),
-      items: sampleItemsFor(registration.gameId),
+      items:
+        (knowMe ? itemsForGame(knowMe, registration.gameId) : null) ??
+        sampleItemsFor(registration.gameId),
       strings: buildGameStrings(code),
       textScale: app.prefs.textScale,
       inputMode:
@@ -246,8 +259,12 @@ export function PlayScreen({
       locale: code,
       isTutorial: false,
     }),
-    [registration, level, code, app.prefs.textScale, app.prefs.preferTouch],
+    [registration, level, code, app.prefs.textScale, app.prefs.preferTouch, knowMe],
   );
+
+  // Held one frame until content is known, so a session never starts on the
+  // generic set and then swaps to the caregiver's mid-play.
+  if (knowMe === null) return <View style={{ flex: 1 }} />;
 
   return (
     <View style={{ flex: 1, paddingTop: spacing.gutter }}>

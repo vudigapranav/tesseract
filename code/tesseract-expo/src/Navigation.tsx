@@ -2,13 +2,12 @@
  * Navigation.
  *
  * A plain state machine rather than a route stack, because the important
- * transitions here are *modes*, not pages: signed out, caregiver, and patient.
- * Patient mode has no path back to caregiver screens except through the
- * protected return, which is the point of the hand-over.
+ * transitions here are *modes*, not pages: signed out, caregiver, doctor and
+ * patient. Patient mode has no path back to caregiver screens except through
+ * the protected gate, which is the point of the hand-over.
  */
 import React, { useState } from 'react';
 import { ActivityIndicator, View } from 'react-native';
-import { Screen, StatusNote, HeadlineLarge, PillButton } from './design/components';
 import { useApp } from './state/AppState';
 import { SignInScreen } from './screens/SignInScreen';
 import {
@@ -17,6 +16,17 @@ import {
   PatientBasicsScreen,
 } from './screens/CaregiverScreens';
 import { SettingsScreen } from './screens/SettingsScreen';
+import { KnowMeScreen } from './screens/KnowMeScreen';
+import {
+  PatientRemindersScreen,
+  RemindersScreen,
+} from './screens/RemindersScreen';
+import { RecommendationsScreen } from './screens/RecommendationsScreen';
+import {
+  DoctorPatientDetailScreen,
+  DoctorPatientsScreen,
+} from './screens/DoctorScreens';
+import { CaregiverGate } from './components/CaregiverGate';
 import {
   ChooseActivityScreen,
   FinishedScreen,
@@ -27,9 +37,17 @@ import {
 } from './screens/PatientScreens';
 import type { GameRegistration } from './games/registry';
 import type { GameResult } from './games/contract';
-import { translate } from './l10n/i18n';
+import type { PatientSummary } from './data/apiClient';
 
-type CaregiverRoute = 'home' | 'basics' | 'settings' | 'handOver' | 'stub';
+type CaregiverRoute =
+  | 'home'
+  | 'basics'
+  | 'settings'
+  | 'handOver'
+  | 'knowMe'
+  | 'reminders'
+  | 'recommendations';
+
 type PatientRoute =
   | 'home'
   | 'choose'
@@ -37,15 +55,20 @@ type PatientRoute =
   | 'play'
   | 'finished'
   | 'rest'
-  | 'reminders';
+  | 'reminders'
+  | 'gate';
+
+type DoctorRoute = 'list' | 'detail';
 
 export function Navigation() {
   const app = useApp();
   const [caregiverRoute, setCaregiverRoute] = useState<CaregiverRoute>('home');
   const [patientRoute, setPatientRoute] = useState<PatientRoute>('home');
+  const [doctorRoute, setDoctorRoute] = useState<DoctorRoute>('list');
   const [registration, setRegistration] = useState<GameRegistration | null>(null);
+  const [level, setLevel] = useState(1);
   const [result, setResult] = useState<GameResult | null>(null);
-  const [stubTitle, setStubTitle] = useState('');
+  const [doctorPatient, setDoctorPatient] = useState<PatientSummary | null>(null);
 
   if (!app.ready) {
     return (
@@ -57,6 +80,27 @@ export function Navigation() {
 
   if (!app.signedIn && !app.previewMode) return <SignInScreen />;
 
+  /* ------------------------------------------------------- doctor mode - */
+  if (app.role === 'doctor' && !app.patientMode) {
+    if (doctorRoute === 'detail' && doctorPatient) {
+      return (
+        <DoctorPatientDetailScreen
+          patient={doctorPatient}
+          onBack={() => setDoctorRoute('list')}
+        />
+      );
+    }
+    return (
+      <DoctorPatientsScreen
+        onOpen={(p) => {
+          setDoctorPatient(p);
+          setDoctorRoute('detail');
+        }}
+        onBack={() => setDoctorRoute('list')}
+      />
+    );
+  }
+
   /* ------------------------------------------------------ patient mode - */
   if (app.patientMode) {
     switch (patientRoute) {
@@ -65,6 +109,7 @@ export function Navigation() {
           <ChooseActivityScreen
             onChoose={(r) => {
               setRegistration(r);
+              setLevel(1);
               setPatientRoute('howToPlay');
             }}
             onBack={() => setPatientRoute('home')}
@@ -82,7 +127,7 @@ export function Navigation() {
         return registration ? (
           <PlayScreen
             registration={registration}
-            level={1}
+            level={level}
             onFinished={(r) => {
               setResult(r);
               setPatientRoute('finished');
@@ -105,11 +150,16 @@ export function Navigation() {
           />
         );
       case 'reminders':
+        return <PatientRemindersScreen onBack={() => setPatientRoute('home')} />;
+      case 'gate':
         return (
-          <Stub
-            title={translate(app.patientLanguage, 'todaysReminders')}
-            note="Reminders are not implemented in this Expo build yet. See the status document for what is and is not done."
-            onBack={() => setPatientRoute('home')}
+          <CaregiverGate
+            onUnlocked={() => {
+              app.leavePatientMode();
+              setPatientRoute('home');
+              setCaregiverRoute('home');
+            }}
+            onCancel={() => setPatientRoute('home')}
           />
         );
       default:
@@ -118,13 +168,8 @@ export function Navigation() {
             onPlay={() => setPatientRoute('choose')}
             onRest={() => setPatientRoute('rest')}
             onReminders={() => setPatientRoute('reminders')}
-            onReturn={() => {
-              // The protected door back. There is no other route out of
-              // patient mode.
-              app.leavePatientMode();
-              setPatientRoute('home');
-              setCaregiverRoute('home');
-            }}
+            // The only route out of patient mode, and it is protected.
+            onReturn={() => setPatientRoute('gate')}
           />
         );
     }
@@ -136,6 +181,12 @@ export function Navigation() {
       return <PatientBasicsScreen onDone={() => setCaregiverRoute('home')} />;
     case 'settings':
       return <SettingsScreen onBack={() => setCaregiverRoute('home')} />;
+    case 'knowMe':
+      return <KnowMeScreen onBack={() => setCaregiverRoute('home')} />;
+    case 'reminders':
+      return <RemindersScreen onBack={() => setCaregiverRoute('home')} />;
+    case 'recommendations':
+      return <RecommendationsScreen onBack={() => setCaregiverRoute('home')} />;
     case 'handOver':
       return (
         <HandOverScreen
@@ -147,62 +198,16 @@ export function Navigation() {
           onCancel={() => setCaregiverRoute('home')}
         />
       );
-    case 'stub':
-      return (
-        <Stub
-          title={stubTitle}
-          note="Not implemented in this Expo build yet. The Flutter build has it; see the Expo status document for the current gap list."
-          onBack={() => setCaregiverRoute('home')}
-        />
-      );
     default:
       return (
         <CaregiverHomeScreen
           onHandOver={() => setCaregiverRoute('handOver')}
           onBasics={() => setCaregiverRoute('basics')}
           onSettings={() => setCaregiverRoute('settings')}
-          onKnowMe={() => {
-            setStubTitle(translate(app.interfaceLanguage, 'knowMe'));
-            setCaregiverRoute('stub');
-          }}
-          onReminders={() => {
-            setStubTitle(translate(app.interfaceLanguage, 'reminders'));
-            setCaregiverRoute('stub');
-          }}
+          onKnowMe={() => setCaregiverRoute('knowMe')}
+          onReminders={() => setCaregiverRoute('reminders')}
+          onRecommendations={() => setCaregiverRoute('recommendations')}
         />
       );
   }
-}
-
-/**
- * An explicitly unfinished screen.
- *
- * Deliberately blunt rather than a plausible-looking empty state: a screen
- * that looks finished but does nothing is worse than one that says it is not
- * built yet.
- */
-function Stub({
-  title,
-  note,
-  onBack,
-}: {
-  title: string;
-  note: string;
-  onBack: () => void;
-}) {
-  const app = useApp();
-  return (
-    <Screen>
-      <View style={{ height: 24 }} />
-      <HeadlineLarge>{title}</HeadlineLarge>
-      <View style={{ height: 16 }} />
-      <StatusNote glyph="⚑" tone="attention" text={note} />
-      <View style={{ height: 16 }} />
-      <PillButton
-        label={translate(app.interfaceLanguage, 'goBack')}
-        variant="outline"
-        onPress={onBack}
-      />
-    </Screen>
-  );
 }

@@ -764,3 +764,30 @@ Game catalogue unchanged: four of nine required plus one extra. Reveal Match,
 Trace, Coloring, Spot Difference and Picture Recall still missing.
 
 Detail: `docs/handoffs/EXPO_GO_STATUS.md`.
+
+
+## 2026-09-08 — Apnapan branding and remaining Expo features
+
+Product renamed **Apnapan** (अपनापन); attribution unchanged. Flutter untouched.
+
+Assets: approved logo verbatim at `assets/branding/apnapan-logo.png`; icon
+derivatives composed from the symbol band only (wordmarks excluded by
+construction) with explicit safe margins.
+
+In-app opening screen (~1s) with logo, localised tagline and attribution.
+Reopen logic distinguishes a genuine background from `inactive` (biometrics,
+permission sheets, notification shade) and requires 90s away; shown as an
+overlay so route/auth/game state and timing survive.
+
+Expo Go: top-level `splash` is legacy in SDK 57 (caught by expo-doctor) — now
+uses the `expo-splash-screen` plugin. Since SDK 52 Expo Go shows its own icon
+rather than the splash, so the Apnapan home-screen icon and native launch
+require a separately installed build. Expo Go remains the container.
+
+Completed: Know Me (feeding real content into games), reminders with local
+notifications, recommendations with accept/modify/reject, doctor screens,
+biometric caregiver gate, bundled Noto fonts, clean first-run language picker.
+
+Verified: TypeScript clean, **50 tests**, expo-doctor 21/21, iOS bundle builds,
+opening screen + sign-in captured on **iOS Simulator** (iPhone 17 Pro, iOS 26.5,
+Expo Go 57.0.9). **No iPhone hardware verification has been performed.**

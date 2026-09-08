@@ -9,7 +9,7 @@
  * preview is a separate, explicitly chosen, visibly labelled path.
  */
 import React, { useState } from 'react';
-import { TextInput, StyleSheet, View } from 'react-native';
+import { Image, TextInput, StyleSheet, View } from 'react-native';
 import { colors, fontFamilyForScript, spacing } from '../design/tokens';
 import {
   BodyMedium,
@@ -65,8 +65,27 @@ export function SignInScreen() {
   return (
     <Screen>
       <View style={{ height: 12 }} />
+      <View style={styles.brandRow}>
+        <Image
+          source={require('../../assets/branding/apnapan-icon.png')}
+          style={styles.brandMark}
+          resizeMode="contain"
+          accessibilityElementsHidden
+          importantForAccessibility="no"
+        />
+        <View style={{ flex: 1 }}>
+          <HeadlineLarge fontFamily={font}>{t('appName')}</HeadlineLarge>
+          {/* The Devanagari wordmark as real text, so it scales and is
+              announced — not only as pixels inside the logo. */}
+          <TitleLarge tone="soft" fontFamily="NotoSansBengali">
+            {t('appNameHindi')}
+          </TitleLarge>
+        </View>
+      </View>
       <CoralAccent />
-      <HeadlineLarge fontFamily={font}>{t('appName')}</HeadlineLarge>
+      <BodyMedium tone="soft" fontFamily={font} style={{ marginTop: 2 }}>
+        {t('appTagline')}
+      </BodyMedium>
       <BodyMedium tone="soft" fontFamily={font} style={{ marginTop: 6 }}>
         {t('signInSubtitle')}
       </BodyMedium>
@@ -84,6 +103,7 @@ export function SignInScreen() {
         {showLanguages ? (
           <View style={{ marginTop: 8 }}>
             <LanguagePicker
+              compact
               selected={app.interfaceLanguage}
               uiLanguage={app.interfaceLanguage}
               onSelect={(code) => {
@@ -175,6 +195,13 @@ export function SignInScreen() {
 }
 
 const styles = StyleSheet.create({
+  brandRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 14,
+    marginBottom: 10,
+  },
+  brandMark: { width: 68, height: 68, borderRadius: 18 },
   roleRow: { flexDirection: 'row', gap: 12 },
   roleButton: { flex: 1 },
   input: {

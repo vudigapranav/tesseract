@@ -1,36 +1,44 @@
 {
   "expo": {
-    "name": "Tesseract",
+    "name": "Apnapan",
     "slug": "tesseract",
     "version": "0.1.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
+    "icon": "./assets/branding/apnapan-icon.png",
     "userInterfaceStyle": "light",
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.tesseract.app",
       "infoPlist": {
-        "NSMicrophoneUsageDescription": "Tesseract asks for the microphone only when you tap to speak, and never listens on its own.",
+        "NSMicrophoneUsageDescription": "Apnapan asks for the microphone only when you tap to speak, and never listens on its own.",
         "NSMotionUsageDescription": "Marble Maze uses phone motion to guide the marble. A touch alternative is always available."
-      }
+      },
+      "icon": "./assets/branding/apnapan-icon.png"
     },
     "android": {
       "adaptiveIcon": {
-        "backgroundColor": "#E6F4FE",
-        "foregroundImage": "./assets/android-icon-foreground.png",
-        "backgroundImage": "./assets/android-icon-background.png",
-        "monochromeImage": "./assets/android-icon-monochrome.png"
+        "foregroundImage": "./assets/branding/apnapan-icon-adaptive.png",
+        "backgroundColor": "#FEF8EE"
       },
       "predictiveBackGestureEnabled": false
     },
     "web": {
-      "favicon": "./assets/favicon.png"
+      "favicon": "./assets/branding/apnapan-icon.png"
     },
     "plugins": [
       "expo-secure-store",
       "expo-sqlite",
       "expo-font",
-      "expo-localization"
+      "expo-localization",
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/branding/apnapan-mark.png",
+          "imageWidth": 200,
+          "resizeMode": "contain",
+          "backgroundColor": "#FEF8EE"
+        }
+      ]
     ],
     "scheme": "tesseract"
   }

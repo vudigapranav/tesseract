@@ -22,12 +22,25 @@ export function LanguagePicker({
   onSelect,
   uiLanguage,
   showUncovered = true,
+  /**
+   * First-run presentation: just the languages, no coverage badges and no
+   * notices.
+   *
+   * Someone choosing a language before they have even signed in is answering
+   * "which language do you read?", and a wall of percentages and caveats makes
+   * that harder, not more honest. The disclosure lives in Settings, where a
+   * caregiver decides what language the person they care for will actually
+   * use, and where the information can change their mind. The underlying data
+   * is unchanged: nothing is marked reviewed that has not been.
+   */
+  compact = false,
 }: {
   selected: LanguageCode;
   onSelect: (code: LanguageCode) => void;
   /** Language the surrounding labels are drawn in. */
   uiLanguage: LanguageCode;
   showUncovered?: boolean;
+  compact?: boolean;
 }) {
   return (
     <View>
@@ -38,11 +51,15 @@ export function LanguagePicker({
             key={l.code}
             accessibilityRole="radio"
             accessibilityState={{ selected: isSelected }}
-            accessibilityLabel={`${l.endonym}. ${l.englishName}${
-              l.reviewStatus === 'draft'
-                ? `. Draft, ${l.coveragePercent} percent translated`
-                : ''
-            }`}
+            accessibilityLabel={
+              compact
+                ? `${l.endonym}. ${l.englishName}`
+                : `${l.endonym}. ${l.englishName}${
+                    l.reviewStatus === 'draft'
+                      ? `. Draft, ${l.coveragePercent} percent translated`
+                      : ''
+                  }`
+            }
             onPress={() => onSelect(l.code)}
             style={({ pressed }) => [
               styles.row,
@@ -58,7 +75,7 @@ export function LanguagePicker({
                 {l.region ? `${l.englishName} · ${l.region}` : l.englishName}
               </BodyMedium>
             </View>
-            {l.reviewStatus === 'draft' ? (
+            {!compact && l.reviewStatus === 'draft' ? (
               <Badge label={`Draft · ${l.coveragePercent}%`} />
             ) : null}
             {isSelected ? <BodyMedium>✓</BodyMedium> : null}
@@ -66,13 +83,16 @@ export function LanguagePicker({
         );
       })}
 
-      {/* A partial language is honest about being partial. */}
-      <StatusNote
-        glyph="ℹ"
-        text={translate(uiLanguage, 'draftTranslationNotice')}
-      />
+      {/* A partial language is honest about being partial — in Settings,
+          where the information is actionable. */}
+      {!compact ? (
+        <StatusNote
+          glyph="ℹ"
+          text={translate(uiLanguage, 'draftTranslationNotice')}
+        />
+      ) : null}
 
-      {showUncovered ? (
+      {!compact && showUncovered ? (
         // The gap stays visible rather than being quietly papered over.
         <StatusNote
           glyph="!"
