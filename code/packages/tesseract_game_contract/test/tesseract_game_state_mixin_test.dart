@@ -3,28 +3,28 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:tesseract_game_contract/tesseract_game_contract.dart';
 
 GameConfig _config() => GameConfig(
-  gameId: 'route_quest',
-  gameVersion: '1.0.0',
-  schemaVersion: '1',
-  configVersion: '1',
-  contentVersion: '1',
-  metricVersion: '1',
-  level: 1,
-  difficultyParams: const <String, Object?>{'nodeCount': 3},
-  items: const <GameItem>[],
-  strings: const GameStrings(
-    helpButtonLabel: 'Help',
-    breakButtonLabel: 'Break',
-    pausedTitle: 'Taking a break',
-    pausedBody: 'Take your time',
-    resumeButtonLabel: 'Continue',
-    finishNowButtonLabel: 'Finish for now',
-  ),
-  textScale: 1.0,
-  inputMode: GameInputMode.touch,
-  showLabels: true,
-  locale: 'en',
-);
+      gameId: 'route_quest',
+      gameVersion: '1.0.0',
+      schemaVersion: '1',
+      configVersion: '1',
+      contentVersion: '1',
+      metricVersion: '1',
+      level: 1,
+      difficultyParams: const <String, Object?>{'nodeCount': 3},
+      items: const <GameItem>[],
+      strings: const GameStrings(
+        helpButtonLabel: 'Help',
+        breakButtonLabel: 'Break',
+        pausedTitle: 'Taking a break',
+        pausedBody: 'Take your time',
+        resumeButtonLabel: 'Continue',
+        finishNowButtonLabel: 'Finish for now',
+      ),
+      textScale: 1.0,
+      inputMode: GameInputMode.touch,
+      showLabels: true,
+      locale: 'en',
+    );
 
 class _TestGame extends TesseractGame {
   const _TestGame({
@@ -50,14 +50,20 @@ class _TestGameState extends State<_TestGame>
 }
 
 void main() {
-  testWidgets('backgrounding pauses the session and foregrounding resumes it', (tester) async {
+  testWidgets('backgrounding pauses the session and foregrounding resumes it',
+      (tester) async {
     final recorder = TesseractEventRecorder();
+    final events = <GameEvent>[];
     recorder.sessionStarted();
 
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
-        child: _TestGame(config: _config(), onEvent: (_) {}, onFinish: (_) {}, recorder: recorder),
+        child: _TestGame(
+            config: _config(),
+            onEvent: events.add,
+            onFinish: (_) {},
+            recorder: recorder),
       ),
     );
 
@@ -68,16 +74,23 @@ void main() {
 
     tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
     expect(recorder.isPaused, isFalse);
+    expect(events.map((e) => e.type), ['paused', 'resumed']);
+    expect(events.map((e) => e.seq), [2, 3]);
   });
 
-  testWidgets('does not touch a pause it did not cause (a manual Break)', (tester) async {
+  testWidgets('does not touch a pause it did not cause (a manual Break)',
+      (tester) async {
     final recorder = TesseractEventRecorder();
     recorder.sessionStarted();
 
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
-        child: _TestGame(config: _config(), onEvent: (_) {}, onFinish: (_) {}, recorder: recorder),
+        child: _TestGame(
+            config: _config(),
+            onEvent: (_) {},
+            onFinish: (_) {},
+            recorder: recorder),
       ),
     );
 
@@ -95,13 +108,18 @@ void main() {
     expect(recorder.isPaused, isTrue);
   });
 
-  testWidgets('ignores lifecycle changes before the session has started', (tester) async {
+  testWidgets('ignores lifecycle changes before the session has started',
+      (tester) async {
     final recorder = TesseractEventRecorder();
 
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
-        child: _TestGame(config: _config(), onEvent: (_) {}, onFinish: (_) {}, recorder: recorder),
+        child: _TestGame(
+            config: _config(),
+            onEvent: (_) {},
+            onFinish: (_) {},
+            recorder: recorder),
       ),
     );
 

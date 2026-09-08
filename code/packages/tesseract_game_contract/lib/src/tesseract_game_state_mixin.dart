@@ -34,7 +34,8 @@ import 'tesseract_game.dart';
 ///   TesseractEventRecorder get eventRecorder => _recorder;
 /// }
 /// ```
-mixin TesseractGameStateMixin<T extends TesseractGame> on State<T>, WidgetsBindingObserver {
+mixin TesseractGameStateMixin<T extends TesseractGame>
+    on State<T>, WidgetsBindingObserver {
   /// The recorder driving this session's events.
   TesseractEventRecorder get eventRecorder;
 
@@ -54,7 +55,8 @@ mixin TesseractGameStateMixin<T extends TesseractGame> on State<T>, WidgetsBindi
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    final bool sessionIsLive = eventRecorder.lastSeq > 0 && !eventRecorder.isFinished;
+    final bool sessionIsLive =
+        eventRecorder.lastSeq > 0 && !eventRecorder.isFinished;
     if (!sessionIsLive) {
       return;
     }
@@ -63,13 +65,13 @@ mixin TesseractGameStateMixin<T extends TesseractGame> on State<T>, WidgetsBindi
       case AppLifecycleState.inactive:
       case AppLifecycleState.hidden:
         if (!eventRecorder.isPaused) {
-          eventRecorder.paused(reason: 'backgrounded');
+          widget.onEvent(eventRecorder.paused(reason: 'backgrounded'));
           _pausedByLifecycle = true;
         }
         break;
       case AppLifecycleState.resumed:
         if (_pausedByLifecycle) {
-          eventRecorder.resumed();
+          widget.onEvent(eventRecorder.resumed());
           _pausedByLifecycle = false;
         }
         break;

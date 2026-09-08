@@ -69,7 +69,8 @@ class TesseractEventRecorder {
   /// Throws [StateError] if an event has already been emitted this session.
   GameEvent sessionStarted() {
     if (_seq != 0) {
-      throw StateError('sessionStarted() must be the first event emitted, and called exactly once');
+      throw StateError(
+          'sessionStarted() must be the first event emitted, and called exactly once');
     }
     _clock
       ..reset()
@@ -88,7 +89,8 @@ class TesseractEventRecorder {
   /// change mid-session (for example a guide overlay being toggled).
   /// [setting] is an opaque, host-defined description of what changed.
   GameEvent supportChanged({required String setting}) {
-    return _emit(GameLifecycleEvent.supportChanged, <String, Object?>{'setting': setting});
+    return _emit(GameLifecycleEvent.supportChanged,
+        <String, Object?>{'setting': setting});
   }
 
   /// Stops the session clock (so paused time is excluded from [elapsedMs])
@@ -97,7 +99,9 @@ class TesseractEventRecorder {
   GameEvent paused({String? reason}) {
     final GameEvent event = _emit(
       GameLifecycleEvent.paused,
-      reason == null ? const <String, Object?>{} : <String, Object?>{'reason': reason},
+      reason == null
+          ? const <String, Object?>{}
+          : <String, Object?>{'reason': reason},
     );
     _clock.stop();
     return event;
@@ -121,7 +125,8 @@ class TesseractEventRecorder {
 
   /// Emits a game-defined event type with [payload]. [payload] must carry
   /// opaque ids only.
-  GameEvent custom(String type, [Map<String, Object?> payload = const <String, Object?>{}]) {
+  GameEvent custom(String type,
+      [Map<String, Object?> payload = const <String, Object?>{}]) {
     return _emit(type, payload);
   }
 
@@ -132,7 +137,8 @@ class TesseractEventRecorder {
   /// and [StateError] if the session has already finished.
   GameEvent sessionFinished(String status) {
     if (!GameResultStatus.values.contains(status)) {
-      throw ArgumentError.value(status, 'status', 'must be one of GameResultStatus');
+      throw ArgumentError.value(
+          status, 'status', 'must be one of GameResultStatus');
     }
     final GameEvent event = _emit(
       GameLifecycleEvent.sessionFinished,
@@ -143,11 +149,14 @@ class TesseractEventRecorder {
     return event;
   }
 
-  GameEvent _emit(String type, [Map<String, Object?> payload = const <String, Object?>{}]) {
+  GameEvent _emit(String type,
+      [Map<String, Object?> payload = const <String, Object?>{}]) {
     if (_finished) {
-      throw StateError("cannot emit '$type': session already finished (sessionFinished() was already called)");
+      throw StateError(
+          "cannot emit '$type': session already finished (sessionFinished() was already called)");
     }
     _seq += 1;
-    return GameEvent(type: type, seq: _seq, elapsedMs: elapsedMs, payload: payload);
+    return GameEvent(
+        type: type, seq: _seq, elapsedMs: elapsedMs, payload: payload);
   }
 }

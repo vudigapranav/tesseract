@@ -43,10 +43,19 @@ class _PatientBasicsScreenState extends State<PatientBasicsScreen> {
     super.dispose();
   }
 
-  void _next() {
+  Future<void> _next() async {
+    if (_nameController.text.trim().isEmpty) {
+      ScaffoldMessenger.of(context)
+          .showSnackBar(const SnackBar(content: Text('Please enter a name.')));
+      return;
+    }
     widget.flowState.patientName = _nameController.text.trim();
     widget.flowState.patientAge = int.tryParse(_ageController.text.trim());
     widget.flowState.knownConditionType = _condition;
+    await widget.flowState.save();
+    if (!mounted) {
+      return;
+    }
     Navigator.of(context).push(
       MaterialPageRoute<void>(
         builder: (BuildContext context) =>

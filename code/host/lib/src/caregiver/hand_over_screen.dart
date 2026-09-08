@@ -25,9 +25,22 @@ class _HandOverScreenState extends State<HandOverScreen> {
       widget.flowState.approvedActivity ?? gameRegistry.first;
   late int _level = widget.flowState.approvedLevel;
 
-  void _enterPatientMode() {
+  Future<void> _enterPatientMode() async {
+    if (!await widget.flowState.identity.unlock()) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+            content: Text(
+                'Set up device security before handing over. It protects caregiver return.')));
+      }
+      return;
+    }
+    widget.flowState.patientMode = true;
     widget.flowState.approvedActivity = _selected;
     widget.flowState.approvedLevel = _level;
+    await widget.flowState.save();
+    if (!mounted) {
+      return;
+    }
     Navigator.of(context).pushAndRemoveUntil(
       MaterialPageRoute<void>(
         builder: (BuildContext context) =>
@@ -80,6 +93,13 @@ class _HandOverScreenState extends State<HandOverScreen> {
                     .toList(),
               ),
             ),
+            SwitchListTile(
+                title: const Text('Use touch controls'),
+                subtitle: const Text(
+                    'Marble Maze uses phone tilt by default. Touch is an accessible alternative.'),
+                value: widget.flowState.preferTouch,
+                onChanged: (value) =>
+                    setState(() => widget.flowState.preferTouch = value)),
             const SizedBox(height: 32),
             SizedBox(
               height: 56,

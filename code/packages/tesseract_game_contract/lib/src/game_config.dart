@@ -45,7 +45,8 @@ class GameConfig {
     this.isTutorial = false,
   }) {
     if (!GameInputMode.values.contains(inputMode)) {
-      throw ArgumentError.value(inputMode, 'inputMode', "must be one of GameInputMode ('touch' or 'tilt')");
+      throw ArgumentError.value(inputMode, 'inputMode',
+          "must be one of GameInputMode ('touch' or 'tilt')");
     }
   }
 

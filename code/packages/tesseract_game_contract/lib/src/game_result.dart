@@ -14,7 +14,11 @@ abstract final class GameResultStatus {
   static const String interrupted = 'interrupted';
 
   /// Every valid value, for validation.
-  static const List<String> values = <String>[completed, stoppedByUser, interrupted];
+  static const List<String> values = <String>[
+    completed,
+    stoppedByUser,
+    interrupted
+  ];
 }
 
 /// Reported exactly once per session, when a [TesseractGame] calls its
@@ -30,7 +34,8 @@ class GameResult {
     required this.assisted,
   }) {
     if (!GameResultStatus.values.contains(status)) {
-      throw ArgumentError.value(status, 'status', 'must be one of GameResultStatus');
+      throw ArgumentError.value(
+          status, 'status', 'must be one of GameResultStatus');
     }
   }
 

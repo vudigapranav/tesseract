@@ -1,9 +1,9 @@
 name: tesseract_host
 description: >
-  The real host shell: Home, Choose Activity, How to Play, Play, Finished and
-  Rest, plus the SessionController that wraps game events for the (not yet
-  built) backend outbox. No network, database, auth or shared_preferences
-  dependency — that is wired in separately, later.
+  The real app shell: patient P1-P9 and caregiver C1-C7, the game host, and the
+  durable data layer behind them — SQLite storage partitioned by caregiver
+  identity, a session/event outbox that uploads to the Tesseract API, local
+  reminders and Firebase-backed caregiver identity.
 version: 0.1.0
 publish_to: 'none'
 
@@ -20,11 +20,25 @@ dependencies:
     path: ../games/route_quest
   marble_maze:
     path: ../games/marble_maze
+  sqflite: ^2.4.3
+  path_provider: ^2.1.6
+  http: ^1.6.0
+  # Pinned to the 9.x line. 11.x declares compileSdk 37, and the only API-37
+  # platform installed on this machine reports a malformed ApiLevel ("37.0")
+  # that AGP cannot resolve to the "android-37" hash string. 9.x builds against
+  # API 36 and exposes the same read/write/delete API. Revisit once a
+  # well-formed API 37 platform is installed.
+  flutter_secure_storage: ^9.2.4
+  local_auth: ^3.0.2
+  flutter_local_notifications: ^22.3.0
+  timezone: ^0.11.1
+  flutter_timezone: ^5.1.0
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^4.0.0
+  sqflite_common_ffi: ^2.4.2+1
 
 flutter:
   uses-material-design: true

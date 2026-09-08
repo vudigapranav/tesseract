@@ -36,12 +36,20 @@ class _PlayScreenState extends State<PlayScreen> {
     registration: widget.registration,
     level: widget.level,
     isTutorial: widget.isTutorial,
+    repository: widget.flowState.repository,
+    patientId: widget.flowState.patientId,
+    preferTouch: widget.flowState.preferTouch,
   );
   void _onEvent(GameEvent event) {
     _session.recordEvent(event);
   }
 
-  void _onFinish(GameResult result) {
+  bool _finishing = false;
+  Future<void> _onFinish(GameResult result) async {
+    if (_finishing) {
+      return;
+    }
+    _finishing = true;
     _session.finish(result);
     if (result.status == GameResultStatus.completed) {
       widget.flowState.completedActivitiesCount += 1;
@@ -54,8 +62,22 @@ class _PlayScreenState extends State<PlayScreen> {
         status: result.status,
       ),
     );
+    try {
+      await _session.flush();
+      await widget.flowState.save();
+    } catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+            content: Text(
+                'Activity could not be fully saved. Please tell your caregiver.')));
+      }
+    }
+    if (!mounted) {
+      return;
+    }
     Navigator.of(context).pushReplacement(PageRouteBuilder<void>(
-      transitionDuration: const Duration(milliseconds: 380),
+      transitionDuration: Duration(
+          milliseconds: MediaQuery.disableAnimationsOf(context) ? 0 : 380),
       reverseTransitionDuration: const Duration(milliseconds: 240),
       pageBuilder: (_, __, ___) => FinishedScreen(
           flowState: widget.flowState, registration: widget.registration),
@@ -77,9 +99,19 @@ class _PlayScreenState extends State<PlayScreen> {
   Widget build(BuildContext context) {
     final double textScale = MediaQuery.textScalerOf(context).scale(1.0);
     final GameConfig config = _session.buildConfig(textScale: textScale);
-    return Scaffold(
-      body: widget.registration
-          .builder(config: config, onEvent: _onEvent, onFinish: _onFinish),
-    );
+    return PopScope(
+        canPop: false,
+        onPopInvokedWithResult: (didPop, result) {
+          if (!didPop) {
+            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                content: Text(
+                    'Use Break, then Finish for now to leave this activity.')));
+          }
+        },
+        child: Scaffold(
+          body: SafeArea(
+              child: widget.registration.builder(
+                  config: config, onEvent: _onEvent, onFinish: _onFinish)),
+        ));
   }
 }

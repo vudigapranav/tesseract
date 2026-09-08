@@ -6,11 +6,11 @@ import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
 import android.view.Surface
-import io.flutter.embedding.android.FlutterActivity
+import io.flutter.embedding.android.FlutterFragmentActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.EventChannel
 
-class MainActivity : FlutterActivity(), EventChannel.StreamHandler, SensorEventListener {
+class MainActivity : FlutterFragmentActivity(), EventChannel.StreamHandler, SensorEventListener {
     private val channelName = "org.tesseract/marble_tilt"
     private var sensorManager: SensorManager? = null
     private var rotationSensor: Sensor? = null

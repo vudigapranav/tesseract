@@ -2,35 +2,36 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:tesseract_game_contract/tesseract_game_contract.dart';
 
 GameStrings _strings() => const GameStrings(
-  helpButtonLabel: 'Help',
-  breakButtonLabel: 'Break',
-  pausedTitle: 'Taking a break',
-  pausedBody: 'Take your time',
-  resumeButtonLabel: 'Continue',
-  finishNowButtonLabel: 'Finish for now',
-);
+      helpButtonLabel: 'Help',
+      breakButtonLabel: 'Break',
+      pausedTitle: 'Taking a break',
+      pausedBody: 'Take your time',
+      resumeButtonLabel: 'Continue',
+      finishNowButtonLabel: 'Finish for now',
+    );
 
 GameConfig _configWith({required String inputMode}) => GameConfig(
-  gameId: 'route_quest',
-  gameVersion: '1.0.0',
-  schemaVersion: '1',
-  configVersion: '1',
-  contentVersion: '1',
-  metricVersion: '1',
-  level: 1,
-  difficultyParams: const <String, Object?>{'nodeCount': 3},
-  items: const <GameItem>[],
-  strings: _strings(),
-  textScale: 1.0,
-  inputMode: inputMode,
-  showLabels: true,
-  locale: 'en',
-);
+      gameId: 'route_quest',
+      gameVersion: '1.0.0',
+      schemaVersion: '1',
+      configVersion: '1',
+      contentVersion: '1',
+      metricVersion: '1',
+      level: 1,
+      difficultyParams: const <String, Object?>{'nodeCount': 3},
+      items: const <GameItem>[],
+      strings: _strings(),
+      textScale: 1.0,
+      inputMode: inputMode,
+      showLabels: true,
+      locale: 'en',
+    );
 
 void main() {
   group('GameConfig', () {
     test('accepts a valid inputMode', () {
-      expect(() => _configWith(inputMode: GameInputMode.touch), returnsNormally);
+      expect(
+          () => _configWith(inputMode: GameInputMode.touch), returnsNormally);
       expect(() => _configWith(inputMode: GameInputMode.tilt), returnsNormally);
     });
 

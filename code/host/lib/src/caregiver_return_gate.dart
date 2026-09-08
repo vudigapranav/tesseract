@@ -17,24 +17,18 @@ class CaregiverReturnGate extends StatelessWidget {
   final HostFlowState flowState;
 
   Future<void> _confirmReturn(BuildContext context) async {
-    final bool? confirmed = await showDialog<bool>(
-      context: context,
-      builder: (BuildContext context) => AlertDialog(
-        title: const Text('For the caregiver'),
-        content: const Text('Switch to the caregiver area?'),
-        actions: <Widget>[
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Cancel'),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            child: const Text('Continue'),
-          ),
-        ],
-      ),
-    );
+    final bool confirmed = await flowState.identity.unlock();
+    if (!confirmed && context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          content: Text(
+              'Caregiver area stays locked. Set up a device screen lock and try again.')));
+    }
     if (confirmed == true && context.mounted) {
+      flowState.patientMode = false;
+      await flowState.save();
+      if (!context.mounted) {
+        return;
+      }
       Navigator.of(context).pushAndRemoveUntil(
         MaterialPageRoute<void>(
           builder: (BuildContext context) =>

@@ -47,7 +47,11 @@ class _KnowMeScreenState extends State<KnowMeScreen> {
     });
   }
 
-  void _done() {
+  Future<void> _done() async {
+    await widget.flowState.save();
+    if (!mounted) {
+      return;
+    }
     Navigator.of(context).pushAndRemoveUntil(
       MaterialPageRoute<void>(
         builder: (BuildContext context) =>

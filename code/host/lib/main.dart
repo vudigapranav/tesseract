@@ -1,45 +1,70 @@
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-
 import 'src/caregiver/sign_in_screen.dart';
 import 'src/host_flow_state.dart';
-import 'src/phone_frame.dart';
+import 'src/home_screen.dart';
+import 'src/design_system.dart';
+import 'src/data/local_repository.dart';
 
-void main() {
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  SystemChrome.setPreferredOrientations(<DeviceOrientation>[
-    DeviceOrientation.portraitUp,
-    DeviceOrientation.portraitDown,
-  ]);
-  runApp(const HostApp());
+  try {
+    final repository = kIsWeb ? null : await LocalRepository.open();
+    // Reopen the partition belonging to whoever was signed in last. Until a
+    // caregiver signs in, this stays on the anonymous scope and no patient
+    // content is readable.
+    final String? activeScope = await repository?.readActiveScope();
+    if (repository != null && activeScope != null) {
+      await repository.useScope(activeScope);
+    }
+    final flow = HostFlowState(repository: repository);
+    await flow.restore();
+    try {
+      await flow.reminderService
+          .restore(flow.reminders, sound: flow.audioEnabled);
+    } catch (_) {
+      flow.reminderService.status =
+          'Notification scheduling unavailable. Your reminders are saved.';
+    }
+    runApp(HostApp(flowState: flow));
+  } catch (_) {
+    runApp(MaterialApp(
+        theme: TesseractDesign.theme,
+        home: const Scaffold(
+            body: SafeArea(
+                child: Center(
+                    child: Padding(
+                        padding: EdgeInsets.all(24),
+                        child: Text(
+                            'Your saved data could not be opened. Close and reopen the app. Existing data has not been reset.')))))));
+  }
 }
 
 class HostApp extends StatefulWidget {
-  const HostApp({super.key});
-
+  const HostApp({super.key, this.flowState});
+  final HostFlowState? flowState;
   @override
   State<HostApp> createState() => _HostAppState();
 }
 
 class _HostAppState extends State<HostApp> {
-  final HostFlowState _flowState = HostFlowState();
-
+  late final flow = widget.flowState ?? HostFlowState();
   @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
+  Widget build(BuildContext context) => MaterialApp(
       title: 'Tesseract',
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-          colorSchemeSeed: const Color(0xFF2E7D5B), useMaterial3: true),
-      home: SignInScreen(flowState: _flowState),
-      builder: (BuildContext context, Widget? child) {
-        if (!kIsWeb || child == null) {
-          return child ?? const SizedBox.shrink();
-        }
-        return WebPreviewFrame(
-            mediaQueryData: MediaQuery.of(context), child: child);
-      },
-    );
-  }
+      theme: TesseractDesign.theme,
+      home: flow.patientMode
+          ? HomeScreen(flowState: flow)
+          : SignInScreen(flowState: flow),
+      builder: (context, child) {
+        final media = MediaQuery.of(context);
+        return MediaQuery(
+            data: media.copyWith(
+                textScaler: TextScaler.linear(
+                    media.textScaler.scale(1) * flow.textScalePreference),
+                disableAnimations:
+                    media.disableAnimations || flow.reducedMotion),
+            child: child ?? const SizedBox.shrink());
+      });
 }

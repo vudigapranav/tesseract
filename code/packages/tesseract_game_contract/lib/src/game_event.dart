@@ -43,11 +43,11 @@ class GameEvent {
   final Map<String, Object?> payload;
 
   Map<String, Object?> toJson() => <String, Object?>{
-    'type': type,
-    'seq': seq,
-    'elapsedMs': elapsedMs,
-    'payload': payload,
-  };
+        'type': type,
+        'seq': seq,
+        'elapsedMs': elapsedMs,
+        'payload': payload,
+      };
 
   @override
   String toString() => 'GameEvent(${toJson()})';

@@ -6,6 +6,17 @@ Before changing this project, read `PS003_MASTER_CONTEXT.md` and the relevant se
 
 Respect fixed team ownership and distinguish proposed decisions from confirmed requirements. Do not mark planned features as implemented. Update current status and verified evidence after milestones. The initial request was review/planning only; start implementation when the user asks. Do not modify the supplied SIH PPT unless requested.
 
+## Standing product-quality requirement
+
+Confirmed by the user on 2026-09-07: the final target is a polished, fully
+functional, production-quality app that stands out to judges among eight other
+teams. Every future Tesseract prompt, plan and handoff must carry this target,
+with task-appropriate functional, design, reliability and verification criteria.
+Skeletons and demo-only behavior are interim work, not completion. Use the user's
+healthcare UI reference as visual inspiration while preserving patient
+accessibility, team ownership and truthful evidence. See Brain.md for details;
+this requirement alone does not authorize new implementation or external actions.
+
 ## Repository layout
 
 `code/` holds the Flutter mobile side of the app; `services/` holds the backend. Within `code/`, every game (`code/games/*`) depends only on `code/packages/tesseract_game_contract` — no game may add a network, database or auth dependency of its own.

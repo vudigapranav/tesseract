@@ -17,7 +17,9 @@ void main() {
       expect(strings.text('destination_reached_body'), 'You made it!');
     });
 
-    test('text() asserts on a missing key, so a missing translation is caught in debug', () {
+    test(
+        'text() asserts on a missing key, so a missing translation is caught in debug',
+        () {
       const strings = GameStrings(
         helpButtonLabel: 'Help',
         breakButtonLabel: 'Break',

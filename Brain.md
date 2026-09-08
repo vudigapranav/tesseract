@@ -482,3 +482,203 @@ When continuing work, append or revise the relevant section with:
 - Screenshots/device evidence, if any
 - Remaining limitations
 - Next dependency-ready action
+
+
+## 2026-09-07 Codex non-game integration — STOPPED BY USER
+
+User explicitly requested: stop all implementation, report completed work and provide a Claude continuation prompt, including this record in project files. Implementation is paused at the user's request, not complete or production-ready. Do not resume unless asked. No commits or pushes were made in this pass.
+
+### Critical workspace location
+
+This task initially opened in an unrelated UserProfileApp worktree at `/Users/pranav07vudiga/.codex/worktrees/4fa8/pranav07vudiga`. The actual Tesseract repository is `/Users/pranav07vudiga/Desktop/Projects/Hackathon/SIH` on `feature/backend-foundation`, at `00f5cc9`, with an uncommitted AGENTS.md quality update. To preserve it, Codex cloned that repository into `/Users/pranav07vudiga/.codex/worktrees/4fa8/pranav07vudiga/tesseract`, then created branch `codex/patient-caregiver-integration`. ALL implementation changes and this stop/handoff record are in that nested clone, uncommitted. The original SIH checkout is untouched. Its AGENTS.md update was copied into the clone. Do not look for this work in the original checkout or accidentally stage the parent home/UserProfileApp repo.
+
+### Code written (not accepted as verified behavior)
+
+- Shared lifecycle mixin now forwards recorder-returned `paused` and `resumed` events to `widget.onEvent`; its test gained sink type/sequence assertions. The discovered original defect advanced seq but dropped both events.
+- Added `code/host/lib/src/data/local_repository.dart`: SQLite tables for settings, sessions/events, immutable local completion checking and interrupted-session recovery.
+- Added `data/api_client.dart` and `data/session_outbox.dart`: bearer-token HTTP adapter; session create → batches of at most 500 → complete; stable event IDs; accepted/duplicate checks; retain permanent errors instead of deleting data. These are not verified against the live backend.
+- `session_controller.dart`: elapsedMs → elapsed_ms mapping, sequence/finalization guards, queued durable writes and flush, frozen config, explicit touch preference, omission of unknown actual tilt mode, removal of printed session JSON.
+- `host_flow_state.dart`: settings serialization/restore, saved-history loading, identity/API references and initial sync/config/recommendation fetch plumbing.
+- `play_screen.dart`: flush before finish navigation, duplicate callback guard, safe area, explicit system-back guidance to use Break/Finish, reduced-motion finish transition.
+- Added `data/identity_service.dart`: optional Firebase email/password REST adapter using public build config, refresh token in flutter_secure_storage, local_auth device gate. Replaced fake password/name sign-in with configuration/error/loading states; synthetic preview is explicitly build-gated. Protected return and handover use device authentication. Real Firebase project/provider remains unconfirmed and UNTESTED.
+- Added `design_system.dart`: cream/peach/coral/ink tokens, rounded white cards, pill buttons, typography and Flutter-native Tesseract activity illustration. Applied app theme/onboarding; no settled-design screenshot acceptance yet.
+- Basics/Know Me/handover gained save calls. Settings gained persistent text/audio/reduced-motion preferences, sign-out and initial sync status. How-to-play gained game-specific instructions. Most caregiver dashboard/patient visual work remains unfinished.
+- Added `data/reminder_service.dart` and rewrote reminders screen: daily local scheduling adapter, permission handling, persisted IDs, reconciliation, editing/enabling/removal, 15-minute postponement and acknowledgement. Android receiver/desugaring/permissions added. This was the last code written and has NOT been analyzed, built or exercised.
+- Android MainActivity switched to FlutterFragmentActivity for local_auth while preserving tilt bridge; styles changed to AppCompat; backup disabled. Platform compilation pending.
+- Host dependencies resolved: sqflite, path_provider, http, flutter_secure_storage, local_auth, flutter_local_notifications, timezone, flutter_timezone; sqflite_common_ffi for future tests. Some dependencies may be unused and need review.
+- `docs/handoffs/SHANKS_API_REVIEW.md` records draft P1–P7/§14 responses, conflicts, design handoff and independent doctor scope. Prepared notes only: nobody was contacted and no contract was approved/frozen.
+
+### Evidence actually obtained in this pass
+
+- Actual repository HEAD inspected: 00f5cc9. Backend routes/contract inspected; patient create/read exist, but patient-basics update route was not found in `services/api/app/patients/router.py`.
+- Reference PNG was available and visually inspected: `/var/folders/4_/rgvg3fz13bj3f8wmgvvwklmr0000gn/T/codex-clipboard-b477698e-8ccb-42f6-a215-f0a05380e5ac.png`.
+- Flutter dependency resolution succeeded (required SDK/package-cache sandbox escalation).
+- One interim `flutter analyze` in host passed before later identity/UI/reminder edits.
+- A second interim `flutter analyze` returned exit 1 with two `prefer_single_quotes` info findings in patient_basics_screen.dart and play_screen.dart. No compile/analyzer errors were reported at that checkpoint. The final reminder/platform changes came AFTER that run, so this is not a final clean-analysis claim.
+- No flutter tests were run. New lifecycle assertion is written, NOT executed. No new persistence/outbox/identity/reminder behavioral tests have yet been authored.
+- No current APK build, browser walkthrough, golden regeneration or new screenshots. Physical-device checks NOT TESTED; connected-device inventory was not run this pass. Historical test/build figures above are not current verification.
+- Required guidance was read via command output, but several combined outputs were truncated. Claude must re-read any relevant unobserved portions rather than assuming complete review from this pass.
+
+### Known unfinished integration and review risks — start here on continuation
+
+1. New code is rough, unformatted and unverified. Run formatting, analysis, focused tests and Android compilation before making any functionality claim.
+2. Outbox has no periodic/backoff/reconnect driver, last-success timestamp is not persisted, and sessions created with zero events remain open on recovery. Async event writes can be lost if the process dies before the queue drains; do not claim crash-proof capture. Test actual SQLite transactions/restart and lost-response replay. Reject mismatched/duplicate IDs and sequence gaps; protect concurrent finalization.
+3. Profile/session cache is not partitioned by caregiver identity. `connect()` selects the first accessible patient if no matching patient exists and can leave prior local content/history mixed. This is a blocking access/privacy issue to fix before real-user use. Do not enable real use yet.
+4. New-patient server creation, server patient selection, personalization upload/version conflict handling, server history pagination and reminder API occurrence/definition synchronization are not wired to screens. Local basics edit cannot be described as synced: backend currently lacks its update endpoint. Do not independently change backend contracts.
+5. Recommendations are fetched only; caregiver dashboard accept/modify/reject UI and applied config version propagation are unfinished. Session config/content versions remain hardcoded '1'. Handover still permits local game/level changes without server approval/version reconciliation. Resolve with Pranav, preserve approved offline config, and do not mislabel local changes as backend-approved.
+6. Know Me data is not yet converted to stable approved GameItems in PlayScreen. Future-game adapters are unfinished. No games were edited/imported; both existing registry games remain.
+7. Notification plugin configuration/scheduling is untested. Notification taps are not routed to the reminder view; patient home does not yet expose the new patient reminder view. Time-zone changes during an already-running process are not reconciled. Occurrence records are only latest local timestamps, not full server-compatible occurrence history. ID collision avoidance, cancellation of stale postponed alarms after edit, and sound-change rescheduling need fixes/tests. Android reboot/time-zone/permission/duplicate behavior needs device evidence.
+8. Device gate uses OS biometric/PIN credentials, not backend caregiver identity. Security policy needs review; on devices without a configured screen lock it fails closed. Protected-return save errors and other unhandled save failures need usable retry UI. Sign-in provider/project still requires user choice; HTTPS endpoint/public client config are missing. Never ask for Admin credentials or AI keys in chat.
+9. Large-text/reduced-motion preferences are not live-reactive (root state does not listen); settings explain reopen for text size. Golden layouts, smaller screens, TalkBack, navigation and all patient/caregiver flows still need work. Existing fixed-height/row layouts may overflow. Check system-back behavior rather than claiming a verified pause experience.
+10. Stale comments/pubspec description still call implemented scaffolding in-memory-only or say backend is absent. Update them after verification to precise current capability, without overstating completion.
+11. Doctor D1–D8 required, platform still unanswered. No doctor frontend built. Original prompt's other seven games, device checks, public Firebase setup, and production acceptance remain explicit external/deferred dependencies.
+
+Full continuation instruction: `docs/handoffs/CLAUDE_CONTINUATION.md`. Next action is user-authorized continuation in this clone, followed by review/fixes and truthful verification. No task scope is marked complete by this paused milestone.
+
+
+### 2026-09-08 stop follow-up
+
+An automatic continuation fired during the stop handoff. The explicit user stop remains in effect; no implementation resumed. The `complete-tesseract-non-game-frontend` heartbeat was paused through the Codex automation tool. Resume only on a new user instruction.
+
+## 2026-09-08 Claude — resumed Codex integration: verification and repair
+
+**Actor:** Claude, in the nested clone
+`/Users/pranav07vudiga/.codex/worktrees/4fa8/pranav07vudiga/tesseract`, branch
+`codex/patient-caregiver-integration`. Resumed on explicit user instruction
+following the stop record above. All uncommitted Codex work was preserved; the
+original SIH checkout and the unrelated parent repo were not touched.
+
+### What the stop record left unverified, and what is now actually true
+
+Codex had run only dependency resolution and two interim analyses. No tests, no
+APK, no formatting. That is now resolved:
+
+- `dart format` applied to host lib, contract lib and contract tests (27 files
+  changed). The new data layer was dense single-line code and unreviewable.
+- `flutter analyze`: **clean, no issues**, on `code/host` and on
+  `tesseract_game_contract`. This is the first clean analysis that *includes*
+  the reminder/platform code Codex wrote after its last analysis run.
+- **The lifecycle fix is real and now tested.** `TesseractGameStateMixin` had
+  been advancing `seq` for backgrounding `paused`/`resumed` while discarding
+  both returned events. Codex's one-line-each fix forwards them to
+  `widget.onEvent`; I verified the diff and ran its 3 tests (pass). I added a
+  host-level test proving the pair reaches durable storage with a contiguous
+  sequence, because the practical consequence of the old behaviour was a
+  permanent `sequence_gap` rejection at `POST /complete`.
+- **`flutter build apk --debug` now SUCCEEDS** (193s) —
+  `code/host/build/app/outputs/flutter-apk/app-debug.apk`, 167 MB debug. This
+  is the first compile of the FlutterFragmentActivity switch, core-library
+  desugaring, notification receivers and local_auth. `aapt2 dump badging`
+  confirms `android.hardware.sensor.gyroscope` is still **not-required** (the
+  touch fallback survives), plus POST_NOTIFICATIONS, RECEIVE_BOOT_COMPLETED,
+  VIBRATE and USE_BIOMETRIC.
+
+### Build blocker found and fixed
+
+The first APK attempt failed: `flutter_secure_storage` 11.x declares
+compileSdk 37, and the only API-37 platform on this machine reports a
+malformed `AndroidVersion.ApiLevel=37.0`, which AGP cannot resolve to the
+`android-37` hash string. I did not hand-edit the user's Android SDK. Pinned
+`flutter_secure_storage` to `^9.2.4` (same read/write/delete API, builds
+against API 36) with the reason recorded in `pubspec.yaml`.
+
+### Blocking privacy defect fixed — durable data is now identity-partitioned
+
+Stop-record risk 3 was real and is the most important repair in this pass.
+`saveSettings` wrote a single fixed row `'profile'` shared by every caregiver,
+sessions and events carried no owner, and `connect()` fell back to
+`patients.first` when the remembered patient did not match. On a shared device
+a second caregiver would have inherited the first one's patient name, Know Me
+content, reminders and session history — and could have had their own play
+attached to a stranger's patient.
+
+- `LocalRepository` schema v2: `sessions.scope` column, per-scope `meta` table,
+  scope index, migration from v1 that leaves unattributable rows on the
+  anonymous scope rather than handing them to whoever signs in next.
+- Every read and write is scoped: settings, sessions, events (joined through
+  session ownership), metadata, `markSynced`, `markError`, `recoverInterrupted`.
+- `useScope` / `readActiveScope` / `clearActiveScope`. The active-scope pointer
+  stores an identity key only, never patient content.
+- `IdentityService` now surfaces the provider `uid` (`localId` on sign-in,
+  `user_id` on refresh) as the partition key.
+- `connect()` no longer adopts a stranger's patient: a stale selection is
+  cleared and `availablePatients` is exposed for explicit choice. A single
+  accessible patient is still adopted automatically.
+- Sign-out saves into the caregiver's own partition, then drops the active
+  pointer. Their data is retained for sign-in again, not deleted.
+- `main.dart` reopens the last active partition on launch.
+
+### Other repairs
+
+- Zero-event sessions were left open forever and retried on every launch;
+  `recoverInterrupted` now drops them (nothing to upload, nothing to complete).
+- `lastSuccessfulSync` is persisted per scope and restored via
+  `SessionOutbox.restore()`, so sync status survives a restart instead of
+  reading as "never synced".
+- Corrected the `SessionController` doc comment and the `pubspec` description,
+  both of which still claimed there was no backend, database or persistence.
+
+### Tests written this pass — 35 new, all passing
+
+`code/host/test/data/`:
+
+- `local_repository_test.dart` (16): reopen durability for settings and for a
+  completed session's events; four identity-isolation cases; sign-out keeps
+  data but hides it; per-scope metadata isolation; identical completion
+  accepted and differing completion refused; interrupted recovery for terminal,
+  mid-play, assisted, zero-event, repeated-launch and wrong-scope cases.
+- `session_outbox_test.dart` (11): create→batch→complete ordering; replay after
+  a lost response; duplicate-only acknowledgement still completes; a rejected
+  event is retained not deleted; an unacknowledged event is a failure not a
+  success; 500 retryable leaves the session pending; 401 stops without
+  discarding; offline keeps data; 1201 events upload in 3 ordered batches;
+  last-sync time survives restart; another caregiver's session is never sent.
+- `session_pipeline_test.dart` (8): contiguous sequence storage; backgrounding
+  yields a gap-free uploadable session; a dropped event is refused rather than
+  written as a gap; `elapsed_ms` on the wire and no `elapsedMs`; no double
+  finalisation; tilt sessions do not claim an observed input mode; explicit
+  touch preference is recorded; interrupted recovery invents no finish event.
+
+### Checks actually run, exact results
+
+- `flutter analyze` host: **No issues found.** contract: **No issues found.**
+- `flutter test` — contract 22, route_quest 16, marble_maze 17, host 56.
+  **111 passing project-wide** (host was 21 before this pass).
+- Two HowToPlay goldens were stale because Codex added game-specific
+  instructions; regenerated deliberately, whole golden suite 20/20.
+- `flutter build apk --debug`: **success**, manifest verified with `aapt2`.
+- Device inventory run: `flutter devices` shows iOS simulator, a wireless
+  iPhone, macOS and Chrome. `adb devices` is **empty**.
+
+### NOT TESTED — no evidence exists for these
+
+- **No Android phone or emulator is connected**, so every Android device
+  behaviour is NOT TESTED: notification delivery, permission denial, reboot
+  restoration, time-zone change, duplicate scheduling, biometric/PIN gate,
+  Marble Maze tilt feel, and real-device performance.
+- **Firebase is unverified against any real project.** No project, provider
+  choice or HTTPS backend URL has been supplied; `IdentityService.configured`
+  is false without them, so real sign-in cannot be exercised at all.
+- **The outbox has never talked to the live backend.** All 11 outbox tests use
+  a mocked HTTP client shaped to the contract, not the running service.
+- No browser walkthrough or new screenshots this pass.
+
+### Remaining unfinished work
+
+Stop-record items 4, 5, 6, 7, 9 and 11 are largely untouched: server patient
+creation/selection and personalization upload are not wired to screens; the
+caregiver dashboard still lacks accept/modify/reject UI and config-version
+propagation; Know Me content is not yet converted into approved `GameItem`s;
+notification taps are not routed and the patient reminder view does not exist;
+large-text/reduced-motion are not live-reactive; the caregiver dashboard and
+patient screens have not had the visual pass; doctor D1-D8 platform is still
+unanswered. Session `config_version`/`content_version` remain hardcoded '1'.
+
+### Next action
+
+Wire the caregiver dashboard: pending recommendations with accept/modify/reject
+against `POST /v1/recommendations/{id}/decision`, applied config version
+propagation, and real session history — then the patient-facing visual pass.
+Ask the user for the Firebase project/provider choice and HTTPS backend URL,
+and for an Android device for the reminder and tilt checks that cannot be
+verified in this environment.

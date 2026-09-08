@@ -35,7 +35,8 @@ class HowToPlayScreen extends StatelessWidget {
       appBar: AppBar(
           title: Text(HostStrings.displayName(registration.displayNameKey))),
       body: SafeArea(
-        child: Padding(
+        child: SingleChildScrollView(
+            child: Padding(
           padding: const EdgeInsets.all(24),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -43,7 +44,11 @@ class HowToPlayScreen extends StatelessWidget {
               Icon(registration.icon, size: 56),
               const SizedBox(height: 16),
               Text(
-                "Let's try together. Take your time.",
+                registration.gameId == 'route_quest'
+                    ? 'Follow the road to the flag. Tap a connected place to move. Pick up the flag, then return home. Help shows the way.'
+                    : flowState.preferTouch
+                        ? 'Guide the marble along the wooden paths with your finger. Reach the glowing goal. Help shows the route.'
+                        : 'Hold your phone comfortably while it settles, then gently tilt to guide the marble to the glowing goal. If tilt is unavailable, use your finger. Help shows the route.',
                 style: Theme.of(context).textTheme.titleMedium,
                 textAlign: TextAlign.center,
               ),
@@ -70,7 +75,7 @@ class HowToPlayScreen extends StatelessWidget {
               ),
             ],
           ),
-        ),
+        )),
       ),
     );
   }

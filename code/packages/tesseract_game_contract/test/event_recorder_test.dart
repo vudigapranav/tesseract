@@ -27,8 +27,10 @@ void main() {
       expect(recorder.paused().type, 'paused');
       expect(recorder.resumed().type, 'resumed');
       expect(recorder.hintRequested().type, 'hint_requested');
-      expect(recorder.supportChanged(setting: 'guide_overlay_on').type, 'support_changed');
-      expect(recorder.sessionFinished(GameResultStatus.completed).type, 'session_finished');
+      expect(recorder.supportChanged(setting: 'guide_overlay_on').type,
+          'support_changed');
+      expect(recorder.sessionFinished(GameResultStatus.completed).type,
+          'session_finished');
     });
 
     test('supportChanged carries the setting that changed', () {
@@ -77,7 +79,8 @@ void main() {
       final recorder = TesseractEventRecorder();
       recorder.sessionStarted();
       recorder.custom('location_entered', {'nodeId': 'n1'});
-      final finishEvent = recorder.sessionFinished(GameResultStatus.stoppedByUser);
+      final finishEvent =
+          recorder.sessionFinished(GameResultStatus.stoppedByUser);
 
       final result = GameResult(
         status: GameResultStatus.stoppedByUser,
@@ -101,7 +104,9 @@ void main() {
       expect(recorder.sessionStarted, throwsStateError);
     });
 
-    test('sessionStarted() after another event has already fired throws StateError', () {
+    test(
+        'sessionStarted() after another event has already fired throws StateError',
+        () {
       final recorder = TesseractEventRecorder();
       recorder.tutorialStarted();
       expect(recorder.sessionStarted, throwsStateError);
@@ -111,7 +116,8 @@ void main() {
       final recorder = TesseractEventRecorder();
       recorder.sessionStarted();
       recorder.sessionFinished(GameResultStatus.completed);
-      expect(() => recorder.sessionFinished(GameResultStatus.completed), throwsStateError);
+      expect(() => recorder.sessionFinished(GameResultStatus.completed),
+          throwsStateError);
     });
 
     test('any event emitted after sessionFinished() throws StateError', () {
