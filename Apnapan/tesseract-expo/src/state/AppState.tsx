@@ -25,6 +25,7 @@ import { ApiClient, type PatientOut } from '../data/apiClient';
 import { isApiConfigured, isIdentityConfigured } from '../data/config';
 import { IdentityService } from '../data/identity';
 import { SessionOutbox } from '../data/outbox';
+import { seedDemoScope } from '../data/demoSeed';
 import {
   ANON_SCOPE,
   ScopedStore,
@@ -299,6 +300,18 @@ export function AppStateProvider({ children }: { children: React.ReactNode }) {
     cancelSync();
     clearInMemory();
     const s = await adoptScope('preview');
+    // A demonstration needs someone to demonstrate with. Seeding is idempotent
+    // and confined to this scope, so it cannot create a second Kamala and
+    // cannot reach a signed-in caregiver's real data. It seeds content only —
+    // no sessions, no observations, nothing that would fill an analysis card.
+    try {
+      await seedDemoScope(s);
+    } catch {
+      // Seeding is a convenience, never a gate. If local storage is
+      // unavailable — as it is on web, where expo-secure-store has no
+      // implementation — the preview must still open, with no patient, rather
+      // than trapping the person on the sign-in screen.
+    }
     setPreviewMode(true);
     setRole('caregiver');
     await loadFrom(s);

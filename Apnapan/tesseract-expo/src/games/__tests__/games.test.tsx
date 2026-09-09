@@ -99,24 +99,40 @@ function assertNoPersonalData(events: GameEvent[], labels: string[]) {
 }
 
 describe('the registry states the catalogue honestly', () => {
-  it('registers six activities', () => {
-    expect(GAME_REGISTRY).toHaveLength(6);
+  it('registers ten activities', () => {
+    expect(GAME_REGISTRY).toHaveLength(10);
   });
 
-  it('is five of the nine required games plus one extra', () => {
+  it('is all nine required games plus one extra', () => {
     const required = GAME_REGISTRY.filter((g) => g.required);
     const extra = GAME_REGISTRY.filter((g) => !g.required);
-    expect(required).toHaveLength(5);
-    expect(extra).toHaveLength(1);
+    expect(required).toHaveLength(9);
+    // Picture Sorting is an extra. It has never counted towards the nine, and
+    // must not start counting because the nine are now complete.
+    expect(extra.map((g) => g.gameId)).toEqual(['picture_sorting']);
     expect(REQUIRED_GAME_IDS).toHaveLength(9);
   });
 
-  it('names the four required games that are still missing', () => {
-    // If someone stubs one of these out, this test tells them the count
-    // changed rather than letting the catalogue quietly claim completeness.
-    expect([...MISSING_REQUIRED_GAME_IDS].sort()).toEqual(
-      ['coloring', 'picture_recall', 'spot_difference', 'trace'].sort(),
-    );
+  it('has no required game left unregistered', () => {
+    expect([...MISSING_REQUIRED_GAME_IDS]).toEqual([]);
+  });
+
+  it('gives every required game its own component', () => {
+    // The way a catalogue fakes completeness is by pointing two entries at one
+    // component — Picture Recall rendering Picture Pairs, say. Distinct
+    // components do not prove distinct behaviour, but sharing one disproves it.
+    const components = GAME_REGISTRY.filter((g) => g.required).map((g) => g.component);
+    expect(new Set(components).size).toBe(components.length);
+  });
+
+  it('gives every activity real per-level settings, not a level number', () => {
+    for (const game of GAME_REGISTRY) {
+      const first = game.difficultyParamsForLevel(1);
+      const last = game.difficultyParamsForLevel(game.maxLevel);
+      expect(Object.keys(first).length).toBeGreaterThan(0);
+      // Levels must actually differ, or "difficulty" is a label on nothing.
+      expect(JSON.stringify(first)).not.toEqual(JSON.stringify(last));
+    }
   });
 
   it('attributes every activity to its owner', () => {

@@ -68,7 +68,7 @@ export const LANGUAGES: readonly LanguageOption[] = [
     code: 'mni',
     endonym: 'ꯃꯤꯇꯩꯂꯣꯟ',
     englishName: 'Meitei (Manipuri)',
-    coveragePercent: 7,
+    coveragePercent: 6,
     reviewStatus: 'draft',
     script: 'Meetei Mayek',
     region: 'Manipur',

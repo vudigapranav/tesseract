@@ -1,5 +1,15 @@
 # PS003 mobile code status
 
+> **2026-09-09.** The Expo client now registers **all nine required games**
+> plus Picture Sorting as an extra. Trace, Coloring, Spot Difference and
+> Picture Recall were ported from Aryan's staged Flutter package on this date;
+> Reveal Match was ported on 2026-09-08. Registration means playable and
+> covered by model and host-integration tests — it does not mean exercised on a
+> phone. Nothing in this file has been run on a physical device or emulator.
+> Row-by-row state, including what was deliberately left undone, is in
+> `docs/handoffs/REQUIREMENT_MATRIX_2026-09-09.md`.
+
+
 Updated 2026-09-07 by Claude. This is the entry point for anything under `Apnapan/`.
 Backend agents: this file tells you what the Flutter side actually is right now, so
 you do not have to read the Dart. Nothing under `Apnapan/` reaches into `services/`.
@@ -905,3 +915,13 @@ Demo instructions: `docs/handoffs/DEMO_RUNBOOK.md`.
 User authorized committing and pushing current accumulated app/backend work to GitHub. Fresh Expo typecheck and 170 tests (11 suites) pass. Corrected TEAMMATE_TESTING_GUIDE.md: API factory startup, HTTPS build-time URL, no nonexistent server settings, isolated preview versus real identity, and secret-free setup. Gemini live calls/backend DB tests not repeated in this publication task. No physical-device verification. Six activities registered: five required plus Picture Sorting extra; four required games remain absent. Secrets, local environments and staged downloads remain ignored. This is a prototype testing handoff, not full production acceptance.
 
 Publication checks continued: fresh iOS and Android Expo exports both passed; staged secret/path scan and git diff whitespace check passed.
+
+
+## 2026-09-09 Android Expo Go notification startup fix
+User supplied Android runtime error from remote push registration. Replaced expo-notifications barrel import in src/data/reminders.ts with isolated local-only exports in src/data/localNotifications.ts. Local permission/scheduling/cancellation APIs preserved; remote push modules no longer imported through reminders. SDK internal subpaths require review on upgrades. Added regression test that rejects remote push module evaluation. TypeScript and Android export passed; existing 230 tests passed, targeted import regression verified separately. Physical Android startup and reminder delivery still require teammate retest. Other in-progress polish/game changes preserved; no commit/push for this fix.
+
+
+## 2026-09-09 — Android patient saving and combined publication
+Fixed Android encrypted-record reload: Expo Crypto Android SealedData.fromCombined expects bytes, whereas the JS wrapper forwards Base64 strings unchanged. Decode saved Base64 to Uint8Array before importing. Ciphertext format/key preserved; no data deletion or plaintext fallback. Strict Android-shaped test failed before fix and passed after; added save/reopen/select/edit patient persistence regression. TypeScript passed, 231 existing/current tests passed before adding the extra persistence case, then all five cipher tests passed. Localization consistency passed. Notification startup fix included. Claude's pending nine-game/patient-UI/content/backend work retained for user-authorized combined push. No physical Android verification; no promise that all device faults are resolved.
+
+Final publication checks: Android and iOS exports passed; 159 backend tests passed on dedicated synthetic tesseract_test database (three dependency deprecation warnings). Staged secret/path scan and diff whitespace checks passed.

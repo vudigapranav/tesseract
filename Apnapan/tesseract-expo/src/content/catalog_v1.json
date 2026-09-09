@@ -1,0 +1,1444 @@
+{
+ "schemaVersion": 1,
+ "id": "synthetic-catalog001",
+ "version": 1,
+ "images": [
+  {
+   "id": "img001",
+   "version": 1,
+   "label": "Book",
+   "primitives": [
+    {
+     "type": "rect",
+     "rect": [
+      0,
+      0,
+      100,
+      100
+     ],
+     "color": "FFF5DF"
+    },
+    {
+     "type": "rect",
+     "rect": [
+      17,
+      24,
+      66,
+      54
+     ],
+     "color": "386CAC"
+    },
+    {
+     "type": "rect",
+     "rect": [
+      22,
+      29,
+      56,
+      44
+     ],
+     "color": "6091CC"
+    },
+    {
+     "type": "rect",
+     "rect": [
+      23,
+      68,
+      55,
+      5
+     ],
+     "color": "FFFAEA"
+    },
+    {
+     "type": "rect",
+     "rect": [
+      22,
+      29,
+      5,
+      38
+     ],
+     "color": "386CAC"
+    }
+   ]
+  },
+  {
+   "id": "img002",
+   "version": 1,
+   "label": "Cup",
+   "primitives": [
+    {
+     "type": "rect",
+     "rect": [
+      0,
+      0,
+      100,
+      100
+     ],
+     "color": "FFF5DF"
+    },
+    {
+     "type": "ellipse",
+     "rect": [
+      61,
+      35,
+      28,
+      34
+     ],
+     "color": "A8573C"
+    },
+    {
+     "type": "ellipse",
+     "rect": [
+      65,
+      40,
+      18,
+      23
+     ],
+     "color": "FFF5DF"
+    },
+    {
+     "type": "rect",
+     "rect": [
+      20,
+      29,
+      47,
+      47
+     ],
+     "color": "C87950"
+    },
+    {
+     "type": "ellipse",
+     "rect": [
+      20,
+      23,
+      47,
+      14
+     ],
+     "color": "D49A75"
+    },
+    {
+     "type": "ellipse",
+     "rect": [
+      26,
+      27,
+      35,
+      6
+     ],
+     "color": "96563C"
+    }
+   ]
+  },
+  {
+   "id": "img003",
+   "version": 1,
+   "label": "Flower",
+   "primitives": [
+    {
+     "type": "rect",
+     "rect": [
+      0,
+      0,
+      100,
+      100
+     ],
+     "color": "FFF5DF"
+    },
+    {
+     "type": "rect",
+     "rect": [
+      48,
+      36,
+      4,
+      48
+     ],
+     "color": "448B55"
+    },
+    {
+     "type": "ellipse",
+     "rect": [
+      50,
+      61,
+      20,
+      9
+     ],
+     "color": "448B55"
+    },
+    {
+     "type": "ellipse",
+     "rect": [
+      38,
+      24,
+      15,
+      15
+     ],
+     "color": "DE7797"
+    },
+    {
+     "type": "ellipse",
+     "rect": [
+      51,
+      24,
+      15,
+      15
+     ],
+     "color": "DE7797"
+    },
+    {
+     "type": "ellipse",
+     "rect": [
+      34,
+      36,
+      15,
+      15
+     ],
+     "color": "DE7797"
+    },
+    {
+     "type": "ellipse",
+     "rect": [
+      55,
+      36,
+      15,
+      15
+     ],
+     "color": "DE7797"
+    },
+    {
+     "type": "ellipse",
+     "rect": [
+      43,
+      44,
+      15,
+      15
+     ],
+     "color": "DE7797"
+    },
+    {
+     "type": "ellipse",
+     "rect": [
+      43,
+      33,
+      15,
+      15
+     ],
+     "color": "FFD25F"
+    }
+   ]
+  },
+  {
+   "id": "img004",
+   "version": 1,
+   "label": "Ball",
+   "primitives": [
+    {
+     "type": "rect",
+     "rect": [
+      0,
+      0,
+      100,
+      100
+     ],
+     "color": "FFF5DF"
+    },
+    {
+     "type": "ellipse",
+     "rect": [
+      20,
+      20,
+      60,
+      60
+     ],
+     "color": "D87853"
+    },
+    {
+     "type": "polygon",
+     "points": [
+      [
+       26,
+       50
+      ],
+      [
+       50,
+       25
+      ],
+      [
+       75,
+       50
+      ],
+      [
+       50,
+       75
+      ]
+     ],
+     "color": "FFD878"
+    }
+   ]
+  },
+  {
+   "id": "img005",
+   "version": 1,
+   "label": "House and sun",
+   "primitives": [
+    {
+     "type": "rect",
+     "rect": [
+      0,
+      0,
+      100,
+      100
+     ],
+     "color": "D9EEF7"
+    },
+    {
+     "type": "rect",
+     "rect": [
+      0,
+      78,
+      100,
+      22
+     ],
+     "color": "9BC78E"
+    },
+    {
+     "type": "rect",
+     "rect": [
+      30,
+      47,
+      40,
+      39
+     ],
+     "color": "F0C398"
+    },
+    {
+     "type": "polygon",
+     "points": [
+      [
+       24,
+       48
+      ],
+      [
+       50,
+       24
+      ],
+      [
+       76,
+       48
+      ]
+     ],
+     "color": "B7654F"
+    },
+    {
+     "type": "rect",
+     "rect": [
+      46,
+      63,
+      10,
+      23
+     ],
+     "color": "755447"
+    },
+    {
+     "type": "rect",
+     "rect": [
+      34,
+      55,
+      9,
+      9
+     ],
+     "color": "CEE7F2"
+    },
+    {
+     "type": "rect",
+     "rect": [
+      58,
+      55,
+      8,
+      9
+     ],
+     "color": "CEE7F2"
+    },
+    {
+     "type": "ellipse",
+     "rect": [
+      75,
+      10,
+      16,
+      16
+     ],
+     "color": "FFD15C"
+    }
+   ]
+  },
+  {
+   "id": "img006",
+   "version": 1,
+   "label": "House",
+   "primitives": [
+    {
+     "type": "rect",
+     "rect": [
+      0,
+      0,
+      100,
+      100
+     ],
+     "color": "D9EEF7"
+    },
+    {
+     "type": "rect",
+     "rect": [
+      0,
+      78,
+      100,
+      22
+     ],
+     "color": "9BC78E"
+    },
+    {
+     "type": "rect",
+     "rect": [
+      30,
+      47,
+      40,
+      39
+     ],
+     "color": "F0C398"
+    },
+    {
+     "type": "polygon",
+     "points": [
+      [
+       24,
+       48
+      ],
+      [
+       50,
+       24
+      ],
+      [
+       76,
+       48
+      ]
+     ],
+     "color": "B7654F"
+    },
+    {
+     "type": "rect",
+     "rect": [
+      46,
+      63,
+      10,
+      23
+     ],
+     "color": "755447"
+    },
+    {
+     "type": "rect",
+     "rect": [
+      34,
+      55,
+      9,
+      9
+     ],
+     "color": "CEE7F2"
+    },
+    {
+     "type": "rect",
+     "rect": [
+      58,
+      55,
+      8,
+      9
+     ],
+     "color": "CEE7F2"
+    }
+   ]
+  },
+  {
+   "id": "img007",
+   "version": 1,
+   "label": "Flower garden",
+   "primitives": [
+    {
+     "type": "rect",
+     "rect": [
+      0,
+      0,
+      100,
+      100
+     ],
+     "color": "D9EEF7"
+    },
+    {
+     "type": "rect",
+     "rect": [
+      0,
+      78,
+      100,
+      22
+     ],
+     "color": "9BC78E"
+    },
+    {
+     "type": "rect",
+     "rect": [
+      48,
+      36,
+      4,
+      48
+     ],
+     "color": "448B55"
+    },
+    {
+     "type": "ellipse",
+     "rect": [
+      50,
+      61,
+      20,
+      9
+     ],
+     "color": "448B55"
+    },
+    {
+     "type": "ellipse",
+     "rect": [
+      38,
+      24,
+      15,
+      15
+     ],
+     "color": "DE7797"
+    },
+    {
+     "type": "ellipse",
+     "rect": [
+      51,
+      24,
+      15,
+      15
+     ],
+     "color": "DE7797"
+    },
+    {
+     "type": "ellipse",
+     "rect": [
+      34,
+      36,
+      15,
+      15
+     ],
+     "color": "DE7797"
+    },
+    {
+     "type": "ellipse",
+     "rect": [
+      55,
+      36,
+      15,
+      15
+     ],
+     "color": "DE7797"
+    },
+    {
+     "type": "ellipse",
+     "rect": [
+      43,
+      44,
+      15,
+      15
+     ],
+     "color": "DE7797"
+    },
+    {
+     "type": "ellipse",
+     "rect": [
+      43,
+      33,
+      15,
+      15
+     ],
+     "color": "FFD25F"
+    },
+    {
+     "type": "ellipse",
+     "rect": [
+      75,
+      10,
+      16,
+      16
+     ],
+     "color": "FFD15C"
+    },
+    {
+     "type": "ellipse",
+     "rect": [
+      9,
+      67,
+      15,
+      15
+     ],
+     "color": "D87853"
+    },
+    {
+     "type": "polygon",
+     "points": [
+      [
+       10.5,
+       74.5
+      ],
+      [
+       16.5,
+       68.25
+      ],
+      [
+       22.75,
+       74.5
+      ],
+      [
+       16.5,
+       80.75
+      ]
+     ],
+     "color": "FFD878"
+    }
+   ]
+  },
+  {
+   "id": "img008",
+   "version": 1,
+   "label": "Flower garden without sun and ball",
+   "primitives": [
+    {
+     "type": "rect",
+     "rect": [
+      0,
+      0,
+      100,
+      100
+     ],
+     "color": "D9EEF7"
+    },
+    {
+     "type": "rect",
+     "rect": [
+      0,
+      78,
+      100,
+      22
+     ],
+     "color": "9BC78E"
+    },
+    {
+     "type": "rect",
+     "rect": [
+      48,
+      36,
+      4,
+      48
+     ],
+     "color": "448B55"
+    },
+    {
+     "type": "ellipse",
+     "rect": [
+      50,
+      61,
+      20,
+      9
+     ],
+     "color": "448B55"
+    },
+    {
+     "type": "ellipse",
+     "rect": [
+      38,
+      24,
+      15,
+      15
+     ],
+     "color": "DE7797"
+    },
+    {
+     "type": "ellipse",
+     "rect": [
+      51,
+      24,
+      15,
+      15
+     ],
+     "color": "DE7797"
+    },
+    {
+     "type": "ellipse",
+     "rect": [
+      34,
+      36,
+      15,
+      15
+     ],
+     "color": "DE7797"
+    },
+    {
+     "type": "ellipse",
+     "rect": [
+      55,
+      36,
+      15,
+      15
+     ],
+     "color": "DE7797"
+    },
+    {
+     "type": "ellipse",
+     "rect": [
+      43,
+      44,
+      15,
+      15
+     ],
+     "color": "DE7797"
+    },
+    {
+     "type": "ellipse",
+     "rect": [
+      43,
+      33,
+      15,
+      15
+     ],
+     "color": "FFD25F"
+    }
+   ]
+  },
+  {
+   "id": "img009",
+   "version": 1,
+   "label": "Book and cup",
+   "primitives": [
+    {
+     "type": "rect",
+     "rect": [
+      0,
+      0,
+      100,
+      100
+     ],
+     "color": "F4EEDC"
+    },
+    {
+     "type": "rect",
+     "rect": [
+      0,
+      65,
+      100,
+      35
+     ],
+     "color": "D5B997"
+    },
+    {
+     "type": "rect",
+     "rect": [
+      10.350000000000001,
+      33.2,
+      36.300000000000004,
+      29.700000000000003
+     ],
+     "color": "386CAC"
+    },
+    {
+     "type": "rect",
+     "rect": [
+      13.100000000000001,
+      35.95,
+      30.800000000000004,
+      24.200000000000003
+     ],
+     "color": "6091CC"
+    },
+    {
+     "type": "rect",
+     "rect": [
+      13.65,
+      57.400000000000006,
+      30.250000000000004,
+      2.75
+     ],
+     "color": "FFFAEA"
+    },
+    {
+     "type": "rect",
+     "rect": [
+      13.100000000000001,
+      35.95,
+      2.75,
+      20.900000000000002
+     ],
+     "color": "386CAC"
+    },
+    {
+     "type": "ellipse",
+     "rect": [
+      81.5,
+      41.5,
+      14,
+      17
+     ],
+     "color": "A8573C"
+    },
+    {
+     "type": "ellipse",
+     "rect": [
+      83.5,
+      44,
+      9,
+      11.5
+     ],
+     "color": "FFF5DF"
+    },
+    {
+     "type": "rect",
+     "rect": [
+      61,
+      38.5,
+      23.5,
+      23.5
+     ],
+     "color": "C87950"
+    },
+    {
+     "type": "ellipse",
+     "rect": [
+      61,
+      35.5,
+      23.5,
+      7
+     ],
+     "color": "D49A75"
+    },
+    {
+     "type": "ellipse",
+     "rect": [
+      64,
+      37.5,
+      17.5,
+      3
+     ],
+     "color": "96563C"
+    }
+   ]
+  },
+  {
+   "id": "img010",
+   "version": 1,
+   "label": "Flower and ball",
+   "primitives": [
+    {
+     "type": "rect",
+     "rect": [
+      0,
+      0,
+      100,
+      100
+     ],
+     "color": "F4EEDC"
+    },
+    {
+     "type": "rect",
+     "rect": [
+      0,
+      75,
+      100,
+      25
+     ],
+     "color": "D5B997"
+    },
+    {
+     "type": "rect",
+     "rect": [
+      40.8,
+      34.599999999999994,
+      3.4,
+      40.8
+     ],
+     "color": "448B55"
+    },
+    {
+     "type": "ellipse",
+     "rect": [
+      42.5,
+      55.85,
+      17,
+      7.6499999999999995
+     ],
+     "color": "448B55"
+    },
+    {
+     "type": "ellipse",
+     "rect": [
+      32.3,
+      24.4,
+      12.75,
+      12.75
+     ],
+     "color": "DE7797"
+    },
+    {
+     "type": "ellipse",
+     "rect": [
+      43.35,
+      24.4,
+      12.75,
+      12.75
+     ],
+     "color": "DE7797"
+    },
+    {
+     "type": "ellipse",
+     "rect": [
+      28.9,
+      34.599999999999994,
+      12.75,
+      12.75
+     ],
+     "color": "DE7797"
+    },
+    {
+     "type": "ellipse",
+     "rect": [
+      46.75,
+      34.599999999999994,
+      12.75,
+      12.75
+     ],
+     "color": "DE7797"
+    },
+    {
+     "type": "ellipse",
+     "rect": [
+      36.55,
+      41.4,
+      12.75,
+      12.75
+     ],
+     "color": "DE7797"
+    },
+    {
+     "type": "ellipse",
+     "rect": [
+      36.55,
+      32.05,
+      12.75,
+      12.75
+     ],
+     "color": "FFD25F"
+    },
+    {
+     "type": "ellipse",
+     "rect": [
+      63.6,
+      46.6,
+      28.799999999999997,
+      28.799999999999997
+     ],
+     "color": "D87853"
+    },
+    {
+     "type": "polygon",
+     "points": [
+      [
+       66.48,
+       61
+      ],
+      [
+       78,
+       49
+      ],
+      [
+       90,
+       61
+      ],
+      [
+       78,
+       73
+      ]
+     ],
+     "color": "FFD878"
+    }
+   ]
+  }
+ ],
+ "entries": [
+  {
+   "id": "demo001",
+   "version": 1,
+   "title": "Reveal Match",
+   "configId": "cfg001",
+   "configVersion": 1,
+   "config": {
+    "gameId": "G1",
+    "version": 1,
+    "difficulty": "extended",
+    "values": {
+     "pairCount": 4,
+     "guidedPreview": false,
+     "resolutionMilliseconds": 1200
+    },
+    "metadata": {}
+   },
+   "content": {
+    "id": "pack001",
+    "version": 1,
+    "assets": [
+     "img001",
+     "img002",
+     "img003",
+     "img004"
+    ],
+    "metadata": {}
+   }
+  },
+  {
+   "id": "demo002",
+   "version": 1,
+   "title": "Swipe-to-Reveal — House",
+   "configId": "cfg002",
+   "configVersion": 1,
+   "config": {
+    "gameId": "G5",
+    "version": 1,
+    "difficulty": "supported",
+    "values": {
+     "maskSize": 64,
+     "brushRadius": 0.09,
+     "eligibleCells": "ALL"
+    },
+    "metadata": {}
+   },
+   "content": {
+    "id": "pack002",
+    "version": 1,
+    "assets": [
+     "img005"
+    ],
+    "metadata": {}
+   }
+  },
+  {
+   "id": "demo003",
+   "version": 1,
+   "title": "Swipe-to-Reveal — Garden",
+   "configId": "cfg003",
+   "configVersion": 1,
+   "config": {
+    "gameId": "G5",
+    "version": 1,
+    "difficulty": "supported",
+    "values": {
+     "maskSize": 64,
+     "brushRadius": 0.09,
+     "eligibleCells": "ALL"
+    },
+    "metadata": {}
+   },
+   "content": {
+    "id": "pack003",
+    "version": 1,
+    "assets": [
+     "img007"
+    ],
+    "metadata": {}
+   }
+  },
+  {
+   "id": "demo004",
+   "version": 1,
+   "title": "Spot Difference — House",
+   "configId": "cfg004",
+   "configVersion": 1,
+   "config": {
+    "gameId": "G6",
+    "version": 1,
+    "difficulty": "supported",
+    "values": {
+     "differenceCount": 1
+    },
+    "metadata": {}
+   },
+   "content": {
+    "id": "pack004",
+    "version": 1,
+    "assets": [
+     "img005",
+     "img006"
+    ],
+    "metadata": {
+     "aspectRatio": 1,
+     "regions": [
+      {
+       "id": "region001",
+       "left": 0.74,
+       "top": 0.09,
+       "width": 0.18,
+       "height": 0.18,
+       "margin": 0.04
+      }
+     ]
+    }
+   }
+  },
+  {
+   "id": "demo005",
+   "version": 1,
+   "title": "Spot Difference — Garden",
+   "configId": "cfg005",
+   "configVersion": 1,
+   "config": {
+    "gameId": "G6",
+    "version": 1,
+    "difficulty": "standard",
+    "values": {
+     "differenceCount": 2
+    },
+    "metadata": {}
+   },
+   "content": {
+    "id": "pack005",
+    "version": 1,
+    "assets": [
+     "img007",
+     "img008"
+    ],
+    "metadata": {
+     "aspectRatio": 1,
+     "regions": [
+      {
+       "id": "region002",
+       "left": 0.74,
+       "top": 0.09,
+       "width": 0.18,
+       "height": 0.18,
+       "margin": 0.04
+      },
+      {
+       "id": "region003",
+       "left": 0.08,
+       "top": 0.66,
+       "width": 0.17,
+       "height": 0.17,
+       "margin": 0.04
+      }
+     ]
+    }
+   }
+  },
+  {
+   "id": "demo006",
+   "version": 1,
+   "title": "Picture Recall — Book and cup",
+   "configId": "cfg006",
+   "configVersion": 1,
+   "config": {
+    "gameId": "G9",
+    "version": 1,
+    "difficulty": "standard",
+    "values": {
+     "questionCount": 2,
+     "choiceCount": 2
+    },
+    "metadata": {}
+   },
+   "content": {
+    "id": "pack006",
+    "version": 1,
+    "assets": [
+     "img009"
+    ],
+    "metadata": {
+     "imageVersion": 1,
+     "questions": [
+      {
+       "id": "question001",
+       "version": 1,
+       "prompt": "Which object could you read?",
+       "correctChoiceId": "option-img001",
+       "hint": "It had pages.",
+       "choices": [
+        {
+         "id": "option-img001",
+         "label": "Book",
+         "imageId": "img001",
+         "imageVersion": 1
+        },
+        {
+         "id": "option-img004",
+         "label": "Ball",
+         "imageId": "img004",
+         "imageVersion": 1
+        }
+       ]
+      },
+      {
+       "id": "question002",
+       "version": 1,
+       "prompt": "Which object was beside the book?",
+       "correctChoiceId": "option-img002",
+       "hint": null,
+       "choices": [
+        {
+         "id": "option-img002",
+         "label": "Cup",
+         "imageId": "img002",
+         "imageVersion": 1
+        },
+        {
+         "id": "option-img003",
+         "label": "Flower",
+         "imageId": "img003",
+         "imageVersion": 1
+        }
+       ]
+      }
+     ]
+    }
+   }
+  },
+  {
+   "id": "demo007",
+   "version": 1,
+   "title": "Picture Recall — Flower and ball",
+   "configId": "cfg007",
+   "configVersion": 1,
+   "config": {
+    "gameId": "G9",
+    "version": 1,
+    "difficulty": "standard",
+    "values": {
+     "questionCount": 2,
+     "choiceCount": 2
+    },
+    "metadata": {}
+   },
+   "content": {
+    "id": "pack007",
+    "version": 1,
+    "assets": [
+     "img010"
+    ],
+    "metadata": {
+     "imageVersion": 1,
+     "questions": [
+      {
+       "id": "question003",
+       "version": 1,
+       "prompt": "Which plant was in the picture?",
+       "correctChoiceId": "option-img003",
+       "hint": "It had petals.",
+       "choices": [
+        {
+         "id": "option-img003",
+         "label": "Flower",
+         "imageId": "img003",
+         "imageVersion": 1
+        },
+        {
+         "id": "option-img001",
+         "label": "Book",
+         "imageId": "img001",
+         "imageVersion": 1
+        }
+       ]
+      },
+      {
+       "id": "question004",
+       "version": 1,
+       "prompt": "Which round object was beside it?",
+       "correctChoiceId": "option-img004",
+       "hint": null,
+       "choices": [
+        {
+         "id": "option-img004",
+         "label": "Ball",
+         "imageId": "img004",
+         "imageVersion": 1
+        },
+        {
+         "id": "option-img002",
+         "label": "Cup",
+         "imageId": "img002",
+         "imageVersion": 1
+        }
+       ]
+      }
+     ]
+    }
+   }
+  },
+  {
+   "id": "demo008",
+   "version": 1,
+   "title": "Trace — Gentle curve",
+   "configId": "cfg008",
+   "configVersion": 1,
+   "config": {
+    "gameId": "G4",
+    "version": 1,
+    "difficulty": "supported",
+    "values": {
+     "sampleSpacing": 0.01,
+     "maxSamples": 4096,
+     "maxStrokes": 128,
+     "samplingVersion": 1
+    },
+    "metadata": {}
+   },
+   "content": {
+    "id": "pack008",
+    "version": 1,
+    "assets": [],
+    "metadata": {
+     "referencePath": [
+      [
+       0.15,
+       0.7
+      ],
+      [
+       0.25,
+       0.5
+      ],
+      [
+       0.4,
+       0.33
+      ],
+      [
+       0.5,
+       0.28
+      ],
+      [
+       0.6,
+       0.33
+      ],
+      [
+       0.75,
+       0.5
+      ],
+      [
+       0.85,
+       0.7
+      ]
+     ],
+     "corridorWidth": 0.12,
+     "requiredBins": 64,
+     "optionalDirection": true,
+     "kind": "curve"
+    }
+   }
+  },
+  {
+   "id": "demo009",
+   "version": 1,
+   "title": "Trace — Square",
+   "configId": "cfg009",
+   "configVersion": 1,
+   "config": {
+    "gameId": "G4",
+    "version": 1,
+    "difficulty": "supported",
+    "values": {
+     "sampleSpacing": 0.01,
+     "maxSamples": 4096,
+     "maxStrokes": 128,
+     "samplingVersion": 1
+    },
+    "metadata": {}
+   },
+   "content": {
+    "id": "pack009",
+    "version": 1,
+    "assets": [],
+    "metadata": {
+     "referencePath": [
+      [
+       0.25,
+       0.25
+      ],
+      [
+       0.75,
+       0.25
+      ],
+      [
+       0.75,
+       0.75
+      ],
+      [
+       0.25,
+       0.75
+      ],
+      [
+       0.25,
+       0.25
+      ]
+     ],
+     "corridorWidth": 0.12,
+     "requiredBins": 64,
+     "optionalDirection": true,
+     "kind": "shape"
+    }
+   }
+  },
+  {
+   "id": "demo010",
+   "version": 1,
+   "title": "Trace — House",
+   "configId": "cfg010",
+   "configVersion": 1,
+   "config": {
+    "gameId": "G4",
+    "version": 1,
+    "difficulty": "supported",
+    "values": {
+     "sampleSpacing": 0.01,
+     "maxSamples": 4096,
+     "maxStrokes": 128,
+     "samplingVersion": 1
+    },
+    "metadata": {}
+   },
+   "content": {
+    "id": "pack010",
+    "version": 1,
+    "assets": [],
+    "metadata": {
+     "referencePath": [
+      [
+       0.2,
+       0.45
+      ],
+      [
+       0.5,
+       0.2
+      ],
+      [
+       0.8,
+       0.45
+      ],
+      [
+       0.8,
+       0.8
+      ],
+      [
+       0.2,
+       0.8
+      ],
+      [
+       0.2,
+       0.45
+      ]
+     ],
+     "corridorWidth": 0.12,
+     "requiredBins": 64,
+     "optionalDirection": true,
+     "kind": "object"
+    }
+   }
+  }
+ ]
+}

@@ -61,21 +61,23 @@ Tunnel is slower to start and slower to load; only use it if LAN fails.
 
 ## What can truthfully be claimed
 
-- Six activities are registered and playable: Route Quest, Marble Maze, Word
-  Search, Daily Routine Recall, Picture Pairs (Aryan's Reveal Match, ported),
-  and Picture Sorting as an extra.
-- **Five of the nine required games ship.** Trace, Coloring, Spot Difference
-  and Picture Recall are **not implemented** — Aryan's Flutter source is staged
-  for porting but those four are not ported. Do not imply otherwise; the
-  registry states this in its header and `MISSING_REQUIRED_GAME_IDS` counts it
-  in code.
+- **All nine required games are registered and playable**, plus Picture Sorting
+  as an extra — ten activities. `MISSING_REQUIRED_GAME_IDS` is empty in code
+  and a test asserts it.
+  Aryan's five: Picture Pairs, Follow the Line, Bring Back the Colours,
+  Find the Change, Picture Questions.
+  Ruthika's four: Route Quest, Marble Maze, Word Search, Daily Routine.
+- The activity pictures are **original vector artwork**, bundled and offline.
+  Nothing is downloaded, nothing can 404, and no photograph of a real person
+  appears anywhere.
+- The patient journey is picture-led: a picture on the home screen, picture
+  cards in the chooser, an illustration and one short sentence before play.
+- Seven languages ship. Only English is reviewed; the rest are drafts, and the
+  About screen states each one's measured coverage.
 - Gemini-assisted analysis is wired through the backend and was verified live
-  against synthetic data. The phone never holds the key and never calls Google.
-  Every failure falls back to the app's own wording, and the screen names which
-  one you are reading.
-- Seven languages ship. Only English is reviewed; the rest are drafts.
-- Text scaling is capped per tier so large system font sizes do not burst
-  layouts, while still scaling for low vision.
+  against synthetic data on 2026-09-08. The phone never holds the key.
+- The demonstration profile is Kamala (72) and her daughter Bidisha, seeded
+  only into the labelled preview scope, with **no invented session history**.
 
 ## What must NOT be claimed
 

@@ -1,3 +1,64 @@
+# Brain — current working state
+
+## 2026-09-09 — all nine games registered; patient experience rebuilt
+
+Branch `codex/patient-caregiver-integration`. **Not committed, not pushed.**
+
+**Catalogue is complete.** Ten activities registered: the nine required games
+plus Picture Sorting as an extra. `MISSING_REQUIRED_GAME_IDS` is empty and a
+test asserts that rather than a comment claiming it. The four that were missing
+were ported from Aryan's staged Flutter package this pass:
+
+- G4 Trace — `src/games/trace/` (arc-length bins, corridor tolerance)
+- G5 Coloring — `src/games/coloring/` (swipe-to-reveal through an SVG mask)
+- G6 Spot Difference — `src/games/spotDifference/` (two-pass hit test preserved)
+- G9 Picture Recall — `src/games/pictureRecall/` (viewing → question → feedback)
+
+**Content.** `Apnapan/tesseract-expo/src/content/catalog_v1.json` is Aryan's
+original vector artwork (ten pictures as coloured primitives). It is drawn, not
+photographed: no licence, no remote URL, no image of a real person, and it
+scales from a 60pt card to a 300pt scene. `PictureView` renders it;
+`ActivityPreview` draws a per-activity illustration for the chooser.
+
+**Patient experience.** Home leads with a picture and one action. The chooser is
+a two-column grid of picture cards, four at a time. The instruction screen shows
+a replayable illustration above one short sentence — every `howToPlay*` string
+was shortened to a single sentence in en/hi/as/bn.
+
+**Typography.** Reduced centrally at the user's direction: headline 32→27,
+title 22→20, body 18→16, plus a new `patientInstruction` at 18. Touch targets,
+contrast policy and OS scaling caps were **not** touched; the test that used to
+pin the old sizes now pins floors instead.
+
+**Demo data.** `src/data/demoSeed.ts` seeds Kamala (72) and her daughter Bidisha
+into the preview scope only, idempotently. It seeds content — places, routine,
+words, pictures — and **no sessions, observations or analysis**, so an empty
+analysis screen stays empty.
+
+**Backend.** Calculators added for all four new games plus the earlier
+`reveal_match`; all nine games registered in `app/games.py`.
+
+**Two defects found by looking at the screen, not by tests:**
+1. Picture Recall's second answer choice was clipped out of view — a `Settle`
+   animation wrapper is a flex container, so `flex: 1` applied inside it.
+2. `expo-secure-store` has no web implementation, so the web build could not
+   write anything at all. Now behind `src/data/secureKeyStore.ts`, which is the
+   Keychain on device and `localStorage` on web, with `isSecure` saying which.
+
+**Checks:** Expo 230 tests / 12 suites pass, `tsc --noEmit` clean; backend 159
+tests pass, `ruff` clean; l10n regenerates and coverage was re-measured
+(mni 8→6%, kha/lus 8→7%). Screens rendered and inspected in a browser at
+375×812. **No physical device, no emulator, no Android bundle check.**
+
+**Not done, and not marked done:** additions A1–A7 (none started); G2/G3/G7/G8
+visual improvements; session-history filters; doctor trend view. See
+`docs/handoffs/REQUIREMENT_MATRIX_2026-09-09.md` for the full row-by-row state.
+
+**Next:** pick up either the four un-improved games or A1/A5, and get the app
+onto a real phone — device behaviour is the largest untested area.
+
+---
+
 # Tesseract Shared Brain
 
 Last updated: 2026-09-07 (Codex, confirmed product-quality requirement)
@@ -1657,3 +1718,13 @@ can render in RN SVG.
 User authorized committing and pushing current accumulated app/backend work to GitHub. Fresh Expo typecheck and 170 tests (11 suites) pass. Corrected TEAMMATE_TESTING_GUIDE.md: API factory startup, HTTPS build-time URL, no nonexistent server settings, isolated preview versus real identity, and secret-free setup. Gemini live calls/backend DB tests not repeated in this publication task. No physical-device verification. Six activities registered: five required plus Picture Sorting extra; four required games remain absent. Secrets, local environments and staged downloads remain ignored. This is a prototype testing handoff, not full production acceptance.
 
 Publication checks continued: fresh iOS and Android Expo exports both passed; staged secret/path scan and git diff whitespace check passed.
+
+
+## 2026-09-09 Android Expo Go notification startup fix
+User supplied Android runtime error from remote push registration. Replaced expo-notifications barrel import in src/data/reminders.ts with isolated local-only exports in src/data/localNotifications.ts. Local permission/scheduling/cancellation APIs preserved; remote push modules no longer imported through reminders. SDK internal subpaths require review on upgrades. Added regression test that rejects remote push module evaluation. TypeScript and Android export passed; existing 230 tests passed, targeted import regression verified separately. Physical Android startup and reminder delivery still require teammate retest. Other in-progress polish/game changes preserved; no commit/push for this fix.
+
+
+## 2026-09-09 — Android patient saving and combined publication
+Fixed Android encrypted-record reload: Expo Crypto Android SealedData.fromCombined expects bytes, whereas the JS wrapper forwards Base64 strings unchanged. Decode saved Base64 to Uint8Array before importing. Ciphertext format/key preserved; no data deletion or plaintext fallback. Strict Android-shaped test failed before fix and passed after; added save/reopen/select/edit patient persistence regression. TypeScript passed, 231 existing/current tests passed before adding the extra persistence case, then all five cipher tests passed. Localization consistency passed. Notification startup fix included. Claude's pending nine-game/patient-UI/content/backend work retained for user-authorized combined push. No physical Android verification; no promise that all device faults are resolved.
+
+Final publication checks: Android and iOS exports passed; 159 backend tests passed on dedicated synthetic tesseract_test database (three dependency deprecation warnings). Staged secret/path scan and diff whitespace checks passed.

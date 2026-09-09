@@ -23,6 +23,8 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { colors, fontScaleCaps, spacing } from '../../design/tokens';
+import { PictureView } from '../../content/PictureView';
+import { pictureById } from '../../content/pictures';
 import { GameScaffold } from '../GameScaffold';
 import { EmptyBoard, GameLayout, Settle, tileVisual } from '../presentation';
 import {
@@ -203,7 +205,10 @@ export function RevealMatchGame({ config, onEvent, onFinish }: TesseractGameProp
                 matched ? 'done' : hinted ? 'hinted' : 'idle',
               );
               const item = itemsByAsset.get(card.asset);
-              const label = item?.label ?? '';
+              const picture = pictureById(card.asset);
+              // The catalogue's own label when the content is a picture, so a
+              // screen reader announces "Cup" rather than an opaque id.
+              const label = item?.label ?? picture?.label ?? '';
 
               return (
                 <Settle key={card.id} trigger={`${faceUp}-${matched}`}>
@@ -232,13 +237,25 @@ export function RevealMatchGame({ config, onEvent, onFinish }: TesseractGameProp
                     ]}
                   >
                     {faceUp ? (
-                      <Text
-                        numberOfLines={2}
-                        maxFontSizeMultiplier={fontScaleCaps.buttonLabel}
-                        style={[styles.face, { color: visual.fg }]}
-                      >
-                        {label}
-                      </Text>
+                      // A picture when the content has one, which is what the
+                      // bundled catalogue provides. A caregiver's own Know Me
+                      // entry is words, so that still falls back to its label
+                      // rather than showing a blank card.
+                      picture ? (
+                        <PictureView
+                          pictureId={card.asset}
+                          size={cell - 16}
+                          decorative
+                        />
+                      ) : (
+                        <Text
+                          numberOfLines={2}
+                          maxFontSizeMultiplier={fontScaleCaps.buttonLabel}
+                          style={[styles.face, { color: visual.fg }]}
+                        >
+                          {label}
+                        </Text>
+                      )
                     ) : (
                       // A calm back, not a question mark: nothing here should
                       // read as a quiz the patient might fail.

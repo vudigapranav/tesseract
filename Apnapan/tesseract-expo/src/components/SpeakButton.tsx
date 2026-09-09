@@ -68,11 +68,16 @@ export function SpeakButton({
       ? translate(languageCode, 'readAloudAgain')
       : translate(languageCode, 'speakThis');
 
+  // Centred and only as wide as its words. It used to be a full-width pill,
+  // which made it compete with the screen's actual action — on the
+  // instructions screen there were four identical full-width pills stacked up
+  // and no way to tell which one mattered.
   return (
-    <View style={{ marginTop: 8 }}>
+    <View style={{ marginTop: 6, alignItems: 'center' }}>
       <PillButton
         label={label}
         variant="outline"
+        compact
         disabled={busy && !speaking}
         onPress={async () => {
           if (speaking) {

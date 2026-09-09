@@ -14,7 +14,7 @@
  * used. Scheduling is reconciled against the OS after every change and on
  * startup, so a restart cannot leave a stale or duplicated schedule.
  */
-import * as Notifications from 'expo-notifications';
+import * as Notifications from './localNotifications';
 import { patientKey, type ScopedStore } from './storage';
 import { translate } from '../l10n/i18n';
 import type { LanguageCode } from '../l10n/languages';

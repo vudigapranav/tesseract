@@ -1,15 +1,23 @@
 /**
  * The activity registry.
  *
- * **Catalogue status, stated plainly:** this ships FIVE of the NINE required
- * games — Reveal Match (G1), Route Quest (G2), Marble Maze (G3), Word Search
- * (G7) and Daily Routine Recall (G8) — plus Picture Sorting as an extra
- * activity.
+ * **Catalogue status, stated plainly:** all NINE required games are registered
+ * and playable, plus Picture Sorting as an extra:
  *
- * Still missing, and owned by Aryan: Trace (G4), Coloring (G5), Spot
- * Difference (G6) and Picture Recall (G9). Their Flutter source is staged at
- * `tmp/incoming/aryan/extracted/` and triaged, but nothing is ported. They are
- * not stubbed, faked or approximated here.
+ *   G1 Reveal Match     Aryan    ported from Flutter `reveal_match`
+ *   G2 Route Quest      Ruthika
+ *   G3 Marble Maze      Ruthika
+ *   G4 Trace            Aryan    ported from Flutter `trace`
+ *   G5 Coloring         Aryan    ported from Flutter `swipe_reveal`
+ *   G6 Spot Difference  Aryan    ported from Flutter `spot_difference`
+ *   G7 Word Search      Ruthika
+ *   G8 Routine Recall   Ruthika
+ *   G9 Picture Recall   Aryan    ported from Flutter `picture_recall`
+ *
+ * `MISSING_REQUIRED_GAME_IDS` is now empty, and the test suite asserts that
+ * rather than trusting this comment. Registration is not the same as polish:
+ * see `PS003_MOBILE_CODE_STATUS.md` for what has and has not been exercised on
+ * a real device.
  */
 import type React from 'react';
 import type { TesseractGameProps } from './contract';
@@ -20,6 +28,10 @@ import { WordSearchGame, WORD_SEARCH_ID, wordSearchDifficultyParams } from './wo
 import { RoutineRecallGame, ROUTINE_RECALL_ID, routineRecallDifficultyParams } from './routineRecall/RoutineRecallGame';
 import { PictureSortingGame, PICTURE_SORTING_ID, pictureSortingDifficultyParams } from './pictureSorting/PictureSortingGame';
 import { RevealMatchGame, REVEAL_MATCH_ID, revealMatchDifficultyParams } from './revealMatch/RevealMatchGame';
+import { PictureRecallGame, PICTURE_RECALL_ID, pictureRecallDifficultyParams } from './pictureRecall/PictureRecallGame';
+import { SpotDifferenceGame, SPOT_DIFFERENCE_ID, spotDifferenceDifficultyParams } from './spotDifference/SpotDifferenceGame';
+import { ColoringGame, COLORING_ID, coloringDifficultyParams } from './coloring/ColoringGame';
+import { TraceGame, TRACE_ID, traceDifficultyParams } from './trace/TraceGame';
 
 export interface GameRegistration {
   gameId: string;
@@ -98,6 +110,46 @@ export const GAME_REGISTRY: readonly GameRegistration[] = [
     owner: 'Aryan',
     component: RevealMatchGame,
     difficultyParamsForLevel: revealMatchDifficultyParams,
+    maxLevel: 3,
+  },
+  {
+    gameId: PICTURE_RECALL_ID,
+    displayNameKey: 'gamePictureRecall',
+    instructionKey: 'howToPlayPictureRecall',
+    required: true,
+    owner: 'Aryan',
+    component: PictureRecallGame,
+    difficultyParamsForLevel: pictureRecallDifficultyParams,
+    maxLevel: 3,
+  },
+  {
+    gameId: SPOT_DIFFERENCE_ID,
+    displayNameKey: 'gameSpotDifference',
+    instructionKey: 'howToPlaySpotDifference',
+    required: true,
+    owner: 'Aryan',
+    component: SpotDifferenceGame,
+    difficultyParamsForLevel: spotDifferenceDifficultyParams,
+    maxLevel: 3,
+  },
+  {
+    gameId: COLORING_ID,
+    displayNameKey: 'gameColoring',
+    instructionKey: 'howToPlayColoring',
+    required: true,
+    owner: 'Aryan',
+    component: ColoringGame,
+    difficultyParamsForLevel: coloringDifficultyParams,
+    maxLevel: 3,
+  },
+  {
+    gameId: TRACE_ID,
+    displayNameKey: 'gameTrace',
+    instructionKey: 'howToPlayTrace',
+    required: true,
+    owner: 'Aryan',
+    component: TraceGame,
+    difficultyParamsForLevel: traceDifficultyParams,
     maxLevel: 3,
   },
 ];

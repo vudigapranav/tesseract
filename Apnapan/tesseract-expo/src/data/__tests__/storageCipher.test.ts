@@ -1,3 +1,5 @@
+jest.mock('@react-native-async-storage/async-storage', () => require('@react-native-async-storage/async-storage/jest/async-storage-mock'));
+import { ScopedStore } from '../storage';
 import { sealStorage, openStorage } from '../storageCipher';
 import * as SecureStore from 'expo-secure-store';
 jest.unmock('../storageCipher');
@@ -9,7 +11,11 @@ jest.mock('expo-crypto', () => {
       generate: async () => { const bytes = c.randomBytes(32); return { bytes, encoded: () => Promise.resolve(bytes.toString('base64')) }; },
       import: async (s: string) => ({ bytes: Buffer.from(s, 'base64') }),
     },
-    AESSealedData: { fromCombined: (s: string) => Buffer.from(s, 'base64') },
+    AESSealedData: { fromCombined: (bytes: Uint8Array) => {
+      // Android's native fromCombined takes ByteArray, not a Base64 string.
+      if (!(bytes instanceof Uint8Array)) throw new Error('Android requires bytes');
+      return Buffer.from(bytes);
+    } },
     aesEncryptAsync: async (data: Uint8Array, key: any, options: any) => {
       const iv = c.randomBytes(12); const cipher = c.createCipheriv('aes-256-gcm', key.bytes, iv);
       cipher.setAAD(Buffer.from(options.additionalData));
@@ -51,4 +57,17 @@ it('refuses modified ciphertext and a missing key without replacement', async ()
 });
 it('preserves legacy plaintext for non-destructive migration', async () => {
   expect(await openStorage('alice', '{"old":true}')).toBe('{"old":true}');
+});
+
+it('saves, reopens, selects and edits a patient using the Android byte contract', async () => {
+  const store = new ScopedStore('android-save-regression');
+  const patient = { id: 'p1', displayName: 'कमला', ageYears: 72, language: 'hi' };
+  await store.write('patients', [patient]);
+  const reopened = new ScopedStore('android-save-regression');
+  expect(await reopened.read('patients', [])).toEqual([patient]);
+  await reopened.write('selectedPatient', patient.id);
+  await reopened.write('patientLanguage', patient.language);
+  await reopened.write('patients', [{ ...patient, ageYears: 73 }]);
+  expect(await reopened.read('patients', [])).toEqual([{ ...patient, ageYears: 73 }]);
+  expect(await reopened.read('selectedPatient', '')).toBe('p1');
 });

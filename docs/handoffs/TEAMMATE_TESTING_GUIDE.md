@@ -55,16 +55,23 @@ If the tunnel starts successfully, share its generated URL. Keep the laptop awak
    It has its own storage scope and its own outbox, so it cannot mix with a
    real caregiver's data. It is not a real sign-in and does not pretend to be.
 3. **Caregiver home** → hand over → patient mode.
-4. **Play the activities.** Six are registered:
+4. **Play the activities.** Ten are registered — all nine required, plus one
+   extra. The chooser shows four at a time; press **Show me more**.
 
-   | Activity | Owner | Notes |
+   | Activity | Owner | What it is |
    |---|---|---|
-   | Route Quest | Ruthika | tap a connected place to move |
-   | Marble Maze | Ruthika | tilt, or finger if tilt is off |
-   | Word Search | Ruthika | tap first letter, then last |
+   | Route Quest | Ruthika | tap the next connected place, then go home |
+   | Marble Maze | Ruthika | tilt, or use a finger |
+   | Word Search | Ruthika | tap a word's first letter, then its last |
    | Daily Routine | Ruthika | choose what comes next |
+   | Picture Pairs | Aryan | turn two cards over and match them |
+   | **Picture Questions** | **Aryan** | **look at a scene, then answer about it** |
+   | **Find the Change** | **Aryan** | **two pictures, tap what differs** |
+   | **Bring Back the Colours** | **Aryan** | **sweep a finger to reveal colour** |
+   | **Follow the Line** | **Aryan** | **trace a shape from the green dot** |
    | Picture Sorting | Ruthika | extra, not one of the nine |
-   | **Picture Pairs** | **Aryan** | **new — ported from Aryan's Flutter `reveal_match`** |
+
+   The four in bold were ported on 2026-09-09 and have had the least use.
 
 5. **Picture Pairs specifically.** Level 1 opens with every card face-up: look,
    then press **I am ready**. Tap two cards. A match stays; a mismatch turns
@@ -188,10 +195,13 @@ than working around it.
 
 ## What is honestly true right now
 
-- **Five of the nine required games ship**, plus one extra. Trace, Coloring,
-  Spot Difference and Picture Recall are **not implemented**; Aryan's Flutter
-  source for them is staged but not ported. The registry says so in code
-  (`MISSING_REQUIRED_GAME_IDS`).
+- **All nine required games ship**, plus one extra. `MISSING_REQUIRED_GAME_IDS`
+  is empty in code and a test asserts it.
+- Every activity picture is original vector artwork bundled with the app —
+  offline, nothing to download, nothing that can break.
+- The demonstration profile is Kamala (72) and her daughter Bidisha. It seeds
+  her places, routine and words, and **no session history at all** — so the
+  analysis screen is empty until someone actually plays. That is correct.
 - Gemini provider code is present. A prior session reported a live synthetic check; this publishing task did not repeat it. No full phone-to-server analysis verification is claimed.
 - Seven languages ship. Only English is reviewed; the rest are drafts. Meitei,
   Khasi and Mizo cover about 7% of the interface and fall back to English,
@@ -225,3 +235,7 @@ Web is not a verified fallback; use the supported native testing path.
 
 ## Report bugs
 Use synthetic data only. Send phone model/OS, language, activity, exact reproduction steps, expected versus actual behavior, and a screenshot without personal data. Test launch, language changes, all six registered activities, Help, Break/resume, exit, completion and the protected caregiver return. Missing required games: Trace, Coloring, Spot Difference, Picture Recall.
+
+
+## Android retest after 2026-09-09 fixes
+Pull the testing branch, run npm ci, then restart with npx expo start --clear --tunnel (or --lan on the same Wi-Fi). Close and reopen Expo Go and scan the new QR. Do not clear app data or reinstall to fix saving: existing encrypted records are preserved by the byte-conversion fix. Test patient create/save, reopen, edit, change patient language, then close/reopen the app and verify persistence. Local-only notification imports avoid remote push registration at startup. Physical Android confirmation remains pending.

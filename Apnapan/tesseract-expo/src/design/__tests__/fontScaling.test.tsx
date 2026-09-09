@@ -52,12 +52,23 @@ describe('the policy itself', () => {
     }
   });
 
-  it('keeps the base type scale large for an elderly reader', () => {
-    // These are a deliberate accessibility decision, not defaults. Capping
-    // scaling must never become an excuse to shrink the 100% sizes.
-    expect(typeScale.bodyLarge.fontSize).toBe(18);
-    expect(typeScale.headlineLarge.fontSize).toBe(32);
+  it('keeps the base type scale readable for an elderly reader', () => {
+    // The sizes were reduced on 2026-09-09 at the user's direction, because
+    // the screens read as oversized. These floors are what stops that becoming
+    // a slide towards small text: the scale may be tuned, but not shrunk past
+    // the point where it needs an OS setting to be legible.
+    expect(typeScale.headlineLarge.fontSize).toBeGreaterThanOrEqual(26);
+    expect(typeScale.titleLarge.fontSize).toBeGreaterThanOrEqual(20);
+    expect(typeScale.bodyLarge.fontSize).toBeGreaterThanOrEqual(16);
+    // The patient's one instruction is the exception: it stays larger than
+    // ordinary body text, because it is the sentence they actually must read.
+    expect(typeScale.patientInstruction.fontSize).toBeGreaterThanOrEqual(18);
+    expect(typeScale.patientInstruction.fontSize).toBeGreaterThan(
+      typeScale.bodyLarge.fontSize,
+    );
+    // Type shrank; targets did not. Reach is not a typography decision.
     expect(spacing.patientTarget).toBe(64);
+    expect(spacing.minTarget).toBe(48);
   });
 });
 

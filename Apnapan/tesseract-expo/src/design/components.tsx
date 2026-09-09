@@ -92,6 +92,11 @@ export const BodyMedium = makeText(
   typeScale.bodyMedium as TextStyle,
   fontScaleCaps.body,
 );
+/** The one sentence a patient is asked to read. Larger than ordinary body. */
+export const PatientInstruction = makeText(
+  typeScale.patientInstruction as TextStyle,
+  fontScaleCaps.body,
+);
 
 /* ---------------------------------------------------------------- screen - */
 
@@ -189,6 +194,7 @@ export function PillButton({
   busy,
   variant = 'primary',
   accessibilityHint,
+  compact = false,
   style,
 }: {
   label: string;
@@ -197,6 +203,11 @@ export function PillButton({
   busy?: boolean;
   variant?: 'primary' | 'outline';
   accessibilityHint?: string;
+  /**
+   * Only as wide as its label, for a secondary control that should not look
+   * like the screen's main action. The target height is untouched.
+   */
+  compact?: boolean;
   style?: StyleProp<ViewStyle>;
 }) {
   const isDisabled = disabled || busy;
@@ -211,6 +222,7 @@ export function PillButton({
       onPress={onPress}
       style={({ pressed }) => [
         styles.pill,
+        compact && styles.pillCompact,
         primary ? styles.pillPrimary : styles.pillOutline,
         isDisabled && styles.pillDisabled,
         pressed && !isDisabled && styles.pressed,
@@ -350,16 +362,18 @@ const styles = StyleSheet.create({
   flex: { flex: 1 },
   screen: { flex: 1, backgroundColor: colors.cream },
   card: {
+    // Tightened with the type scale on 2026-09-09. Cards were 20pt-padded
+    // around 32pt headings; at the smaller sizes that read as empty space.
     backgroundColor: colors.white,
     borderRadius: spacing.cardRadius,
-    padding: 20,
-    marginVertical: 8,
+    padding: 16,
+    marginVertical: 6,
   },
   sectionHeading: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingTop: 20,
-    paddingBottom: 10,
+    paddingTop: 14,
+    paddingBottom: 8,
     gap: 12,
   },
   accent: {
@@ -384,7 +398,8 @@ const styles = StyleSheet.create({
   },
   pillDisabled: { opacity: 0.4 },
   pressed: { opacity: 0.75 },
-  pillLabel: { fontSize: 18, fontWeight: '600', textAlign: 'center' },
+  pillCompact: { alignSelf: 'center', paddingHorizontal: 20 },
+  pillLabel: { fontSize: 17, fontWeight: '600', textAlign: 'center' },
   bigAction: {
     minHeight: spacing.patientTarget,
     borderRadius: 999,
@@ -400,8 +415,8 @@ const styles = StyleSheet.create({
     borderWidth: 1.5,
     borderColor: colors.ink,
   },
-  bigActionLabel: { fontSize: 20, fontWeight: '700', textAlign: 'center' },
-  bigActionSubtitle: { fontSize: 15, textAlign: 'center', marginTop: 4 },
+  bigActionLabel: { fontSize: 19, fontWeight: '700', textAlign: 'center' },
+  bigActionSubtitle: { fontSize: 14, textAlign: 'center', marginTop: 4 },
   statusRow: {
     flexDirection: 'row',
     alignItems: 'flex-start',

@@ -62,12 +62,24 @@ export const fontScaleCaps = {
  * that scaling goes.
  */
 export const type = {
-  headlineLarge: { fontSize: 32, fontWeight: '700', letterSpacing: -0.8 },
-  headlineSmall: { fontSize: 27, fontWeight: '700' },
-  titleLarge: { fontSize: 22, fontWeight: '600' },
-  bodyLarge: { fontSize: 18, lineHeight: 26 },
-  bodyMedium: { fontSize: 16, lineHeight: 23 },
-  label: { fontSize: 14, fontWeight: '600' },
+  /**
+   * Sizes reduced on 2026-09-09 after the screens read as oversized: a 32pt
+   * headline plus a 22pt section title plus 18pt body on a phone left almost
+   * no room for the thing the screen was actually about.
+   *
+   * What did *not* change: touch targets, contrast, and OS scaling. The bulk
+   * came from type size and repeated prose, not from the controls, so the
+   * controls were left alone. `patientInstruction` is deliberately the largest
+   * body size in the app — it is the one sentence a patient has to read.
+   */
+  headlineLarge: { fontSize: 27, fontWeight: '700', letterSpacing: -0.5 },
+  headlineSmall: { fontSize: 23, fontWeight: '700' },
+  titleLarge: { fontSize: 20, fontWeight: '600' },
+  /** The patient's one instruction. Bigger than ordinary body text. */
+  patientInstruction: { fontSize: 18, lineHeight: 25, fontWeight: '600' },
+  bodyLarge: { fontSize: 16, lineHeight: 23 },
+  bodyMedium: { fontSize: 15, lineHeight: 21 },
+  label: { fontSize: 13, fontWeight: '600' },
 } as const;
 
 /**

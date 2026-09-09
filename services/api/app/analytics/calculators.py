@@ -269,6 +269,192 @@ def reveal_match_v1(session: SessionLike, events: list[EventLike]) -> MetricResu
     return result
 
 
+
+# ---------------------------------------------------------------------------
+# Picture Recall (G9)
+# ---------------------------------------------------------------------------
+
+
+def picture_recall_v1(session: SessionLike, events: list[EventLike]) -> MetricResult:
+    """Answers, and how much support each one had.
+
+    The support distinction is the whole point of this calculator. The game
+    lets the patient look at the picture again or take an authored hint, and
+    records that alongside the answer. Collapsing those into one accuracy
+    number would make a supported answer and an unsupported one look
+    identical, which is exactly the comparison a caregiver should not be
+    handed.
+    """
+    result = MetricResult("picture_recall_v1", METRIC_VERSION, dict(_common(session, events)))
+
+    answers = [e for e in events if e.type == "recall_answered"]
+    correct = [e for e in answers if e.payload.get("correct") is True]
+    unsupported = [e for e in answers if e.payload.get("supported") is not True]
+    unsupported_correct = [e for e in unsupported if e.payload.get("correct") is True]
+
+    latencies = [
+        int(e.payload["answerLatencyMs"])
+        for e in answers
+        if isinstance(e.payload.get("answerLatencyMs"), int)
+    ]
+
+    result.values.update(
+        {
+            "questions_answered": len(answers),
+            "questions_skipped": _count(events, "question_skipped"),
+            "answers_correct": len(correct),
+            "answers_supported": len(answers) - len(unsupported),
+            "picture_shown_again": _count(events, "picture_shown_again"),
+            # None, not 0.0, when nothing was answered.
+            "first_attempt_accuracy": (len(correct) / len(answers)) if answers else None,
+            "unsupported_accuracy": (
+                (len(unsupported_correct) / len(unsupported)) if unsupported else None
+            ),
+            "median_answer_latency_ms": _median(latencies),
+        }
+    )
+
+    # How long the picture was actually on screen is exposure time, which the
+    # game tracks but does not emit as an event. Without it, "looked briefly
+    # then answered" and "studied it then answered" are indistinguishable.
+    result.mark_unavailable(
+        "exposure_duration_ms",
+        "missing_game_export",
+        "picture_recall does not emit the time the scene was displayed, so "
+        "viewing time cannot be separated from answering time.",
+        ["exposure_duration_ms"],
+    )
+    return result
+
+
+# ---------------------------------------------------------------------------
+# Spot Difference (G6)
+# ---------------------------------------------------------------------------
+
+
+def spot_difference_v1(session: SessionLike, events: list[EventLike]) -> MetricResult:
+    """Differences found, and taps that landed on none of them.
+
+    A tap that hit nothing is counted, but it is *not* called an error: on a
+    find-the-change activity, looking around by tapping is how the activity is
+    played. It is reported as ``non_matching_taps`` for that reason.
+    """
+    result = MetricResult("spot_difference_v1", METRIC_VERSION, dict(_common(session, events)))
+
+    selections = [e for e in events if e.type == "difference_selected"]
+    found_ids = {
+        e.payload.get("regionId")
+        for e in selections
+        if e.payload.get("correct") is True and e.payload.get("regionId") is not None
+    }
+    first_found = next(
+        (e.elapsed_ms for e in sorted(selections, key=lambda e: e.seq)
+         if e.payload.get("correct") is True),
+        None,
+    )
+
+    finished = [e for e in events if e.type == "puzzle_finished"]
+    total = finished[0].payload.get("total") if finished else None
+
+    result.values.update(
+        {
+            "differences_found": len(found_ids),
+            "selections_total": len(selections),
+            "non_matching_taps": sum(1 for e in selections if e.payload.get("correct") is not True),
+            "repeat_taps_on_found": sum(
+                1 for e in selections if e.payload.get("alreadyFound") is True
+            ),
+            "puzzle_completed": bool(finished),
+            "time_to_first_found_ms": first_found,
+            "hints_used": _count(events, "hint_used") or _count(events, "hint_requested"),
+        }
+    )
+
+    if isinstance(total, int):
+        result.values["differences_total"] = total
+    else:
+        # Only the finish event carries the board's size, so an unfinished
+        # session cannot say how many differences there were to find.
+        result.mark_unavailable(
+            "differences_total",
+            "missing_game_export",
+            "The number of authored differences is only reported when the "
+            "puzzle is finished, so an unfinished session cannot state it.",
+            ["puzzle_finished.total"],
+        )
+    return result
+
+
+# ---------------------------------------------------------------------------
+# Coloring (G5) and Trace (G4)
+# ---------------------------------------------------------------------------
+
+
+def coloring_v1(session: SessionLike, events: list[EventLike]) -> MetricResult:
+    """How much colour was brought back, and with how many sweeps.
+
+    There is no notion of correctness here at all, by design: the activity has
+    no right answer. Coverage is how far the person chose to go, not a score.
+    """
+    result = MetricResult("coloring_v1", METRIC_VERSION, dict(_common(session, events)))
+
+    finished = [e for e in events if e.type == "reveal_finished"]
+    payload = finished[0].payload if finished else {}
+    cells = [
+        int(e.payload["newlyRevealedCells"])
+        for e in events
+        if e.type == "reveal_stroke" and isinstance(e.payload.get("newlyRevealedCells"), int)
+    ]
+
+    result.values.update(
+        {
+            "strokes": _count(events, "reveal_stroke"),
+            "picture_shown_by_help": _count(events, "picture_shown") > 0,
+            "coverage_percent": payload.get("coveragePercent"),
+            "median_cells_per_stroke": _median(cells),
+            "finished": bool(finished),
+        }
+    )
+
+    # Time actually spent with a finger down is tracked in the game but is not
+    # emitted, so "swept steadily for a minute" cannot be told apart from
+    # "swept twice across five minutes".
+    result.mark_unavailable(
+        "active_interaction_ms",
+        "missing_game_export",
+        "coloring does not emit time-with-finger-down, so interaction time "
+        "cannot be separated from time on the screen.",
+        ["active_interaction_ms"],
+    )
+    return result
+
+
+def trace_v1(session: SessionLike, events: list[EventLike]) -> MetricResult:
+    """How much of the line was followed, in how many strokes.
+
+    Deliberately absent: any measure of neatness. The game computes a mean
+    deviation from the line for its own use and does not emit it, and this
+    calculator does not ask for it — a wobble figure would read as a motor
+    assessment, which this product does not make.
+    """
+    result = MetricResult("trace_v1", METRIC_VERSION, dict(_common(session, events)))
+
+    finished = [e for e in events if e.type == "trace_finished"]
+    payload = finished[0].payload if finished else {}
+
+    result.values.update(
+        {
+            "strokes_started": _count(events, "stroke_started"),
+            "strokes_completed": _count(events, "stroke_ended"),
+            "coverage_percent": payload.get("coveragePercent"),
+            "lifts": payload.get("lifts"),
+            "guide_shown": _count(events, "guide_shown") > 0,
+            "finished": bool(finished),
+        }
+    )
+    return result
+
+
 # ---------------------------------------------------------------------------
 # Games without a calculator yet
 # ---------------------------------------------------------------------------
@@ -298,6 +484,10 @@ REGISTRY: dict[tuple[str, str], Calculator] = {
     ("route_quest", METRIC_VERSION): route_quest_v1,
     ("marble_maze", METRIC_VERSION): marble_maze_v1,
     ("reveal_match", METRIC_VERSION): reveal_match_v1,
+    ("picture_recall", METRIC_VERSION): picture_recall_v1,
+    ("spot_difference", METRIC_VERSION): spot_difference_v1,
+    ("coloring", METRIC_VERSION): coloring_v1,
+    ("trace", METRIC_VERSION): trace_v1,
 }
 
 
